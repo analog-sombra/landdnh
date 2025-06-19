@@ -1326,3 +1326,232 @@ export function FluentEye32Regular(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function FlowbiteUndoOutline(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
+      height="1em"
+      viewBox="0 0 24 24"
+      {...props}
+    >
+      {/* Icon from Flowbite Icons by Themesberg - https://github.com/themesberg/flowbite-icons/blob/main/LICENSE */}
+      <path
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d="M3 9h13a5 5 0 0 1 0 10H7M3 9l4-4M3 9l4 4"
+      />
+    </svg>
+  );
+}
+
+export function FlowbiteUndoSolid(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
+      height="1em"
+      viewBox="0 0 24 24"
+      {...props}
+    >
+      {/* Icon from Flowbite Icons by Themesberg - https://github.com/themesberg/flowbite-icons/blob/main/LICENSE */}
+      <g
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="2"
+      >
+        <path d="M20 9H8a5 5 0 0 0-5 5v0a5 5 0 0 0 5 5h9" />
+        <path strokeLinejoin="round" d="m17 5l4 4l-4 4" />
+      </g>
+    </svg>
+  );
+}
+
+export function FluentTextClearFormatting32Light(
+  props: SVGProps<SVGSVGElement>
+) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
+      height="1em"
+      viewBox="0 0 32 32"
+      {...props}
+    >
+      {/* Icon from Fluent UI System Icons by Microsoft Corporation - https://github.com/microsoft/fluentui-system-icons/blob/main/LICENSE */}
+      <path
+        fill="currentColor"
+        d="M18 2.5a.5.5 0 0 0-1 0v14.172l1.618-1.618C18.232 14.34 18 13.468 18 12.5C18 9.905 19.665 8 21.5 8c1.614 0 3.098 1.475 3.43 3.597c.36.077.713.2 1.049.369C25.762 9.266 23.925 7 21.5 7c-1.45 0-2.691.811-3.5 2.04zm-8.564.148c-.325-.863-1.546-.863-1.872 0L2.032 17.323a.5.5 0 1 0 .936.353L4.731 13h7.539l1.762 4.676a.5.5 0 0 0 .936-.352zM11.893 12H5.108L8.5 3zm14.165 1.85a2.91 2.91 0 0 0-4.116 0l-8.091 8.092a2.91 2.91 0 0 0 0 4.116l3.091 3.092a2.9 2.9 0 0 0 2.16.85H26.5a.5.5 0 1 0 0-1h-5.293l7.942-7.942a2.91 2.91 0 0 0 0-4.116zM19 29l-.037.001a1.9 1.9 0 0 1-1.314-.559l-3.091-3.091a1.91 1.91 0 0 1 0-2.701l1.692-1.693l5.793 5.793l-1.692 1.692a1.9 1.9 0 0 1-1.27.558zm3.65-14.442a1.91 1.91 0 0 1 2.7 0l3.092 3.092a1.91 1.91 0 0 1 0 2.7l-5.692 5.693l-5.793-5.793z"
+      />
+    </svg>
+  );
+}
+
+export function FluentCodeBlock28Regular(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
+      height="1em"
+      viewBox="0 0 28 28"
+      {...props}
+    >
+      {/* Icon from Fluent UI System Icons by Microsoft Corporation - https://github.com/microsoft/fluentui-system-icons/blob/main/LICENSE */}
+      <path
+        fill="currentColor"
+        d="M3 6.75A3.75 3.75 0 0 1 6.75 3h14.5A3.75 3.75 0 0 1 25 6.75v14.5A3.75 3.75 0 0 1 21.25 25H6.75A3.75 3.75 0 0 1 3 21.25zM6.75 4.5A2.25 2.25 0 0 0 4.5 6.75v14.5a2.25 2.25 0 0 0 2.25 2.25h14.5a2.25 2.25 0 0 0 2.25-2.25V6.75a2.25 2.25 0 0 0-2.25-2.25zm5.28 4.72a.75.75 0 0 1 0 1.06L8.31 14l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0m5 0a.75.75 0 1 0-1.06 1.06L19.69 14l-3.72 3.72a.75.75 0 1 0 1.06 1.06l4.25-4.25a.75.75 0 0 0 0-1.06z"
+      />
+    </svg>
+  );
+}
+
+export function FluentTextAlignCenter24Regular(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
+      height="1em"
+      viewBox="0 0 24 24"
+      {...props}
+    >
+      {/* Icon from Fluent UI System Icons by Microsoft Corporation - https://github.com/microsoft/fluentui-system-icons/blob/main/LICENSE */}
+      <path
+        fill="currentColor"
+        d="M4 5.75A.75.75 0 0 1 4.75 5h14.5a.75.75 0 0 1 0 1.5H4.75A.75.75 0 0 1 4 5.75m2 13a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H6.75a.75.75 0 0 1-.75-.75M2.75 11.5a.75.75 0 0 0 0 1.5h18.5a.75.75 0 0 0 0-1.5z"
+      />
+    </svg>
+  );
+}
+
+export function FluentTextAlignJustify24Regular(
+  props: SVGProps<SVGSVGElement>
+) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
+      height="1em"
+      viewBox="0 0 24 24"
+      {...props}
+    >
+      {/* Icon from Fluent UI System Icons by Microsoft Corporation - https://github.com/microsoft/fluentui-system-icons/blob/main/LICENSE */}
+      <path
+        fill="currentColor"
+        d="M2 5.75A.75.75 0 0 1 2.75 5h18.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 5.75m0 13a.75.75 0 0 1 .75-.75h18.5a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1-.75-.75m.75-7.25a.75.75 0 0 0 0 1.5h18.5a.75.75 0 0 0 0-1.5z"
+      />
+    </svg>
+  );
+}
+
+export function FluentTextAlignLeft24Regular(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
+      height="1em"
+      viewBox="0 0 24 24"
+      {...props}
+    >
+      {/* Icon from Fluent UI System Icons by Microsoft Corporation - https://github.com/microsoft/fluentui-system-icons/blob/main/LICENSE */}
+      <path
+        fill="currentColor"
+        d="M2 5.75A.75.75 0 0 1 2.75 5h15.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 5.75m0 13a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1-.75-.75m.75-7.25a.75.75 0 0 0 0 1.5h18.5a.75.75 0 0 0 0-1.5z"
+      />
+    </svg>
+  );
+}
+
+export function FluentTextAlignRight24Regular(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
+      height="1em"
+      viewBox="0 0 24 24"
+      {...props}
+    >
+      {/* Icon from Fluent UI System Icons by Microsoft Corporation - https://github.com/microsoft/fluentui-system-icons/blob/main/LICENSE */}
+      <path
+        fill="currentColor"
+        d="M5 5.75A.75.75 0 0 1 5.75 5h15.5a.75.75 0 0 1 0 1.5H5.75A.75.75 0 0 1 5 5.75m5 13a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5h-10.5a.75.75 0 0 1-.75-.75M2.75 11.5a.75.75 0 0 0 0 1.5h18.5a.75.75 0 0 0 0-1.5z"
+      />
+    </svg>
+  );
+}
+
+export function FluentArrowCircleDown32Regular(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
+      height="1em"
+      viewBox="0 0 32 32"
+      {...props}
+    >
+      {/* Icon from Fluent UI System Icons by Microsoft Corporation - https://github.com/microsoft/fluentui-system-icons/blob/main/LICENSE */}
+      <path
+        fill="currentColor"
+        d="M9.293 15.293a1 1 0 0 1 1.414 0L15 19.586V10a1 1 0 1 1 2 0v9.586l4.293-4.293a1 1 0 0 1 1.414 1.414l-6 6a1 1 0 0 1-1.414 0l-6-6a1 1 0 0 1 0-1.414M2 16C2 8.268 8.268 2 16 2s14 6.268 14 14s-6.268 14-14 14S2 23.732 2 16M16 4C9.373 4 4 9.373 4 16s5.373 12 12 12s12-5.373 12-12S22.627 4 16 4"
+      />
+    </svg>
+  );
+}
+
+export function FluentColorFill32Light(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
+      height="1em"
+      viewBox="0 0 32 32"
+      {...props}
+    >
+      {/* Icon from Fluent UI System Icons by Microsoft Corporation - https://github.com/microsoft/fluentui-system-icons/blob/main/LICENSE */}
+      <path
+        fill="currentColor"
+        d="M14 3.5a.5.5 0 0 0-1 0v2.552a3.24 3.24 0 0 0-1.702.897l-5.346 5.347a3.25 3.25 0 0 0 0 4.596l4.153 4.153a3.25 3.25 0 0 0 4.596 0l5.346-5.347a3.25 3.25 0 0 0 0-4.596L15.895 6.95A3.24 3.24 0 0 0 14 6.023zm-1 3.578V9.5a.5.5 0 0 0 1 0V7.034a2.24 2.24 0 0 1 1.187.623l4.153 4.152A2.25 2.25 0 0 1 19.918 14H6.08c.1-.365.293-.71.58-.997l5.346-5.346c.287-.287.63-.48.995-.58M6.66 16.184A2.24 2.24 0 0 1 6.037 15H19.33l-5.337 5.338a2.25 2.25 0 0 1-3.182 0zm15.531.248a.974.974 0 0 1 1.62 0a28 28 0 0 1 1.342 2.19c.224.417.432.843.585 1.238c.148.385.263.787.263 1.139a3 3 0 1 1-6 0c0-.352.115-.754.263-1.139c.153-.395.36-.821.585-1.237c.45-.833.986-1.662 1.342-2.191m.81.587a26 26 0 0 0-1.272 2.078c-.213.396-.4.782-.532 1.123c-.136.353-.196.615-.196.779a2 2 0 1 0 4 0c0-.164-.06-.426-.196-.779a10 10 0 0 0-.532-1.123A26 26 0 0 0 23 17.02m5 5.23a2.24 2.24 0 0 0-.505-1.42c-.03-.573-.207-1.115-.359-1.509l-.005-.014A3.25 3.25 0 0 1 29 22.25v3.5A3.25 3.25 0 0 1 25.75 29H6.25A3.25 3.25 0 0 1 3 25.75v-3.5a3.25 3.25 0 0 1 2.952-3.236l.986.986H6.25A2.25 2.25 0 0 0 4 22.25v3.5A2.25 2.25 0 0 0 6.25 28h19.5A2.25 2.25 0 0 0 28 25.75z"
+      />
+    </svg>
+  );
+}
+
+export function FluentColorLine24Regular(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
+      height="1em"
+      viewBox="0 0 24 24"
+      {...props}
+    >
+      {/* Icon from Fluent UI System Icons by Microsoft Corporation - https://github.com/microsoft/fluentui-system-icons/blob/main/LICENSE */}
+      <path
+        fill="currentColor"
+        d="M4.38 14.003A2.5 2.5 0 0 0 2 16.5v3A2.5 2.5 0 0 0 4.5 22h15a2.5 2.5 0 0 0 2.5-2.5v-3a2.5 2.5 0 0 0-2.5-2.5h-5.954l-1.316 1.314a3 3 0 0 1-.203.186H19.5a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1v-3a1 1 0 0 1 .504-.869a2 2 0 0 1 .092-.744zM18.649 2.944a3.22 3.22 0 0 1-.002 4.551l-7.123 7.111a2.25 2.25 0 0 1-.942.563l-4.294 1.289a1 1 0 0 1-1.239-1.265l1.362-4.228c.11-.34.298-.65.552-.902l7.132-7.122a3.22 3.22 0 0 1 4.554.003m-3.494 1.059l-7.133 7.121a.75.75 0 0 0-.184.301l-1.07 3.322l3.382-1.015a.75.75 0 0 0 .315-.187l7.121-7.11a1.718 1.718 0 1 0-2.43-2.432"
+      />
+    </svg>
+  );
+}
+
+export function FluentTable48Regular(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="1em"
+      height="1em"
+      viewBox="0 0 48 48"
+      {...props}
+    >
+      {/* Icon from Fluent UI System Icons by Microsoft Corporation - https://github.com/microsoft/fluentui-system-icons/blob/main/LICENSE */}
+      <path
+        fill="currentColor"
+        d="M35.75 6A6.25 6.25 0 0 1 42 12.25v23.5A6.25 6.25 0 0 1 35.75 42h-23.5A6.25 6.25 0 0 1 6 35.75v-23.5A6.25 6.25 0 0 1 12.25 6zM8.5 19.5v9H17v-9zm0 11.5v4.75a3.75 3.75 0 0 0 3.75 3.75H17V31zm11 8.5h9V31h-9zm11.5 0h4.75a3.75 3.75 0 0 0 3.75-3.75V31H31zm8.5-11v-9H31v9zm0-11.5v-4.75a3.75 3.75 0 0 0-3.75-3.75H31V17zm-11-8.5h-9V17h9zM17 8.5h-4.75a3.75 3.75 0 0 0-3.75 3.75V17H17zm11.5 20v-9h-9v9z"
+      />
+    </svg>
+  );
+}

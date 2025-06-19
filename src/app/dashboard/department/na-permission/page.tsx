@@ -3,11 +3,14 @@ import { ApiCall } from "@/services/api";
 import { encryptURLData } from "@/utils/methods";
 import { useQuery } from "@tanstack/react-query";
 import { Alert, Pagination } from "antd";
+import { getCookie } from "cookies-next/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const NaPermission = () => {
   const router = useRouter();
+  const userid = getCookie("id");
+
   const [pagination, setPaginatin] = useState<{
     take: number;
     skip: number;
@@ -26,8 +29,13 @@ const NaPermission = () => {
     total: number;
     data: {
       id: number;
-      q2: string;
+      q4: string;
       status: string;
+      office_status: string;
+      form_status: string;
+      dept_user: {
+        role: string;
+      };
       village: {
         name: string;
       };
@@ -40,7 +48,7 @@ const NaPermission = () => {
     queryFn: async () => {
       const response = await ApiCall({
         query:
-          "query GetAllNa($take: Int!, $skip: Int!) { getAllNa(take: $take, skip: $skip) {total, skip, take, data {id, q2, status, village {name}}}}",
+          "query GetAllNa($take: Int!, $skip: Int!) { getAllNa(take: $take, skip: $skip) {total, skip, take, data {id, q4, status, form_status, office_status, dept_user {role}, village {name}}}}",
         variables: {
           take: pagination.take,
           skip: pagination.skip,
@@ -108,10 +116,13 @@ const NaPermission = () => {
                       Sr No.
                     </th>
                     <th className="border border-gray-300 px-4 py-2 text-left text-md font-normal">
-                      q2
+                      Applicant Name
                     </th>
                     <th className="border border-gray-300 px-4 py-2 text-left text-md font-normal">
                       Village
+                    </th>
+                    <th className="border border-gray-300 px-4 py-2 text-left text-md font-normal">
+                      Department
                     </th>
                     <th className="border border-gray-300 px-4 py-2 text-left text-md font-normal">
                       Status
@@ -128,13 +139,16 @@ const NaPermission = () => {
                         {pagination.skip + index + 1}
                       </td>
                       <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
-                        {naform.q2}
+                        {naform.q4}
                       </td>
                       <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
                         {naform.village.name}
                       </td>
                       <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
-                        {naform.status}
+                        {naform.office_status}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                        {naform.form_status}
                       </td>
 
                       <td className="border border-gray-300 px-4 py-2 font-normal text-sm">

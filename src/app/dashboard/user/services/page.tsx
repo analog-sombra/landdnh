@@ -43,7 +43,6 @@ const UserServicesPage = () => {
       <div className="pt-4">
         <p className="text-lg font-semibold mt-4 mx-4">Select Service</p>
         <div className="bg-white rounded mx-4 text-xs shadow border-t-2 border-blue-500 ">
-          {/* table start here */}
           <table border={1} className="mx-auto w-full">
             <tbody className="w-full">
               <tr className="w-full bg-blue-500 text-white">

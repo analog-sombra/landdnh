@@ -14,7 +14,7 @@ const Layout = ({
   return (
     <>
       <div className="min-h-screen w-full bg-[#f3f6f8] relative">
-        <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} role="USER" />
+        <Sidebar isOpen={isOpen} setIsOpen={setIsOpen}/>
 
         <div className={`relative p-0 md:pl-60 min-h-screen w-full`}>
           <div className="pb-8">{children}</div>

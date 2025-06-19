@@ -19,7 +19,6 @@ import { Popover } from "antd";
 interface SidebarProps {
   isOpen: boolean;
   setIsOpen: (arg: boolean) => void;
-  role: string;
 }
 
 const Sidebar = (props: SidebarProps) => {
@@ -92,39 +91,47 @@ const Sidebar = (props: SidebarProps) => {
             />
           </div>
           <div className="h-6"></div>
-          <MenuTab
-            name="Dashboard"
-            path={path}
-            pathcheck="/dashboard/user"
-            click={() => props.setIsOpen(false)}
-            icon={
-              <div className="bg-[#f3f6f8] rounded-lg">
-                <FluentMdl2ViewDashboard className="text-blue-500 w-6 h-6 p-1" />
-              </div>
-            }
-          />
-          <MenuTab
-            name="Service(s)"
-            path={path}
-            pathcheck="/dashboard/user/services"
-            click={() => props.setIsOpen(false)}
-            icon={
-              <div className="bg-[#f3f6f8] rounded-lg">
-                <FluentTaskListLtr20Regular className="text-blue-500 w-6 h-6 p-1" />
-              </div>
-            }
-          />
-          {/* <MenuTab
-            name="NA Permission"
-            path={path}
-            pathcheck="/dashboard/user/na-permission"
-            click={() => props.setIsOpen(false)}
-            icon={
-              <div className="bg-[#f3f6f8] rounded-lg">
-                <FluentMdl2ViewDashboard className="text-blue-500 w-6 h-6 p-1" />
-              </div>
-            }
-          /> */}
+          {userdata.data?.role === "USER" ? (
+            <>
+              <MenuTab
+                name="Dashboard"
+                path={path}
+                pathcheck="/dashboard/user"
+                click={() => props.setIsOpen(false)}
+                icon={
+                  <div className="bg-[#f3f6f8] rounded-lg">
+                    <FluentMdl2ViewDashboard className="text-blue-500 w-6 h-6 p-1" />
+                  </div>
+                }
+              />
+              <MenuTab
+                name="Service(s)"
+                path={path}
+                pathcheck="/dashboard/user/services"
+                click={() => props.setIsOpen(false)}
+                icon={
+                  <div className="bg-[#f3f6f8] rounded-lg">
+                    <FluentTaskListLtr20Regular className="text-blue-500 w-6 h-6 p-1" />
+                  </div>
+                }
+              />
+            </>
+          ) : (
+            <>
+              <MenuTab
+                name="NA Permission"
+                path={path}
+                pathcheck="/dashboard/department/na-permission"
+                click={() => props.setIsOpen(false)}
+                icon={
+                  <div className="bg-[#f3f6f8] rounded-lg">
+                    <FluentMdl2ViewDashboard className="text-blue-500 w-6 h-6 p-1" />
+                  </div>
+                }
+              />
+            </>
+          )}
+
           <MenuTab
             name="Profile"
             path={path}

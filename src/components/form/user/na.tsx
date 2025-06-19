@@ -60,6 +60,7 @@ const NaPage = () => {
     formState: { isSubmitting, errors },
     control,
     setValue,
+    getValues,
   } = useFormContext<NAForm>();
 
   const handleFileUpload = (ref: React.RefObject<HTMLInputElement | null>) => {
@@ -522,6 +523,8 @@ const NaPage = () => {
                 <TextInput<NAForm>
                   required={true}
                   name="q6"
+                  onlynumber={true}
+                  maxlength={10}
                   placeholder="Enter Details"
                 />
               </div>
@@ -602,6 +605,8 @@ const NaPage = () => {
                               <TextInput<NAForm>
                                 name={`applicants.${index}.contact`}
                                 placeholder="Enter Contact"
+                                onlynumber={true}
+                                maxlength={10}
                               />
                               {errors.applicants?.[index]?.contact && (
                                 <p className="text-red-500 text-sm">
@@ -627,6 +632,7 @@ const NaPage = () => {
                                 id={`signature-${index}`}
                                 name={`applicants.${index}.signature`}
                                 onChange={async (e) => {
+                                  e.preventDefault();
                                   const file = e.target.files?.[0];
                                   if (file) {
                                     const response = await UploadFile(
@@ -637,9 +643,10 @@ const NaPage = () => {
                                       toast.error(response.message);
                                       return;
                                     }
-
+                                    // Get the latest values for this applicant
+                                    const currentApplicant = getValues(`applicants.${index}`);
                                     applicants.update(index, {
-                                      ...applicants.fields[index],
+                                      ...currentApplicant,
                                       signature_url: response.data as string,
                                     });
                                   }
@@ -749,7 +756,6 @@ const NaPage = () => {
                       survey_no: "",
                       area: "",
                       sub_division: "",
-                      villageId: 1,
                     })
                   }
                   className="py-1 rounded-md bg-green-500 px-4 text-sm text-white cursor-pointer"
@@ -770,9 +776,6 @@ const NaPage = () => {
                         </th>
                         <th className="border border-gray-300 px-4 py-2 font-normal text-sm">
                           Sub Division
-                        </th>
-                        <th className="border border-gray-300 px-4 py-2 font-normal text-sm w-40">
-                          Village
                         </th>
                         <th className="border border-gray-300 px-4 py-2 font-normal text-sm">
                           Actions
@@ -821,23 +824,7 @@ const NaPage = () => {
                               </p>
                             )}
                           </td>
-                          <td className="border border-gray-300 px-4 py-2">
-                            <MultiSelect<NAForm>
-                              placeholder="Select Village"
-                              name={`surveys.${index}.villageId`}
-                              required={true}
-                              title=""
-                              options={allvillage.data!.map((village) => ({
-                                label: village.name,
-                                value: village.id,
-                              }))}
-                            />
-                            {errors.surveys?.[index]?.villageId && (
-                              <p className="text-red-500 text-sm">
-                                {errors.surveys[index].villageId.message}
-                              </p>
-                            )}
-                          </td>
+
                           <td className="border border-gray-300 px-4 py-2 text-center">
                             <button
                               type="button"
@@ -881,7 +868,7 @@ const NaPage = () => {
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
               <p className="flex-1 text-sm text-gray-500">
                 (11) Present use of the land and whether any building exists
-                thereon and if so, iti use.
+                thereon and if so, it&apos;s use.
               </p>
               <div className="flex-1">
                 <TextInput<NAForm>

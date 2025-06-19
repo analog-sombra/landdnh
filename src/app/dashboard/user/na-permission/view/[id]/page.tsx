@@ -1,5 +1,7 @@
 "use client";
 import { TaxtAreaInput } from "@/components/form/inputfields/textareainput";
+import { TextInput } from "@/components/form/inputfields/textinput";
+import { FeesForm, FeesSchema } from "@/schema/forms/fees";
 import { QueryForm, QuerySchema } from "@/schema/forms/query";
 import { ApiCall, UploadFile } from "@/services/api";
 import { baseurl } from "@/utils/const";
@@ -117,6 +119,9 @@ const ViewPermission = () => {
 
   const [correspondenceBox, setCorrespondenceBox] = useState(false);
 
+  const [paymentHistoryBox, setPaymentHistoryBox] = useState(false);
+  const [feesBox, setFeesBox] = useState(false);
+
   if (formdata.isLoading) {
     return <div>Loading...</div>;
   }
@@ -131,14 +136,20 @@ const ViewPermission = () => {
         View NA Permission
       </h1>
 
-      <div className="flex gap-2 items-center mt-4">
+      <div className="flex gap-2 items-center mt-4 px-4">
         <div className="grow"></div>
 
         <button
           onClick={() => setCorrespondenceBox(true)}
           className="bg-[#162f57] text-white py-1 px-4 rounded-md text-sm grid place-items-center cursor-pointer"
         >
-          Correspondence
+          View Query
+        </button>
+        <button
+          onClick={() => setPaymentHistoryBox(true)}
+          className="bg-[#162f57] text-white py-1 px-4 rounded-md text-sm grid place-items-center cursor-pointer"
+        >
+          Payment History
         </button>
       </div>
 
@@ -419,9 +430,7 @@ const ViewPermission = () => {
             (11) Present use of the land and whether any building exists thereon
             and if so, iti use.
           </p>
-          <div className="flex-1">
-           {formdata.data!.q13}
-          </div>
+          <div className="flex-1">{formdata.data!.q13}</div>
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
           <p className="flex-1 text-sm text-gray-500">
@@ -429,17 +438,13 @@ const ViewPermission = () => {
             and if so, the distance thereof from the proposed building other
             works.
           </p>
-          <div className="flex-1">
-           {formdata.data!.q14}
-          </div>
+          <div className="flex-1">{formdata.data!.q14}</div>
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
           <p className="flex-1 text-sm text-gray-500">
             (13) Is, the land under acquisition ..If so, state details.
           </p>
-          <div className="flex-1">
-           {formdata.data!.q15}
-          </div>
+          <div className="flex-1">{formdata.data!.q15}</div>
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
           <p className="flex-1 text-sm text-gray-500">
@@ -448,30 +453,22 @@ const ViewPermission = () => {
             road or village road. What is the distance of the proposed building
             or other work from the ienter ofthe road.
           </p>
-          <div className="flex-1">
-           {formdata.data!.q16}
-          </div>
+          <div className="flex-1">{formdata.data!.q16}</div>
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
           <p className="flex-1 text-sm text-gray-500">
             (15) If there is no road adjoining the land, how is it proposed to
             be provided for access to the site.
           </p>
-          <div className="flex-1">
-           {formdata.data!.q17}
-          </div>
+          <div className="flex-1">{formdata.data!.q17}</div>
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
           <p className="flex-1 text-sm text-gray-500">
             (16) Was a similar application made in the past for non-agricultural
             use of this land and was it rejected If yes, give details.
           </p>
-          <div className="flex-1">
-           {formdata.data!.q18}
-          </div>
+          <div className="flex-1">{formdata.data!.q18}</div>
         </div>
-
-       
       </div>
 
       <Drawer
@@ -496,6 +493,31 @@ const ViewPermission = () => {
           createdById={formdata.data!.createdById}
           id={formdata.data!.id}
         />
+      </Drawer>
+      <Drawer
+        placement="right"
+        onClose={() => setPaymentHistoryBox(false)}
+        open={paymentHistoryBox}
+        closable={false}
+        width={400}
+        className="bg-white"
+        styles={{
+          body: {
+            paddingLeft: "10px",
+            paddingRight: "10px",
+            paddingTop: "10px",
+            paddingBottom: "0px",
+          },
+        }}
+      >
+        <div>
+          <PaymentHistoryProvider
+            setPaymentHistoryBox={setPaymentHistoryBox}
+            setFeesBox={setFeesBox}
+            feesBox={feesBox}
+            id={formdata.data!.id}
+          />
+        </div>
       </Drawer>
     </div>
   );
@@ -650,7 +672,7 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
           onClick={() => setQueryBox(true)}
           className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-28 text-nowrap"
         >
-          Add Query
+          Reply to Query
         </button>
         <button
           type="button"
@@ -781,11 +803,11 @@ const DeptChat = (props: DeptChatProps) => {
   return (
     <div className="mt-4">
       <div className="flex items-center gap-1 max-w-5/6">
-        <div className="shrink-0 h-8 w-8 rounded-full bg-rose-500 grid place-items-center text-lg text-white font-semibold">
+        <div className="shrink-0 h-6 w-6 rounded-full bg-rose-500 grid place-items-center text-xs text-white font-semibold">
           {props.name.charAt(0).toUpperCase()}
         </div>
         <div className="px-2 py-1 bg-gray-100 rounded-md pb-2 my-1">
-          <p className="text-sm text-gray-500 border-b pb-1">
+          <p className="text-xs text-gray-500 border-b">
             {props.name} ({props.role})
           </p>
           <p className="text-sm leading-4 mt-1">{props.message}</p>
@@ -819,22 +841,22 @@ const UserChat = (props: UserChatProps) => {
   return (
     <div className="mt-4 flex items-end flex-col">
       <div className="flex items-center gap-1 max-w-5/6">
-        <div className="px-2 py-1 bg-gray-100 rounded-md pb-2 my-1">
-          <p className="text-sm text-gray-500 border-b pb-1">
+        <div className="px-2 py-1 bg-blue-500 rounded-md pb-2 my-1">
+          <p className="text-xs text-white border-b">
             {props.name} ({props.role})
           </p>
-          <p className="text-sm leading-4 mt-1">{props.message}</p>
+          <p className="text-sm leading-4 mt-1 text-white">{props.message}</p>
           {props.url && (
             <Link
               target="_blank"
               href={props.url}
-              className="text-left text-sm text-nowrap inline-block"
+              className="text-left text-sm text-nowrap inline-block text-white border border-white px-2 rounded mt-2"
             >
-              View File
+              <p className="text-white inline-block">View File</p>
             </Link>
           )}
         </div>
-        <div className="shrink-0 h-8 w-8 rounded-full bg-rose-500 grid place-items-center text-lg text-white font-semibold">
+        <div className="shrink-0 h-6 w-6 rounded-full bg-rose-500 grid place-items-center text-xs text-white font-semibold">
           {props.name.charAt(0).toUpperCase()}
         </div>
       </div>
@@ -842,5 +864,249 @@ const UserChat = (props: UserChatProps) => {
         {formatDateTime(props.time)}
       </p>
     </div>
+  );
+};
+interface FeesHistoryResponseData {
+  id: number;
+  purpose: string;
+  amount: number;
+  is_paid: boolean;
+  payment_mode: string;
+  payment_type: string;
+}
+
+interface PaymentHistoryProviderProps {
+  setPaymentHistoryBox: React.Dispatch<React.SetStateAction<boolean>>;
+  setFeesBox: React.Dispatch<React.SetStateAction<boolean>>;
+  feesBox: boolean;
+  id: number;
+}
+
+const PaymentHistoryProvider = (props: PaymentHistoryProviderProps) => {
+  const methods = useForm<FeesForm>({
+    resolver: valibotResolver(FeesSchema),
+  });
+
+  return (
+    <>
+      <FormProvider {...methods}>
+        <PaymentHistoryPage
+          setPaymentHistoryBox={props.setPaymentHistoryBox}
+          setFeesBox={props.setFeesBox}
+          feesBox={props.feesBox}
+          id={props.id}
+        />
+      </FormProvider>
+    </>
+  );
+};
+
+const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
+  const userid = getCookie("id");
+  const [feesId, setFeesId] = useState<number>(0);
+
+  const paymenthistorydata = useQuery({
+    queryKey: ["getPaymentHistory"],
+    queryFn: async () => {
+      const response = await ApiCall({
+        query:
+          "query GetFeesHistory($id: Int!) { getFeesHistory(id: $id) { id, purpose, amount, is_paid, payment_mode, payment_type }}",
+        variables: {
+          id: props.id,
+        },
+      });
+
+      if (!response.status) {
+        throw new Error(response.message);
+      }
+
+      if (!(response.data as Record<string, unknown>)["getFeesHistory"]) {
+        throw new Error("Value not found in response");
+      }
+      return (response.data as Record<string, unknown>)[
+        "getFeesHistory"
+      ] as FeesHistoryResponseData[];
+    },
+  });
+
+  const payfees = useMutation({
+    mutationKey: ["createNaFee"],
+    mutationFn: async () => {
+      if (!userid) {
+        toast.error("User ID not found");
+        return;
+      }
+
+      if (feesId === 0) {
+        toast.error("Fees ID not set");
+        return;
+      }
+
+      const response = await ApiCall({
+        query:
+          "mutation PayNaFee($updateNaFeeInput: UpdateNaFeeInput!) {payNaFee(updateNaFeeInput: $updateNaFeeInput) {id}}",
+        variables: {
+          updateNaFeeInput: {
+            updatedById: parseInt(userid.toString()),
+            id: feesId,
+            order_id: getValues("order_id"),
+            track_id: getValues("track_id"),
+            transaction_id: getValues("transaction_id"),
+          },
+        },
+      });
+
+      if (!response.status) {
+        throw new Error(response.message);
+      }
+
+      if (!(response.data as Record<string, unknown>)["payNaFee"]) {
+        throw new Error("Value not found in response");
+      }
+      return (response.data as Record<string, unknown>)[
+        "payNaFee"
+      ] as QueryResponseData;
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+    onSuccess: () => {
+      toast.success("Payment request created successfully");
+    },
+  });
+
+  const {
+    handleSubmit,
+    formState: { isSubmitting },
+    setValue,
+    getValues,
+  } = useFormContext<FeesForm>();
+
+  const onSubmit = async () => {
+    payfees.mutate();
+    props.setFeesBox(false);
+    await paymenthistorydata.refetch();
+  };
+
+  if (paymenthistorydata.isLoading) {
+    return (
+      <>
+        <p className="text-gray-500 text-center">Loading payment history...</p>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <div className="flex items-center gap-2">
+        <p className="text-gray-700 text-lg ">Payment History</p>
+        <div className="grow"></div>
+
+        <button
+          type="button"
+          onClick={() => props.setPaymentHistoryBox(false)}
+          className="py-1 rounded-md bg-rose-500 px-4 text-sm text-white cursor-pointer w-24 text-nowrap"
+        >
+          Close
+        </button>
+      </div>
+
+      {paymenthistorydata.data?.length === 0 && (
+        <div className="mt-2">
+          <Alert message="No Payment Request Found." type="error" showIcon />
+        </div>
+      )}
+
+      {paymenthistorydata.data?.map((field, index) => (
+        <div
+          key={index}
+          className="bg-gradient-to-l from-blue-400 to-blue-500 shadow rounded-lg p-2 mt-3"
+        >
+          <div className="flex items-center gap-2 border-b border-gray-300 pb-1">
+            <p className="text-sm text-white">Purpose</p>
+            <div className="grow"></div>
+            {!field.is_paid && (
+              <button
+                className="py-1 rounded-md  px-4 text-xs text-white cursor-pointer"
+                onClick={() => {
+                  props.setFeesBox(true);
+                  setFeesId(field.id);
+                  setValue("order_id", "");
+                  setValue("transaction_id", "");
+                  setValue("track_id", "");
+                }}
+              >
+                Pay fees
+              </button>
+            )}
+          </div>
+
+          <p className="text-xs text-white">{field.purpose}</p>
+          <div className="flex items-center mt-2">
+            <p className="text-white text-sm border border-white rounded-l-md flex-1 text-center">
+              Amount: ₹{field.amount}
+            </p>
+            <p className="text-white text-sm border border-white flex-1 text-center">
+              {field.payment_type}
+            </p>
+            <p className="text-white text-sm border border-white rounded-r-md flex-1 text-center">
+              {field.is_paid ? "Paid" : "Unpaid"}
+            </p>
+          </div>
+        </div>
+      ))}
+
+      <Drawer
+        width={320}
+        closable={false}
+        onClose={() => props.setFeesBox(false)}
+        open={props.feesBox}
+        styles={{
+          body: {
+            paddingLeft: "10px",
+            paddingRight: "10px",
+            paddingTop: "10px",
+            paddingBottom: "0px",
+          },
+        }}
+      >
+        <h1 className="text-lg font-semibold text-[#162f57] mb-2">Pay Fees</h1>
+        <form onSubmit={handleSubmit(onSubmit, onFormError)}>
+          <div>
+            <TextInput<FeesForm>
+              title="Order ID"
+              required={true}
+              name="order_id"
+              placeholder="Enter Order ID"
+            />
+          </div>
+          <div>
+            <TextInput<FeesForm>
+              title="Transaction ID"
+              required={true}
+              name="transaction_id"
+              placeholder="Enter Transaction ID"
+            />
+          </div>
+
+          <div>
+            <TextInput<FeesForm>
+              title="Track ID"
+              required={true}
+              name="track_id"
+              placeholder="Enter Track ID"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white mt-2 cursor-pointer"
+          >
+            {isSubmitting ? "Loading...." : "Submit"}
+          </button>
+        </form>
+      </Drawer>
+    </>
   );
 };

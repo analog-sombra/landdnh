@@ -23,10 +23,6 @@ const NAApplicantSchema = object({
   contact: optional(string("Please enter your contact number.")),
   relation: optional(string("Please enter your relation.")),
   signature_url: optional(string("Please upload your signature.")),
-  // email: optional(string("Please enter your email.")),
-  // address: optional(string("Please enter your address.")),
-  // aadhar: optional(string()),
-  // villageId: pipe(number(), minValue(1, "Please select your village.")),
 });
 
 const NASurveySchema = object({
@@ -41,10 +37,6 @@ const NASurveySchema = object({
   sub_division: pipe(
     string("Please enter your Sub Division"),
     minLength(1, "Please enter your Sub Division")
-  ),
-  villageId: pipe(
-    number("Please select your village."),
-    minValue(1, "Please select your village.")
   ),
 });
 
