@@ -52,7 +52,7 @@ const LoginPage = () => {
       setCookie("role", data.role);
       setCookie("id", data.id);
       if (data.role == "USER") {
-        router.push("/dashboard/user/na-permission");
+        router.push("/dashboard/user/services");
       } else {
         router.push("/dashboard/department/na-permission");
       }

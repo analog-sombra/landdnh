@@ -21,7 +21,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { toast } from "react-toastify";
-import { file } from "valibot";
+import { encryptURLData } from "@/utils/methods";
 
 interface NaFormResponse {
   id: number;
@@ -203,10 +203,10 @@ const ViewPermission = () => {
 
   return (
     <div className="py-4">
-      <h1 className="text-[#162f57] text-2xl font-semibold  mx-4">
-        View NA Permission
-      </h1>
-      <div className="flex gap-2 items-center mt-4">
+      <div className="flex gap-2 items-center">
+        <h1 className="text-[#162f57] text-2xl font-semibold mx-4">
+          View NA Permission
+        </h1>
         <div className="grow"></div>
         {["LDCMAMLATDAR", "MAMLATDAR", "DEPUTYCOLLECTOR", "COLLECTOR"].includes(
           userdata.data!.role
@@ -238,9 +238,18 @@ const ViewPermission = () => {
         >
           Report
         </button>
-        {/* <button className="bg-[#162f57] text-white py-1 px-4 rounded-md text-sm grid place-items-center cursor-pointer">
-          Seek Report
-        </button> */}
+        <button
+          onClick={() => {
+            router.push(
+              `/dashboard/department/na-permission/view/${encryptURLData(
+                formid.toString()
+              )}/hearing`
+            );
+          }}
+          className="bg-[#162f57] text-white py-1 px-4 rounded-md text-sm grid place-items-center cursor-pointer"
+        >
+          Hearing
+        </button>
 
         <div className="w-2"></div>
       </div>
@@ -623,7 +632,11 @@ const ViewPermission = () => {
           },
         }}
       >
-        <ReportProvider setReportBox={setReportBox} id={formdata.data!.id} />
+        <ReportProvider
+          setReportBox={setReportBox}
+          id={formdata.data!.id}
+          role={userdata.data?.role ?? ""}
+        />
       </Drawer>
       <Drawer
         placement="right"
@@ -1604,10 +1617,9 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
   );
 };
 
-
-
 interface ReportProviderProps {
   setReportBox: React.Dispatch<React.SetStateAction<boolean>>;
+  role: string;
   id: number;
 }
 
@@ -1619,7 +1631,11 @@ const ReportProvider = (props: ReportProviderProps) => {
   return (
     <>
       <FormProvider {...methods}>
-        <ReportPage setReportBox={props.setReportBox} id={props.id} />
+        <ReportPage
+          setReportBox={props.setReportBox}
+          id={props.id}
+          role={props.role}
+        />
       </FormProvider>
     </>
   );
@@ -1629,7 +1645,7 @@ const ReportPage = (props: ReportProviderProps) => {
   const [queryBox, setQueryBox] = useState<boolean>(false);
   const userid = getCookie("id");
 
-  const notingdata = useQuery({
+  const reportdata = useQuery({
     queryKey: ["getQueryByType", props.id],
     queryFn: async () => {
       const response = await ApiCall({
@@ -1637,7 +1653,7 @@ const ReportPage = (props: ReportProviderProps) => {
           "query GetQueryByType($id: Int!, $querytype: [QueryType!]!) {getQueryByType(id: $id, querytype: $querytype) {id,query,upload_url_1,type,request_type,createdAt,from_user {id, firstName,lastName,role},to_user {id, firstName,lastName,role},}}",
         variables: {
           id: props.id,
-          querytype: ["NOTING"],
+          querytype: ["REPORT"],
         },
       });
 
@@ -1714,7 +1730,7 @@ const ReportPage = (props: ReportProviderProps) => {
             from_userId: parseInt(userid.toString()),
             to_userId: parseInt(getValues("userid")!.toString()),
             query: getValues("query"),
-            type: "NOTING",
+            type: "REPORT",
             na_formId: props.id,
             query_status: "PENDING",
             request_type: "DEPTTODEPT",
@@ -1747,7 +1763,7 @@ const ReportPage = (props: ReportProviderProps) => {
   const onSubmit = async () => {
     createquery.mutate();
     setQueryBox(false);
-    notingdata.refetch();
+    reportdata.refetch();
   };
 
   const handleFileUpload = (ref: React.RefObject<HTMLInputElement | null>) => {
@@ -1777,31 +1793,35 @@ const ReportPage = (props: ReportProviderProps) => {
   return (
     <>
       <div className="flex items-center gap-2">
-        <p className="text-gray-700 text-lg ">Notings</p>
+        <p className="text-gray-700 text-lg ">Report</p>
         <div className="grow"></div>
+
+        {["MAMLATDAR", "LDCMAMLATDAR"].includes(props.role) && (
+          <button
+            type="button"
+            onClick={() => setQueryBox(true)}
+            className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-28 text-nowrap"
+          >
+            Seek
+          </button>
+        )}
+
         <button
           type="button"
-          onClick={() => setQueryBox(true)}
-          className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-28 text-nowrap"
-        >
-          Mark to
-        </button>
-        <button
-          type="button"
-          onClick={() => props.setNotingBox(false)}
+          onClick={() => props.setReportBox(false)}
           className="py-1 rounded-md bg-rose-500 px-4 text-sm text-white cursor-pointer w-28 text-nowrap"
         >
           Close
         </button>
       </div>
 
-      {notingdata.data?.length === 0 && (
+      {reportdata.data?.length === 0 && (
         <div className="mt-2">
           <Alert message="No Notings found." type="error" showIcon />
         </div>
       )}
 
-      {notingdata.data?.map((field, index) => {
+      {reportdata.data?.map((field, index) => {
         if (field.from_user.id == Number(userid)) {
           return (
             <UserChat
@@ -1825,30 +1845,6 @@ const ReportPage = (props: ReportProviderProps) => {
             />
           );
         }
-        // return (
-        //   <div key={index} className="mt-4 flex items-end flex-col">
-        //     <div className="flex items-center gap-1 w-full">
-        //       <div className="px-2 py-1 bg-gray-100 rounded-md pb-2 my-1">
-        //         <p className="text-sm text-gray-500 border-b pb-1">
-        //           {field.from_user.role} To {field.to_user.role}
-        //         </p>
-        //         <p className="text-sm leading-4 mt-1">{field.query}</p>
-        //         {field.upload_url_1 && (
-        //           <Link
-        //             target="_blank"
-        //             href={field.upload_url_1}
-        //             className="text-left text-sm text-nowrap inline-block"
-        //           >
-        //             View File
-        //           </Link>
-        //         )}
-        //       </div>
-        //     </div>
-        //     <p className="text-xs text-left text-gray-500 leading-2 w-full pr-9">
-        //       {formatDateTime(new Date(field.createdAt))}
-        //     </p>
-        //   </div>
-        // );
       })}
 
       <Drawer

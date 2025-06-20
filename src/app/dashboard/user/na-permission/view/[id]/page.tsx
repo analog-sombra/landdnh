@@ -132,11 +132,10 @@ const ViewPermission = () => {
 
   return (
     <div className="py-4">
-      <h1 className="text-[#162f57] text-2xl font-semibold mx-4">
-        View NA Permission
-      </h1>
-
-      <div className="flex gap-2 items-center mt-4 px-4">
+      <div className="flex gap-2 items-center px-4">
+        <h1 className="text-[#162f57] text-2xl font-semibold mx-4">
+          View NA Permission
+        </h1>
         <div className="grow"></div>
 
         <button

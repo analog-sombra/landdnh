@@ -1,5 +1,5 @@
 "use client";
-import { Collapse, Tabs, TabsProps } from "antd";
+import { Collapse, Tabs, TabsProps, Popover } from "antd";
 
 const Meeting = () => {
   const onChange = (key: string) => {
@@ -88,33 +88,60 @@ const Meeting = () => {
               <p className="text-gray-700 text-sm">ADOCT</p>
             </div>
           </div>
-          <Collapse
-            items={data}
-            defaultActiveKey={["1", "2"]}
-          />
+          <Collapse items={data} defaultActiveKey={["1", "2"]} />
         </>
       ),
     },
     {
       key: "2",
-      label: "DOCUMENTS",
+      label: "FORM",
       children: "Content of Tab Pane 2",
-    },
-    {
-      key: "3",
-      label: "SCREEN SHARE",
-      children: "Content of Tab Pane 3",
     },
   ];
 
   return (
     <div className="p-6 grid grid-cols-12 gap-2 min-h-screen">
-      <div className="bg-white shadow rounded p-2 col-span-9 flex flex-col">
+      <div className="bg-white shadow rounded p-2 col-span-8 flex flex-col">
         <div className="flex-1 flex flex-col">
           <Tabs defaultActiveKey="1" items={items} onChange={onChange} />
         </div>
       </div>
-      <div className="bg-white shadow rounded p-2 col-span-3">
+      <div className="bg-white shadow rounded p-2 col-span-4">
+        <div className="flex items-center border-b pb-1 border-gray-300">
+          <p>Attendance: </p>
+          <div className="grow"></div>
+          <Popover
+            placement="bottomRight"
+            content={
+              <div className="flex flex-col gap-2">
+                <button className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600 transition-colors">
+                  Attendance
+                </button>
+                <button className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600 transition-colors">
+                  Correspondence
+                </button>
+                <button className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600 transition-colors">
+                  Notings
+                </button>
+                <button className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600 transition-colors">
+                  Report
+                </button>
+                <button className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600 transition-colors">
+                  Payment
+                </button>
+                <button className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600 transition-colors">
+                  Reschedule
+                </button>
+              </div>
+            }
+            title="Actions"
+          >
+            <button className="bg-blue-500 text-white px-4 py-1 rounded-md hover:bg-blue-600 transition-colors text-xs ">
+              Action
+            </button>
+          </Popover>
+        </div>
+
         <p className="text-sm">Maxwell B Jorck: Check in </p>
         <p className="text-sm">Concerns: I Have a photo to share </p>
       </div>
