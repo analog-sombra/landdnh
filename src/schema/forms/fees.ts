@@ -1,4 +1,4 @@
-import { InferInput, minLength, object, optional, pipe, string } from "valibot";
+import { InferInput, minLength, object, pipe, string } from "valibot";
 
 const FeesSchema = object({
   transaction_id: pipe(

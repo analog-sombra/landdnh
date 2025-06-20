@@ -1,5 +1,5 @@
 "use client";
-import { Collapse, Tabs, TabsProps, Popover } from "antd";
+import { Collapse, Tabs, Popover } from "antd";
 
 const Meeting = () => {
   const onChange = (key: string) => {

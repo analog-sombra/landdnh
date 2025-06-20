@@ -1,8 +1,5 @@
 "use client";
 
-import { $getRoot, $getSelection } from "lexical";
-import { useEffect } from "react";
-
 import { AutoFocusPlugin } from "@lexical/react/LexicalAutoFocusPlugin";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
@@ -14,17 +11,11 @@ import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { CodeHighlightNode, CodeNode } from "@lexical/code";
 import { TableNode, TableCellNode, TableRowNode } from "@lexical/table";
 import TreeViewPlugin from "./ThreeViewPlugin";
-import CodeHighlightPlugin from "./CodeHighlightPlugin";
-import { table } from "console";
-const theme = {
-  // Theme styling goes here
-  //...
-};
 
 // Catch any errors that occur during Lexical updates and log them
 // or throw them as needed. If you don't throw them, Lexical will
 // try to recover gracefully without losing user data.
-function onError(error: any) {
+function onError(error: Error) {
   console.error(error);
 }
 

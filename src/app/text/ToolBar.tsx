@@ -3,8 +3,6 @@ import {
   FlowbiteUndoSolid,
   FluentArrowCircleDown32Regular,
   FluentCodeBlock28Regular,
-  FluentColorFill32Light,
-  FluentColorLine24Regular,
   FluentTextAlignCenter24Regular,
   FluentTextAlignJustify24Regular,
   FluentTextAlignLeft24Regular,
@@ -31,9 +29,8 @@ import { useCallback, useEffect, useState } from "react";
 import { mergeRegister } from "@lexical/utils";
 import { $setBlocksType, $patchStyleText } from "@lexical/selection";
 import { $createHeadingNode, HeadingTagType } from "@lexical/rich-text";
-import { InputNumber, Select, Table } from "antd";
+import { InputNumber, Select } from "antd";
 import { $generateHtmlFromNodes } from "@lexical/html";
-import CustomColorPicker from "./ColorPicker";
 import TablePlugin from "./TablePlugin";
 
 const headingOptions = [
@@ -101,10 +98,10 @@ const ToolBar = () => {
   const [fontSize, setFontSizeState] = useState<number>(14);
   const [fontFamily, setFontFamily] = useState<string>("");
 
-  const [showFillColor, setShowFillColor] = useState(false);
-  const [showHighlightColor, setShowHighlightColor] = useState(false);
-  const [fillColor, setFillColor] = useState("#ffff00");
-  const [highlightColor, setHighlightColor] = useState("#000000");
+  // const [showFillColor, setShowFillColor] = useState(false);
+  // const [showHighlightColor, setShowHighlightColor] = useState(false);
+  // const [fillColor, setFillColor] = useState("#ffff00");
+  // const [highlightColor, setHighlightColor] = useState("#000000");
 
   const $updateToolbar = useCallback(() => {
     const selection = $getSelection();
@@ -129,7 +126,7 @@ const ToolBar = () => {
       }),
       editor.registerCommand(
         SELECTION_CHANGE_COMMAND,
-        (_payload, _newEditor) => {
+        () => {
           $updateToolbar();
           return false;
         },
@@ -169,7 +166,7 @@ const ToolBar = () => {
     editor.update(() => {
       const selection = $getSelection();
       if ($isRangeSelection(selection)) {
-        selection.getNodes().forEach((node) => {
+        selection.getNodes().forEach(() => {
           // if ($isTextNode(node)) {
           //   node.setStyle(`font-size: ${size}px`);
           // }
@@ -219,28 +216,28 @@ const ToolBar = () => {
     });
   }
 
-  const applyFillColor = (color: string) => {
-    editor.update(() => {
-      const selection = $getSelection();
-      if ($isRangeSelection(selection)) {
-        $patchStyleText(selection, { "background-color": color });
-      }
-    });
-    setFillColor(color);
-    setShowFillColor(false);
-  };
+  // const applyFillColor = (color: string) => {
+  //   editor.update(() => {
+  //     const selection = $getSelection();
+  //     if ($isRangeSelection(selection)) {
+  //       $patchStyleText(selection, { "background-color": color });
+  //     }
+  //   });
+  //   setFillColor(color);
+  //   setShowFillColor(false);
+  // };
 
-  // Handler to apply text color (highlight)
-  const applyHighlightColor = (color: string) => {
-    editor.update(() => {
-      const selection = $getSelection();
-      if ($isRangeSelection(selection)) {
-        $patchStyleText(selection, { color });
-      }
-    });
-    setHighlightColor(color);
-    setShowHighlightColor(false);
-  };
+  // // Handler to apply text color (highlight)
+  // const applyHighlightColor = (color: string) => {
+  //   editor.update(() => {
+  //     const selection = $getSelection();
+  //     if ($isRangeSelection(selection)) {
+  //       $patchStyleText(selection, { color });
+  //     }
+  //   });
+  //   setHighlightColor(color);
+  //   setShowHighlightColor(false);
+  // };
 
   function downloadAsPDF() {
     editor.read(async () => {
@@ -453,7 +450,7 @@ const ToolBar = () => {
               </span>
             ),
           }))}
-          dropdownRender={(menu) => (
+          dropdownRender={() => (
             <div>
               {fontFamilies.map((f) => (
                 <div

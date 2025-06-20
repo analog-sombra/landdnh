@@ -3,13 +3,11 @@ import { ApiCall } from "@/services/api";
 import { encryptURLData } from "@/utils/methods";
 import { useQuery } from "@tanstack/react-query";
 import { Alert, Pagination } from "antd";
-import { getCookie } from "cookies-next/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const NaPermission = () => {
   const router = useRouter();
-  const userid = getCookie("id");
 
   const [pagination, setPaginatin] = useState<{
     take: number;

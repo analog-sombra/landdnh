@@ -1,19 +1,14 @@
 "use client";
-import { Collapse, Tabs, TabsProps, Popover } from "antd";
-import { useRef, useState } from "react";
+import { Collapse, Tabs, Popover } from "antd";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import {
-  decryptURLData,
-  formatDateTime,
-  formateDate,
-  onFormError,
-} from "@/utils/methods";
-import { ApiCall, UploadFile } from "@/services/api";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { decryptURLData, formatDateTime, formateDate } from "@/utils/methods";
+import { ApiCall } from "@/services/api";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { baseurl } from "@/utils/const";
 import { Alert, Drawer } from "antd";
-import { FormProvider, useForm, useFormContext } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { getCookie } from "cookies-next/client";
 import { RequestPaymentForm, RequestPaymentSchema } from "@/schema/forms/fees";
@@ -70,17 +65,6 @@ interface NaFormResponse {
       name: string;
     };
   }[];
-}
-
-interface UserResponseData {
-  id: number;
-  firstName: string;
-  lastName: string;
-  role?: string | null;
-}
-
-interface QueryResponseData {
-  id: number;
 }
 
 interface QueryTypeResponseData {
@@ -218,7 +202,9 @@ const Meeting = () => {
 
           <div>
             <p className="text-sm">No of survey no</p>
-            <p className="text-sm  font-medium">{formdata.data?.na_survey.length}</p>
+            <p className="text-sm  font-medium">
+              {formdata.data?.na_survey.length}
+            </p>
           </div>
         </div>
       ),
@@ -769,8 +755,6 @@ const CorrespondenceProvider = (props: CorrespondenceProviderProps) => {
 };
 
 const CorrespondencePage = (props: CorrespondenceProviderProps) => {
-  const userid = getCookie("id");
-
   const chatdata = useQuery({
     queryKey: ["getQueryByType", props.id],
     queryFn: async () => {
@@ -1051,8 +1035,6 @@ const PaymentHistoryProvider = (props: PaymentHistoryProviderProps) => {
 };
 
 const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
-  const userid = getCookie("id");
-
   const paymenthistorydata = useQuery({
     queryKey: ["getPaymentHistory"],
     queryFn: async () => {

@@ -137,7 +137,6 @@ const ViewPermission = () => {
           View NA Permission
         </h1>
         <div className="grow"></div>
-
         <button
           onClick={() => setCorrespondenceBox(true)}
           className="bg-[#162f57] text-white py-1 px-4 rounded-md text-sm grid place-items-center cursor-pointer"

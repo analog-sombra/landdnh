@@ -1,10 +1,9 @@
 "use client";
 import { FluentTable48Regular } from "@/components/icons";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { $createTableNodeWithDimensions, TableNode } from "@lexical/table";
+import { $createTableNodeWithDimensions } from "@lexical/table";
 import { $insertNodeToNearestRoot } from "@lexical/utils";
 import { Checkbox, InputNumber, Modal } from "antd";
-import { $getRoot, $getSelection } from "lexical";
 import { useState } from "react";
 import { toast } from "react-toastify";
 

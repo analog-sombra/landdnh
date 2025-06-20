@@ -1504,7 +1504,6 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
   const {
     handleSubmit,
     formState: { isSubmitting },
-    setValue,
     getValues,
   } = useFormContext<RequestPaymentForm>();
 
