@@ -19,6 +19,7 @@ import { YesNoRadioInput } from "../inputfields/yesnoradioinput";
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { getCookie } from "cookies-next/client";
+import { Checkbox } from "antd";
 
 interface VillageResponse {
   id: number;
@@ -37,6 +38,27 @@ export const NaProvider = () => {
   );
 };
 
+interface NaTextInterface {
+  q1: boolean;
+  q2: boolean;
+  q3: boolean;
+  q4: boolean;
+  q5: boolean;
+  q6: boolean;
+  q7: boolean;
+  q8: boolean;
+  q9: boolean;
+  q10: boolean;
+  q11: boolean;
+  q12: boolean;
+  q13: boolean;
+  q14: boolean;
+  q15: boolean;
+  q16: boolean;
+  q17: boolean;
+  q18: boolean;
+}
+
 const NaPage = () => {
   const router = useRouter();
 
@@ -53,6 +75,27 @@ const NaPage = () => {
   const [anx3, setAnx3] = useState<File | null>(null);
   const [anx4, setAnx4] = useState<File | null>(null);
   const [anx5, setAnx5] = useState<File | null>(null);
+
+  const [naTextData, setNaTextData] = useState<NaTextInterface>({
+    q1: false,
+    q2: false,
+    q3: false,
+    q4: false,
+    q5: false,
+    q6: false,
+    q7: false,
+    q8: false,
+    q9: false,
+    q10: false,
+    q11: false,
+    q12: false,
+    q13: false,
+    q14: false,
+    q15: false,
+    q16: false,
+    q17: false,
+    q18: false,
+  });
 
   const {
     reset,
@@ -125,10 +168,10 @@ const NaPage = () => {
   const naform = useMutation({
     mutationKey: ["login"],
     mutationFn: async (data: NAForm) => {
-      if (data.surveys.length === 0) {
-        toast.error("Please add atleast one survey");
-        return;
-      }
+      // if (data.surveys.length === 0) {
+      //   toast.error("Please add atleast one survey");
+      //   return;
+      // }
 
       const response = await ApiCall({
         query:
@@ -136,6 +179,7 @@ const NaPage = () => {
         variables: {
           createNaInput: {
             ...data,
+            createdById: Number(userid),
           },
         },
       });
@@ -157,7 +201,7 @@ const NaPage = () => {
       router.push(
         `/dashboard/user/na-permission/view/${encryptURLData(
           data!.id.toString()
-        )}`
+        )}/preview`
       );
     },
 
@@ -237,12 +281,31 @@ const NaPage = () => {
               <p className="flex-1 text-sm text-gray-500">
                 (b) Assessed or held for the non-agriculture purpose of
               </p>
-              <div className="flex-1">
+              <div className="flex-1 flex gap-2">
                 <TextInput<NAForm>
                   required={true}
                   name="q2"
                   placeholder="Enter Details"
+                  disable={naTextData.q2}
                 />
+                <div>
+                  <Checkbox
+                    onClick={(e) => {
+                      if ((e.target as HTMLInputElement).checked) {
+                        setValue("q2", "Not Applicable");
+                      } else {
+                        setValue("q2", "");
+                      }
+
+                      setNaTextData({
+                        ...naTextData,
+                        q2: (e.target as HTMLInputElement).checked,
+                      });
+                    }}
+                  >
+                    NA
+                  </Checkbox>
+                </div>
               </div>
             </div>
 
@@ -252,12 +315,31 @@ const NaPage = () => {
                 relaxation of condition on the time of grant of land or
                 permission for such non-agricultural use Viz
               </p>
-              <div className="flex-1">
+              <div className="flex-1 flex gap-2">
                 <TextInput<NAForm>
                   required={true}
                   name="q3"
                   placeholder="Enter Details"
+                  disable={naTextData.q3}
                 />
+                <div>
+                  <Checkbox
+                    onClick={(e) => {
+                      if ((e.target as HTMLInputElement).checked) {
+                        setValue("q3", "Not Applicable");
+                      } else {
+                        setValue("q3", "");
+                      }
+
+                      setNaTextData({
+                        ...naTextData,
+                        q3: (e.target as HTMLInputElement).checked,
+                      });
+                    }}
+                  >
+                    NA
+                  </Checkbox>
+                </div>
               </div>
             </div>
             <div className="bg-gray-100 px-4 py-1 my-2 mx-4 text-sm">
@@ -644,7 +726,9 @@ const NaPage = () => {
                                       return;
                                     }
                                     // Get the latest values for this applicant
-                                    const currentApplicant = getValues(`applicants.${index}`);
+                                    const currentApplicant = getValues(
+                                      `applicants.${index}`
+                                    );
                                     applicants.update(index, {
                                       ...currentApplicant,
                                       signature_url: response.data as string,
@@ -715,12 +799,31 @@ const NaPage = () => {
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
               <p className="flex-1 text-sm text-gray-500">(6) Sub Division</p>
-              <div className="flex-1">
+              <div className="flex-1 flex gap-2">
                 <TextInput<NAForm>
                   required={true}
                   name="q8"
                   placeholder="Enter Details"
+                  disable={naTextData.q8}
                 />
+                <div>
+                  <Checkbox
+                    onClick={(e) => {
+                      if ((e.target as HTMLInputElement).checked) {
+                        setValue("q8", "Not Applicable");
+                      } else {
+                        setValue("q8", "");
+                      }
+
+                      setNaTextData({
+                        ...naTextData,
+                        q8: (e.target as HTMLInputElement).checked,
+                      });
+                    }}
+                  >
+                    NA
+                  </Checkbox>
+                </div>
               </div>
             </div>
 
@@ -870,12 +973,31 @@ const NaPage = () => {
                 (11) Present use of the land and whether any building exists
                 thereon and if so, it&apos;s use.
               </p>
-              <div className="flex-1">
+              <div className="flex-1 flex gap-2">
                 <TextInput<NAForm>
                   required={true}
                   name="q13"
                   placeholder="Enter Details"
+                  disable={naTextData.q13}
                 />
+                <div>
+                  <Checkbox
+                    onClick={(e) => {
+                      if ((e.target as HTMLInputElement).checked) {
+                        setValue("q13", "Not Applicable");
+                      } else {
+                        setValue("q13", "");
+                      }
+
+                      setNaTextData({
+                        ...naTextData,
+                        q13: (e.target as HTMLInputElement).checked,
+                      });
+                    }}
+                  >
+                    NA
+                  </Checkbox>
+                </div>
               </div>
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
@@ -884,24 +1006,62 @@ const NaPage = () => {
                 land and if so, the distance thereof from the proposed building
                 other works.
               </p>
-              <div className="flex-1">
+              <div className="flex-1 flex gap-2">
                 <TextInput<NAForm>
                   required={true}
                   name="q14"
                   placeholder="Enter Details"
+                  disable={naTextData.q14}
                 />
+                <div>
+                  <Checkbox
+                    onClick={(e) => {
+                      if ((e.target as HTMLInputElement).checked) {
+                        setValue("q14", "Not Applicable");
+                      } else {
+                        setValue("q14", "");
+                      }
+
+                      setNaTextData({
+                        ...naTextData,
+                        q14: (e.target as HTMLInputElement).checked,
+                      });
+                    }}
+                  >
+                    NA
+                  </Checkbox>
+                </div>
               </div>
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
               <p className="flex-1 text-sm text-gray-500">
                 (13) Is, the land under acquisition ..If so, state details.
               </p>
-              <div className="flex-1">
+              <div className="flex-1 flex gap-2">
                 <TextInput<NAForm>
                   required={true}
                   name="q15"
                   placeholder="Enter Details"
+                  disable={naTextData.q15}
                 />
+                <div>
+                  <Checkbox
+                    onClick={(e) => {
+                      if ((e.target as HTMLInputElement).checked) {
+                        setValue("q15", "Not Applicable");
+                      } else {
+                        setValue("q15", "");
+                      }
+
+                      setNaTextData({
+                        ...naTextData,
+                        q15: (e.target as HTMLInputElement).checked,
+                      });
+                    }}
+                  >
+                    NA
+                  </Checkbox>
+                </div>
               </div>
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
@@ -909,14 +1069,33 @@ const NaPage = () => {
                 (14) Is there a road from where the land is easily accessible ?
                 State the name of the road and whether it is Highway, Major
                 district road or village road. What is the distance of the
-                proposed building or other work from the ienter ofthe road.
+                proposed building or other work from the center of the road.
               </p>
-              <div className="flex-1">
+              <div className="flex-1 flex gap-2">
                 <TextInput<NAForm>
                   required={true}
                   name="q16"
                   placeholder="Enter Details"
+                  disable={naTextData.q16}
                 />
+                <div>
+                  <Checkbox
+                    onClick={(e) => {
+                      if ((e.target as HTMLInputElement).checked) {
+                        setValue("q16", "Not Applicable");
+                      } else {
+                        setValue("q16", "");
+                      }
+
+                      setNaTextData({
+                        ...naTextData,
+                        q16: (e.target as HTMLInputElement).checked,
+                      });
+                    }}
+                  >
+                    NA
+                  </Checkbox>
+                </div>
               </div>
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
@@ -924,12 +1103,31 @@ const NaPage = () => {
                 (15) If there is no road adjoining the land, how is it proposed
                 to be provided for access to the site.
               </p>
-              <div className="flex-1">
+              <div className="flex-1 flex gap-2">
                 <TextInput<NAForm>
                   required={true}
                   name="q17"
                   placeholder="Enter Details"
+                  disable={naTextData.q17}
                 />
+                <div>
+                  <Checkbox
+                    onClick={(e) => {
+                      if ((e.target as HTMLInputElement).checked) {
+                        setValue("q17", "Not Applicable");
+                      } else {
+                        setValue("q17", "");
+                      }
+
+                      setNaTextData({
+                        ...naTextData,
+                        q17: (e.target as HTMLInputElement).checked,
+                      });
+                    }}
+                  >
+                    NA
+                  </Checkbox>
+                </div>
               </div>
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
@@ -938,12 +1136,31 @@ const NaPage = () => {
                 non-agricultural use of this land and was it rejected If yes,
                 give details.
               </p>
-              <div className="flex-1">
+              <div className="flex-1 flex gap-2">
                 <TextInput<NAForm>
                   required={true}
                   name="q18"
                   placeholder="Enter Details"
+                  disable={naTextData.q18}
                 />
+                <div>
+                  <Checkbox
+                    onClick={(e) => {
+                      if ((e.target as HTMLInputElement).checked) {
+                        setValue("q18", "Not Applicable");
+                      } else {
+                        setValue("q18", "");
+                      }
+
+                      setNaTextData({
+                        ...naTextData,
+                        q18: (e.target as HTMLInputElement).checked,
+                      });
+                    }}
+                  >
+                    NA
+                  </Checkbox>
+                </div>
               </div>
             </div>
           </div>

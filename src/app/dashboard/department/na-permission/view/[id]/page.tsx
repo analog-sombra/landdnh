@@ -4,10 +4,11 @@ import { TaxtAreaInput } from "@/components/form/inputfields/textareainput";
 import { TextInput } from "@/components/form/inputfields/textinput";
 import { RequestPaymentForm, RequestPaymentSchema } from "@/schema/forms/fees";
 import {
+  MarkToForm,
+  MarkToSchema,
   NotingForm,
-  NotringSchema,
+  NotingSchema,
   QueryForm,
-  QuerySchema,
 } from "@/schema/forms/query";
 import { ApiCall, UploadFile } from "@/services/api";
 import { baseurl } from "@/utils/const";
@@ -22,6 +23,10 @@ import { useRef, useState } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { toast } from "react-toastify";
 import { encryptURLData } from "@/utils/methods";
+import { HiddenInput } from "@/components/form/inputfields/hiddenfield";
+import { RabioInput } from "@/components/form/inputfields/radioinput";
+import ViewEditor from "@/app/vieweditro/page";
+import { routeModule } from "next/dist/build/templates/pages";
 
 interface NaFormResponse {
   id: number;
@@ -49,6 +54,8 @@ interface NaFormResponse {
   q17: string;
   q18: string;
   createdById: number;
+  seek_report: boolean;
+  dept_user_id: number;
   village: {
     id: number;
     name: string;
@@ -82,12 +89,13 @@ interface QueryResponseData {
 }
 
 interface QueryTypeResponseData {
-  id: string;
+  id: number;
   query: string;
   upload_url_1: string | null;
   type: string;
   request_type: string;
   createdAt: Date;
+  query_status: string;
   from_user: {
     id: number;
     firstName: string;
@@ -114,7 +122,7 @@ const ViewPermission = () => {
     queryFn: async () => {
       const response = await ApiCall({
         query:
-          "query GetNaById($id:Int!) { getNaById(id: $id) { id, q1, q2, q3, q4, anx1, anx2, anx3, anx4, anx5, q4, q5, q6, q7, q8, q9, q10, q11, q12, q13, q14, q15, q16, q17, q18, createdById, village{ id, name }, na_applicant { firstName, lastName, contact,relation, signature_url }, na_survey { area, sub_division, survey_no, village { name }}}}",
+          "query GetNaById($id:Int!) { getNaById(id: $id) { id, q1, q2, q3, q4, anx1, anx2, anx3, anx4, anx5, q4, q5, q6, q7, q8, q9, q10, q11, q12, q13, q14, q15, q16, q17, q18, createdById, dept_user_id, seek_report, village{ id, name }, na_applicant { firstName, lastName, contact,relation, signature_url }, na_survey { area, sub_division, survey_no, village { name }}}}",
         variables: {
           id: formid,
         },
@@ -208,9 +216,13 @@ const ViewPermission = () => {
           View NA Permission
         </h1>
         <div className="grow"></div>
-        {["LDCMAMLATDAR", "MAMLATDAR", "DEPUTYCOLLECTOR", "COLLECTOR"].includes(
-          userdata.data!.role
-        ) && (
+        {[
+          "LDCMAMLATDAR",
+          "MAMLATDAR",
+          "DEPUTYCOLLECTOR",
+          "COLLECTOR",
+          "DNHPDA",
+        ].includes(userdata.data!.role) && (
           <button
             onClick={() => setPaymentHistoryBox(true)}
             className="bg-[#162f57] text-white py-1 px-4 rounded-md text-sm grid place-items-center cursor-pointer"
@@ -218,38 +230,64 @@ const ViewPermission = () => {
             Payment
           </button>
         )}
+        {([
+          "LDCMAMLATDAR",
+          "MAMLATDAR",
+          "DEPUTYCOLLECTOR",
+          "COLLECTOR",
+        ].includes(userdata.data!.role) ||
+          formdata.data?.dept_user_id == Number(userid)) && (
+          <button
+            onClick={() => setCorrespondenceBox(true)}
+            className="bg-[#162f57] text-white py-1 px-4 rounded-md text-sm grid place-items-center cursor-pointer"
+          >
+            Correspondence
+          </button>
+        )}
 
-        <button
-          onClick={() => setCorrespondenceBox(true)}
-          className="bg-[#162f57] text-white py-1 px-4 rounded-md text-sm grid place-items-center cursor-pointer"
-        >
-          Correspondence
-        </button>
-        <button
-          onClick={() => setNotingBox(true)}
-          className="bg-[#162f57] text-white py-1 px-4 rounded-md text-sm grid place-items-center cursor-pointer"
-        >
-          Notings
-        </button>
+        {["LDCMAMLATDAR", "MAMLATDAR", "DEPUTYCOLLECTOR", "COLLECTOR"].includes(
+          userdata.data!.role
+        ) && (
+          <button
+            onClick={() => setNotingBox(true)}
+            className="bg-[#162f57] text-white py-1 px-4 rounded-md text-sm grid place-items-center cursor-pointer"
+          >
+            Notings
+          </button>
+        )}
 
-        <button
-          onClick={() => setReportBox(true)}
-          className="bg-[#162f57] text-white py-1 px-4 rounded-md text-sm grid place-items-center cursor-pointer"
-        >
-          Report
-        </button>
-        <button
-          onClick={() => {
-            router.push(
-              `/dashboard/department/na-permission/view/${encryptURLData(
-                formid.toString()
-              )}/hearing`
-            );
-          }}
-          className="bg-[#162f57] text-white py-1 px-4 rounded-md text-sm grid place-items-center cursor-pointer"
-        >
-          Hearing
-        </button>
+        {([
+          "LDCMAMLATDAR",
+          "MAMLATDAR",
+          "DEPUTYCOLLECTOR",
+          "COLLECTOR",
+        ].includes(userdata.data!.role) ||
+          (formdata.data?.seek_report &&
+            formdata.data?.dept_user_id == Number(userid))) && (
+          <button
+            onClick={() => setReportBox(true)}
+            className="bg-[#162f57] text-white py-1 px-4 rounded-md text-sm grid place-items-center cursor-pointer"
+          >
+            Report
+          </button>
+        )}
+
+        {["LDCMAMLATDAR", "MAMLATDAR", "DEPUTYCOLLECTOR", "COLLECTOR"].includes(
+          userdata.data!.role
+        ) && (
+          <button
+            onClick={() => {
+              router.push(
+                `/dashboard/department/na-permission/view/${encryptURLData(
+                  formid.toString()
+                )}/hearing`
+              );
+            }}
+            className="bg-[#162f57] text-white py-1 px-4 rounded-md text-sm grid place-items-center cursor-pointer"
+          >
+            Hearing
+          </button>
+        )}
 
         <div className="w-2"></div>
       </div>
@@ -551,7 +589,7 @@ const ViewPermission = () => {
             (14) Is there a road from where the land is easily accessible ?
             State the name of the road and whether it is Highway, Major district
             road or village road. What is the distance of the proposed building
-            or other work from the ienter ofthe road.
+            or other work from the center of the road.
           </p>
           <div className="flex-1">{formdata.data!.q16}</div>
         </div>
@@ -676,8 +714,8 @@ interface CorrespondenceProviderProps {
 }
 
 const CorrespondenceProvider = (props: CorrespondenceProviderProps) => {
-  const methods = useForm<QueryForm>({
-    resolver: valibotResolver(QuerySchema),
+  const methods = useForm<MarkToForm>({
+    resolver: valibotResolver(MarkToSchema),
   });
 
   return (
@@ -695,6 +733,8 @@ const CorrespondenceProvider = (props: CorrespondenceProviderProps) => {
 
 const CorrespondencePage = (props: CorrespondenceProviderProps) => {
   const userid = getCookie("id");
+  const router = useRouter();
+  const userrole: string = getCookie("role") as string;
   const [queryBox, setQueryBox] = useState(false);
 
   const chatdata = useQuery({
@@ -705,7 +745,7 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
           "query GetQueryByType($id: Int!, $querytype: [QueryType!]!) {getQueryByType(id: $id, querytype: $querytype) {id,query,upload_url_1,type,request_type,createdAt,from_user {id, firstName,lastName,role},to_user {id, firstName,lastName,role},}}",
         variables: {
           id: props.id,
-          querytype: ["QUERY"],
+          querytype: ["QUERY", "CORESPONDENCE"],
         },
       });
 
@@ -722,13 +762,63 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
     },
   });
 
+  const userdata = useQuery({
+    queryKey: ["getUserByRoles"],
+    queryFn: async () => {
+      const response = await ApiCall({
+        query:
+          "query GetUserByRoles($role: [Role!]!) { getUserByRoles(role: $role) { id, firstName, lastName, role }}",
+        variables: {
+          role: [
+            "SUPTDCOLL",
+            "LDCMAMLATDAR",
+            "MAMLATDAR",
+            "RAK",
+            "DEPUTYCOLLECTOR",
+            "COLLECTOR",
+            "PATOCOLLECTOR",
+            "RTSMAMLATDAR",
+          ],
+        },
+      });
+
+      if (!response.status) {
+        throw new Error(response.message);
+      }
+
+      if (!(response.data as Record<string, unknown>)["getUserByRoles"]) {
+        throw new Error("Value not found in response");
+      }
+      return (response.data as Record<string, unknown>)[
+        "getUserByRoles"
+      ] as UserResponseData[];
+    },
+  });
+
   const createquery = useMutation({
     mutationKey: ["createNaQuery"],
-    mutationFn: async () => {
+    mutationFn: async (data: MarkToForm) => {
       if (!userid) {
         toast.error("User ID not found");
         return;
       }
+
+      console.log({
+        createNaQueryInput: {
+          createdById: parseInt(userid.toString()),
+          from_userId: parseInt(userid.toString()),
+          to_userId: parseInt(data.userid!.toString()),
+          query: data.query,
+          type: data.request_type,
+          na_formId: props.id,
+          query_status: "PENDING",
+          request_type: "DEPTTOAPPL",
+          ...(data.upload_url_1 && {
+            upload_url_1: data.upload_url_1,
+          }),
+          dept_update: true,
+        },
+      });
 
       const response = await ApiCall({
         query:
@@ -737,15 +827,16 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
           createNaQueryInput: {
             createdById: parseInt(userid.toString()),
             from_userId: parseInt(userid.toString()),
-            to_userId: props.createdById,
-            query: getValues("query"),
-            type: "QUERY",
+            to_userId: parseInt(data.userid!.toString()),
+            query: data.query,
+            type: data.request_type,
             na_formId: props.id,
             query_status: "PENDING",
             request_type: "DEPTTOAPPL",
-            ...(getValues("upload_url_1") && {
-              upload_url_1: getValues("upload_url_1"),
+            ...(data.upload_url_1 && {
+              upload_url_1: data.upload_url_1,
             }),
+            dept_update: true,
           },
         },
       });
@@ -764,6 +855,10 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
     onError: (error) => {
       toast.error(error.message);
     },
+    onSuccess: () => {
+      toast.success("Query Created Successfully");
+      router.push("/dashboard/department/na-permission");
+    },
   });
 
   const {
@@ -771,15 +866,20 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
     formState: { isSubmitting },
     setValue,
     getValues,
-  } = useFormContext<QueryForm>();
+  } = useFormContext<MarkToForm>();
 
   const uploadRef = useRef<HTMLInputElement>(null);
   const [upload, setUpload] = useState<File | null>(null);
 
-  const onSubmit = async () => {
+  const onSubmit = async (data: MarkToForm) => {
     setQueryBox(false);
 
-    createquery.mutate();
+    createquery.mutate(data);
+
+    chatdata.refetch();
+    setValue("query", "");
+    setValue("userid", "");
+    setValue("request_type", "CORESPONDENCE");
   };
 
   const handleFileUpload = (ref: React.RefObject<HTMLInputElement | null>) => {
@@ -816,7 +916,7 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
           onClick={() => setQueryBox(true)}
           className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-28 text-nowrap"
         >
-          Add Query
+          Mark To
         </button>
         <button
           type="button"
@@ -839,7 +939,8 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
             <UserChat
               key={index}
               name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-              role={field.from_user.role}
+              fromrole={field.from_user.role}
+              torole={field.to_user.role}
               message={field.query}
               time={new Date(field.createdAt)}
               url={field.upload_url_1}
@@ -850,7 +951,8 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
             <DeptChat
               key={index}
               name={`${field.to_user.firstName} ${field.to_user.lastName}`}
-              role={field.to_user.role}
+              fromrole={field.from_user.role}
+              torole={field.to_user.role}
               message={field.query}
               time={new Date(field.createdAt)}
               url={field.upload_url_1}
@@ -876,7 +978,45 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
         <h1 className="text-lg font-semibold text-[#162f57] mb-2">Query</h1>
         <form onSubmit={handleSubmit(onSubmit, onFormError)}>
           <div>
-            <TaxtAreaInput<QueryForm>
+            <MultiSelect<MarkToForm>
+              title="Select User"
+              required={true}
+              name="userid"
+              placeholder="Select User"
+              options={[
+                ...(userdata.data
+                  ? userdata.data
+                      .filter((val) => val.id !== Number(userid))
+                      .map((user) => ({
+                        label: `${user.firstName} ${user.lastName} [${user.role}]`,
+                        value: user.id.toString(),
+                      }))
+                  : []),
+                ...(["LDCMAMLATDAR", "MAMLATDAR"].includes(userrole)
+                  ? [
+                      {
+                        label: "User",
+                        value: props.createdById.toString(),
+                      },
+                    ]
+                  : []),
+              ]}
+            />
+          </div>
+          <div className="my-2">
+            <RabioInput<MarkToForm>
+              title="Request Type"
+              required={true}
+              name="request_type"
+              options={[
+                { label: "Correspondence", value: "CORESPONDENCE" },
+                { label: "Query", value: "QUERY" },
+              ]}
+              defaultValue={"CORESPONDENCE"}
+            />
+          </div>
+          <div>
+            <TaxtAreaInput<MarkToForm>
               title="Query"
               required={true}
               name="query"
@@ -932,27 +1072,6 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
             {isSubmitting ? "Loading...." : "Submit"}
           </button>
         </form>
-        {/* {userdata.data?.map((field, index) => (
-          <div
-            className="flex gap-2 bg-gray-100 p-2 rounded items-center"
-            key={index}
-          >
-            <h2 className="text-sm font-medium text-gray-700">
-              {field.firstName} {field.lastName}
-            </h2>
-            <div className="grow"></div>
-            <button
-              className="bg-[#162f57] text-white py-1 px-4 rounded-md text-sm"
-              onClick={() => {
-                createquery.mutate(field.id);
-                props.setUserBox(false);
-                props.setQueryBox(false);
-              }}
-            >
-              Submit
-            </button>
-          </div>
-        ))} */}
       </Drawer>
     </>
   );
@@ -960,7 +1079,8 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
 
 interface DeptChatProps {
   name: string;
-  role: string;
+  fromrole: string;
+  torole: string;
   message: string;
   time: Date;
   url?: string | null;
@@ -975,7 +1095,8 @@ const DeptChat = (props: DeptChatProps) => {
         </div>
         <div className="px-2 py-1 bg-gray-100 rounded-md pb-2 my-1">
           <p className="text-xs text-gray-500 border-b">
-            {props.name} ({props.role})
+            {/* {props.name} ({props.role}) */}
+            {props.fromrole} to {props.torole}
           </p>
           <p className="text-sm leading-4 mt-1">{props.message}</p>
           {props.url && (
@@ -998,7 +1119,8 @@ const DeptChat = (props: DeptChatProps) => {
 
 interface UserChatProps {
   name: string;
-  role: string;
+  fromrole: string;
+  torole: string;
   message: string;
   time: Date;
   url?: string | null;
@@ -1010,7 +1132,8 @@ const UserChat = (props: UserChatProps) => {
       <div className="flex items-center gap-1 max-w-5/6">
         <div className="px-2 py-1 bg-blue-500 rounded-md pb-2 my-1">
           <p className="text-xs text-white border-b">
-            {props.name} ({props.role})
+            {/* {props.name} ({props.role}) */}
+            {props.fromrole} to {props.torole}
           </p>
           <p className="text-sm leading-4 mt-1 text-white">{props.message}</p>
           {props.url && (
@@ -1034,6 +1157,36 @@ const UserChat = (props: UserChatProps) => {
   );
 };
 
+interface ShowEditorProps {
+  name: string;
+  fromrole: string;
+  torole: string;
+  data: string;
+  time: Date;
+}
+
+const ShowEditor = (props: ShowEditorProps) => {
+  return (
+    <div className="mt-4">
+      <div className="flex items-center gap-1 max-w-5/6">
+        <div className="shrink-0 h-6 w-6 rounded-full bg-rose-500 grid place-items-center text-xs text-white font-semibold">
+          {props.name.charAt(0).toUpperCase()}
+        </div>
+        <div className="px-2 py-1 bg-gray-100 rounded-md pb-2 my-1">
+          <p className="text-xs text-gray-500 border-b">
+            {/* {props.name} ({props.role}) */}
+            {props.fromrole} to {props.torole}
+          </p>
+          <ViewEditor data={props.data} />
+        </div>
+      </div>
+      <p className="text-xs text-left pl-9 text-gray-500 leading-2 max-w-5/6">
+        {formatDateTime(props.time)}
+      </p>
+    </div>
+  );
+};
+
 interface NotingProviderProps {
   setNotingBox: React.Dispatch<React.SetStateAction<boolean>>;
   id: number;
@@ -1041,7 +1194,7 @@ interface NotingProviderProps {
 
 const NotingProvider = (props: NotingProviderProps) => {
   const methods = useForm<NotingForm>({
-    resolver: valibotResolver(NotringSchema),
+    resolver: valibotResolver(NotingSchema),
   });
 
   return (
@@ -1056,6 +1209,7 @@ const NotingProvider = (props: NotingProviderProps) => {
 const NotingPage = (props: NotingProviderProps) => {
   const [queryBox, setQueryBox] = useState<boolean>(false);
   const userid = getCookie("id");
+  const router = useRouter();
 
   const notingdata = useQuery({
     queryKey: ["getQueryByType", props.id],
@@ -1065,7 +1219,7 @@ const NotingPage = (props: NotingProviderProps) => {
           "query GetQueryByType($id: Int!, $querytype: [QueryType!]!) {getQueryByType(id: $id, querytype: $querytype) {id,query,upload_url_1,type,request_type,createdAt,from_user {id, firstName,lastName,role},to_user {id, firstName,lastName,role},}}",
         variables: {
           id: props.id,
-          querytype: ["NOTING"],
+          querytype: ["NOTING", "PRENOTE"],
         },
       });
 
@@ -1130,6 +1284,11 @@ const NotingPage = (props: NotingProviderProps) => {
     mutationFn: async () => {
       if (!userid) {
         toast.error("User ID not found");
+        return;
+      }
+
+      if (!getValues("userid")) {
+        toast.error("Please select a user to mark to");
         return;
       }
 
@@ -1209,7 +1368,13 @@ const NotingPage = (props: NotingProviderProps) => {
         <div className="grow"></div>
         <button
           type="button"
-          onClick={() => setQueryBox(true)}
+          onClick={() => {
+            router.push(
+              `/dashboard/department/na-permission/view/${encryptURLData(
+                props.id.toString()
+              )}/noting`
+            );
+          }}
           className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-28 text-nowrap"
         >
           Mark to
@@ -1229,55 +1394,60 @@ const NotingPage = (props: NotingProviderProps) => {
         </div>
       )}
 
-      {notingdata.data?.map((field, index) => {
-        if (field.from_user.id == Number(userid)) {
-          return (
-            <UserChat
-              key={index}
-              name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-              role={field.from_user.role}
-              message={field.query}
-              time={new Date(field.createdAt)}
-              url={field.upload_url_1}
-            />
-          );
-        } else {
-          return (
-            <DeptChat
-              key={index}
-              name={`${field.to_user.firstName} ${field.to_user.lastName}`}
-              role={field.to_user.role}
-              message={field.query}
-              time={new Date(field.createdAt)}
-              url={field.upload_url_1}
-            />
-          );
-        }
-        // return (
-        //   <div key={index} className="mt-4 flex items-end flex-col">
-        //     <div className="flex items-center gap-1 w-full">
-        //       <div className="px-2 py-1 bg-gray-100 rounded-md pb-2 my-1">
-        //         <p className="text-sm text-gray-500 border-b pb-1">
-        //           {field.from_user.role} To {field.to_user.role}
-        //         </p>
-        //         <p className="text-sm leading-4 mt-1">{field.query}</p>
-        //         {field.upload_url_1 && (
-        //           <Link
-        //             target="_blank"
-        //             href={field.upload_url_1}
-        //             className="text-left text-sm text-nowrap inline-block"
-        //           >
-        //             View File
-        //           </Link>
-        //         )}
-        //       </div>
-        //     </div>
-        //     <p className="text-xs text-left text-gray-500 leading-2 w-full pr-9">
-        //       {formatDateTime(new Date(field.createdAt))}
-        //     </p>
-        //   </div>
-        // );
-      })}
+      {(() => {
+        if (!notingdata.data) return null;
+
+        // Find latest PRENOTE entry
+        const latestPrenote = [...notingdata.data]
+          .filter((item) => item.type === "PRENOTE")
+          .sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          )[0];
+
+        return notingdata.data.map((field, index) => {
+          // Show only the latest PRENOTE
+          if (field.type === "PRENOTE") {
+            if (field !== latestPrenote) return null; // skip other PRENOTEs
+            return (
+              <ShowEditor
+                key={`prenote-${index}`}
+                data={field.query}
+                fromrole={field.from_user.role}
+                torole={field.to_user.role}
+                name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+                time={new Date(field.createdAt)}
+              />
+            );
+          }
+
+          if (field.from_user.id === Number(userid)) {
+            return (
+              <UserChat
+                key={`user-${index}`}
+                name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+                fromrole={field.from_user.role}
+                torole={field.to_user.role}
+                message={field.query}
+                time={new Date(field.createdAt)}
+                url={field.upload_url_1}
+              />
+            );
+          } else {
+            return (
+              <DeptChat
+                key={`dept-${index}`}
+                name={`${field.to_user.firstName} ${field.to_user.lastName}`}
+                fromrole={field.from_user.role}
+                torole={field.to_user.role}
+                message={field.query}
+                time={new Date(field.createdAt)}
+                url={field.upload_url_1}
+              />
+            );
+          }
+        });
+      })()}
 
       <Drawer
         width={320}
@@ -1514,16 +1684,14 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
 
   if (paymenthistorydata.isLoading || pendingpaymentdata.isLoading) {
     return (
-      <>
-        <p className="text-gray-500 text-center">Loading payment history...</p>
-      </>
+      <p className="text-gray-500 text-center">Loading payment history...</p>
     );
   }
 
   return (
     <>
       <div className="flex items-center gap-2">
-        <p className="text-gray-700 text-lg ">Payment History</p>
+        <p className="text-gray-700 text-lg">Payment History</p>
         <div className="grow"></div>
         {pendingpaymentdata.data && pendingpaymentdata.data.length === 0 && (
           <button
@@ -1624,7 +1792,7 @@ interface ReportProviderProps {
 
 const ReportProvider = (props: ReportProviderProps) => {
   const methods = useForm<NotingForm>({
-    resolver: valibotResolver(NotringSchema),
+    resolver: valibotResolver(NotingSchema),
   });
 
   return (
@@ -1642,6 +1810,8 @@ const ReportProvider = (props: ReportProviderProps) => {
 
 const ReportPage = (props: ReportProviderProps) => {
   const [queryBox, setQueryBox] = useState<boolean>(false);
+  const [submitBox, setSubmitBox] = useState<boolean>(false);
+  const [id, setId] = useState<number>(0);
   const userid = getCookie("id");
 
   const reportdata = useQuery({
@@ -1649,7 +1819,7 @@ const ReportPage = (props: ReportProviderProps) => {
     queryFn: async () => {
       const response = await ApiCall({
         query:
-          "query GetQueryByType($id: Int!, $querytype: [QueryType!]!) {getQueryByType(id: $id, querytype: $querytype) {id,query,upload_url_1,type,request_type,createdAt,from_user {id, firstName,lastName,role},to_user {id, firstName,lastName,role},}}",
+          "query GetQueryByType($id: Int!, $querytype: [QueryType!]!) {getQueryByType(id: $id, querytype: $querytype) {id,query,upload_url_1,type,request_type,query_status,createdAt,from_user {id, firstName,lastName,role},to_user {id, firstName,lastName,role},}}",
         variables: {
           id: props.id,
           querytype: ["REPORT"],
@@ -1677,14 +1847,15 @@ const ReportPage = (props: ReportProviderProps) => {
           "query GetUserByRoles($role: [Role!]!) { getUserByRoles(role: $role) { id, firstName, lastName, role }}",
         variables: {
           role: [
-            "SUPTDCOLL",
-            "LDCMAMLATDAR",
-            "MAMLATDAR",
-            "RAK",
-            "DEPUTYCOLLECTOR",
-            "COLLECTOR",
-            "PATOCOLLECTOR",
+            "TALATHI",
+            "CIRCLEOFFICER",
+            "LRO",
+            "LAQ",
             "RTSMAMLATDAR",
+            "SURVEYSETTLEMENT",
+            "DNHPDA",
+            "SNSSO",
+            "SURVEYOR",
           ],
         },
       });
@@ -1714,7 +1885,7 @@ const ReportPage = (props: ReportProviderProps) => {
 
   const createquery = useMutation({
     mutationKey: ["createNaQuery"],
-    mutationFn: async () => {
+    mutationFn: async (data: NotingForm) => {
       if (!userid) {
         toast.error("User ID not found");
         return;
@@ -1727,15 +1898,16 @@ const ReportPage = (props: ReportProviderProps) => {
           createNaQueryInput: {
             createdById: parseInt(userid.toString()),
             from_userId: parseInt(userid.toString()),
-            to_userId: parseInt(getValues("userid")!.toString()),
-            query: getValues("query"),
+            to_userId: parseInt(data.userid.toString()),
+            query: data.query,
             type: "REPORT",
             na_formId: props.id,
             query_status: "PENDING",
             request_type: "DEPTTODEPT",
-            ...(getValues("upload_url_1") && {
-              upload_url_1: getValues("upload_url_1"),
+            ...(data.upload_url_1 && {
+              upload_url_1: data.upload_url_1,
             }),
+            seek_report: true,
           },
         },
       });
@@ -1759,9 +1931,67 @@ const ReportPage = (props: ReportProviderProps) => {
     },
   });
 
-  const onSubmit = async () => {
-    createquery.mutate();
+  const submitreport = useMutation({
+    mutationKey: ["submitNaQuery"],
+    mutationFn: async () => {
+      if (!userid) {
+        toast.error("User ID not found");
+        return;
+      }
+
+      if (id === 0) {
+        toast.error("ID not set for report submission");
+        return;
+      }
+
+      const response = await ApiCall({
+        query:
+          "mutation SubmitNaQuery($id:Int! $createNaQueryInput: CreateNaQueryInput!) {submitNaQuery(id: $id, createNaQueryInput: $createNaQueryInput) {id}}",
+        variables: {
+          id: id,
+          createNaQueryInput: {
+            createdById: parseInt(userid.toString()),
+            from_userId: parseInt(userid.toString()),
+            to_userId: 5,
+            query: getValues("query"),
+            type: "SUBMITREPORT",
+            na_formId: props.id,
+            query_status: "PENDING",
+            request_type: "DEPTTODEPT",
+            ...(getValues("upload_url_1") && {
+              upload_url_1: getValues("upload_url_1"),
+            }),
+          },
+        },
+      });
+
+      if (!response.status) {
+        throw new Error(response.message);
+      }
+
+      if (!(response.data as Record<string, unknown>)["submitNaQuery"]) {
+        throw new Error("Value not found in response");
+      }
+      return (response.data as Record<string, unknown>)[
+        "submitNaQuery"
+      ] as QueryResponseData;
+    },
+    onSuccess: () => {
+      toast.success("Noting created successfully");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const onSubmit = async (data: NotingForm) => {
+    createquery.mutate(data);
     setQueryBox(false);
+    reportdata.refetch();
+  };
+  const onReportSubmit = async () => {
+    submitreport.mutate();
+    setSubmitBox(false);
     reportdata.refetch();
   };
 
@@ -1805,6 +2035,32 @@ const ReportPage = (props: ReportProviderProps) => {
           </button>
         )}
 
+        {reportdata.data &&
+          reportdata.data.filter(
+            (val) =>
+              val.to_user?.id === Number(userid) &&
+              val.query_status === "PENDING"
+          ).length > 0 && (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  setSubmitBox(true);
+                  setId(
+                    reportdata.data.filter(
+                      (val) =>
+                        val.to_user?.id === Number(userid) &&
+                        val.query_status === "PENDING"
+                    )[0].id
+                  );
+                }}
+                className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-32 text-nowrap"
+              >
+                Submit Report
+              </button>
+            </>
+          )}
+
         <button
           type="button"
           onClick={() => props.setReportBox(false)}
@@ -1826,7 +2082,8 @@ const ReportPage = (props: ReportProviderProps) => {
             <UserChat
               key={index}
               name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-              role={field.from_user.role}
+              fromrole={field.from_user.role}
+              torole={field.to_user.role}
               message={field.query}
               time={new Date(field.createdAt)}
               url={field.upload_url_1}
@@ -1837,7 +2094,8 @@ const ReportPage = (props: ReportProviderProps) => {
             <DeptChat
               key={index}
               name={`${field.to_user.firstName} ${field.to_user.lastName}`}
-              role={field.to_user.role}
+              fromrole={field.from_user.role}
+              torole={field.to_user.role}
               message={field.query}
               time={new Date(field.createdAt)}
               url={field.upload_url_1}
@@ -1879,6 +2137,84 @@ const ReportPage = (props: ReportProviderProps) => {
                   : []
               }
             />
+          </div>
+          <div>
+            <TaxtAreaInput<NotingForm>
+              title="Query"
+              required={true}
+              name="query"
+              placeholder="Enter Details"
+            />
+          </div>
+          <div className="flex items-center mt-2 p-2 rounded-lg bg-gray-100">
+            <p className="text-sm text-gray-700">Upload File</p>
+            <div className="grow"></div>
+            {upload ? (
+              <button
+                type="button"
+                onClick={() => setUpload(null)}
+                className="py-1 rounded-md bg-red-500 px-4 text-sm text-white cursor-pointer w-28"
+              >
+                Remove
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => handleFileUpload(uploadRef)}
+                className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-28 text-nowrap"
+              >
+                Upload File
+              </button>
+            )}
+
+            <input
+              type="file"
+              ref={uploadRef}
+              name="upload_url_1"
+              onChange={(e) => handleFileChange(e, setUpload, uploadRef)}
+              className="hidden"
+            />
+
+            {upload && (
+              <div className="flex gap-2 items-center">
+                <Link
+                  target="_blank"
+                  href={URL.createObjectURL(upload!)}
+                  className="bg-gray-200 text-black py-1 px-4 rounded-md text-sm h-7 grid place-items-center w-28 text-nowrap"
+                >
+                  View File
+                </Link>
+              </div>
+            )}
+          </div>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white mt-2 cursor-pointer"
+          >
+            {isSubmitting ? "Loading...." : "Submit"}
+          </button>
+        </form>
+      </Drawer>
+      <Drawer
+        width={320}
+        closable={false}
+        onClose={() => setSubmitBox(false)}
+        open={submitBox}
+        styles={{
+          body: {
+            paddingLeft: "10px",
+            paddingRight: "10px",
+            paddingTop: "10px",
+            paddingBottom: "0px",
+          },
+        }}
+      >
+        <h1 className="text-lg font-semibold text-[#162f57] mb-2">Mark to</h1>
+        <form onSubmit={handleSubmit(onReportSubmit, onFormError)}>
+          <div>
+            <HiddenInput<NotingForm> name="userid" value={"5"} />
+            {/* <input type="hidden" name="userid" value={"5"} /> */}
           </div>
           <div>
             <TaxtAreaInput<NotingForm>

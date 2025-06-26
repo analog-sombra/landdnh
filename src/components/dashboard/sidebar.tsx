@@ -266,7 +266,7 @@ const Sidebar = (props: SidebarProps) => {
                   <button
                     className="flex gap-2 items-center cursor-pointer border border-blue-500 rounded p-1 w-40"
                     onClick={() => {
-                      router.push("/dashboard/user/profile");
+                      router.push("/dashboard/profile");
                     }}
                   >
                     <MaterialSymbolsPersonRounded className="text-blue-500 w-6 h-6" />

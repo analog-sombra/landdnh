@@ -1,33 +1,18 @@
 "use client";
-import {
-  Collapse,
-  Tabs,
-  Popover,
-  Modal,
-  DatePicker,
-  TimePicker,
-  Checkbox,
-} from "antd";
+import { Collapse, Tabs } from "antd";
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { decryptURLData, formatDateTime, formateDate } from "@/utils/methods";
 import { ApiCall } from "@/services/api";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import Link from "next/link";
 import { baseurl } from "@/utils/const";
-import { Alert, Drawer } from "antd";
-import { FormProvider, useForm } from "react-hook-form";
-import { valibotResolver } from "@hookform/resolvers/valibot";
+import { Alert } from "antd";
 import { getCookie } from "cookies-next/client";
-import { RequestPaymentForm, RequestPaymentSchema } from "@/schema/forms/fees";
-import {
-  NotingForm,
-  NotingSchema,
-  QueryForm,
-  QuerySchema,
-} from "@/schema/forms/query";
-import { IcBaselineArrowBack } from "@/components/icons";
+import Editor from "@/app/notingtexteditor/page";
 import ViewEditor from "@/app/vieweditro/page";
+import { IcBaselineArrowBack } from "@/components/icons";
+import NotingEditor from "@/app/notingtexteditor/page";
 
 interface NaFormResponse {
   id: number;
@@ -99,11 +84,7 @@ interface QueryTypeResponseData {
 }
 
 const Meeting = () => {
-  const [correspondenceBox, setCorrespondenceBox] = useState<boolean>(false);
-  const [notingBox, setNotingBox] = useState<boolean>(false);
-  const [reportBox, setReportBox] = useState<boolean>(false);
-  const [paymentHistoryBox, setPaymentHistoryBox] = useState<boolean>(false);
-  const [rescheduleBox, setRescheduleBox] = useState<boolean>(false);
+  const [isNoting, setIsNoting] = useState<boolean>(false);
 
   const router = useRouter();
 
@@ -225,7 +206,7 @@ const Meeting = () => {
   const items = [
     {
       key: "1",
-      label: "CASE INFO",
+      label: "Case Information",
       children: (
         <>
           <div className="flex items-center mb-4">
@@ -248,7 +229,7 @@ const Meeting = () => {
     },
     {
       key: "2",
-      label: "FORM",
+      label: "Form",
       children: formdata.data ? (
         <>
           <div className="bg-white">
@@ -277,7 +258,6 @@ const Meeting = () => {
               <span className="font-semibold">NA OF LAND</span> for which
               details are given below :-
             </p>
-            {/* <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"> */}
             <div className="bg-gray-100 px-4 py-1 my-2 mx-4 text-sm">
               Applicant Details
             </div>
@@ -575,6 +555,49 @@ const Meeting = () => {
         <></>
       ),
     },
+    {
+      key: "3",
+      label: "Correspondence",
+      children: formdata.data ? (
+        <CorrespondencePage id={formdata.data!.id} />
+      ) : (
+        <></>
+      ),
+    },
+    {
+      key: "4",
+      label: "Report",
+      children: formdata.data ? <ReportPage id={formdata.data!.id} /> : <></>,
+    },
+    {
+      key: "5",
+      label: "Payment History",
+      children: formdata.data ? (
+        <PaymentHistoryPage id={formdata.data!.id} />
+      ) : (
+        <></>
+      ),
+    },
+    {
+      key: "6",
+      label: "Noting",
+      children: formdata.data ? (
+        <>
+          <div className="flex items-center mb-2">
+            <div className="grow"></div>
+            <button
+              onClick={() => setIsNoting(!isNoting)}
+              className="bg-blue-500 text-white px-4 py-1 rounded-md text-sm"
+            >
+              {isNoting ? "Hide Noting" : "Add Noting"}
+            </button>
+          </div>
+          <NotingPage id={formdata.data!.id} />
+        </>
+      ) : (
+        <></>
+      ),
+    },
   ];
 
   if (formdata.isLoading) {
@@ -593,231 +616,27 @@ const Meeting = () => {
 
   return (
     <>
-      <div className="p-4 grid grid-cols-12 gap-2 min-h-screen">
-        <div className="bg-white shadow rounded p-2 col-span-8 flex flex-col">
+      <div className="p-2 grid grid-cols-12 gap-1 min-h-screen">
+        <div
+          className={`bg-white shadow rounded p-2 ${
+            isNoting ? "col-span-6" : "col-span-12"
+          }  flex flex-col`}
+        >
           <div className="flex-1 flex flex-col">
             <Tabs defaultActiveKey="1" items={items} onChange={onChange} />
           </div>
         </div>
-        <div className="bg-white shadow rounded p-2 col-span-4">
-          <div className="flex items-center border-b pb-1 border-gray-300">
-            <p>Attendance: </p>
-            <div className="grow"></div>
-            <Popover
-              placement="bottomRight"
-              content={
-                <div className="flex flex-col gap-2">
-                  <button className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600 transition-colors">
-                    Attendance
-                  </button>
-                  <button
-                    className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600 transition-colors"
-                    onClick={() => setCorrespondenceBox(true)}
-                  >
-                    Correspondence
-                  </button>
-                  <button
-                    className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600 transition-colors"
-                    onClick={() => setNotingBox(true)}
-                  >
-                    Notings
-                  </button>
-                  <button
-                    className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600 transition-colors"
-                    onClick={() => setReportBox(true)}
-                  >
-                    Report
-                  </button>
-                  <button
-                    className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600 transition-colors"
-                    onClick={() => setPaymentHistoryBox(true)}
-                  >
-                    Payment
-                  </button>
-                  <button
-                    className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600 transition-colors"
-                    onClick={() => setRescheduleBox(true)}
-                  >
-                    Reschedule
-                  </button>
-                </div>
-              }
-              title="Actions"
-            >
-              <button className="bg-blue-500 text-white px-4 py-1 rounded-md hover:bg-blue-600 transition-colors text-xs ">
-                Action
-              </button>
-            </Popover>
+        {isNoting && (
+          <div
+            className={`bg-white shadow rounded p-2 ${
+              isNoting ? "col-span-6" : ""
+            }`}
+          >
+            <NotingEditor id={formdata.data!.id} />
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full mt-2 border-collapse border border-gray-200">
-              <tbody>
-                <tr className="hover:bg-gray-50">
-                  <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
-                    Collector
-                  </td>
-                  <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
-                    <Checkbox />
-                  </td>
-                  <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
-                    <button className="bg-blue-500 text-white px-4 py-1 rounded-md hover:bg-blue-600 transition-colors">
-                      Submit
-                    </button>
-                  </td>
-                </tr>
-                <tr className="hover:bg-gray-50">
-                  <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
-                    Mamlatdar
-                  </td>
-                  <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
-                    <Checkbox />
-                  </td>
-                  <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
-                    <button className="bg-blue-500 text-white px-4 py-1 rounded-md hover:bg-blue-600 transition-colors">
-                      Submit
-                    </button>
-                  </td>
-                </tr>
-                <tr className="hover:bg-gray-50">
-                  <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
-                    Ldcmamlatdar
-                  </td>
-                  <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
-                    <Checkbox />
-                  </td>
-                  <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
-                    <button className="bg-blue-500 text-white px-4 py-1 rounded-md hover:bg-blue-600 transition-colors">
-                      Submit
-                    </button>
-                  </td>
-                </tr>
-                {formdata.data?.na_applicant.map((applicant, index) => (
-                  <tr key={index} className="hover:bg-gray-50">
-                    <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
-                      {applicant.firstName} {applicant.lastName}
-                    </td>
-                    <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
-                      <Checkbox />
-                    </td>
-                    <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
-                      <button className="bg-blue-500 text-white px-4 py-1 rounded-md hover:bg-blue-600 transition-colors">
-                        Submit
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <Drawer
-          placement="right"
-          onClose={() => setCorrespondenceBox(false)}
-          open={correspondenceBox}
-          closable={false}
-          width={400}
-          size="large"
-          className="bg-white"
-          styles={{
-            body: {
-              paddingLeft: "10px",
-              paddingRight: "10px",
-              paddingTop: "10px",
-              paddingBottom: "0px",
-            },
-          }}
-        >
-          <CorrespondenceProvider
-            setCorrespondenceBox={setCorrespondenceBox}
-            createdById={formdata.data!.createdById}
-            id={formdata.data!.id}
-          />
-        </Drawer>
-
-        <Drawer
-          placement="right"
-          onClose={() => setNotingBox(false)}
-          open={notingBox}
-          closable={false}
-          width={400}
-          size="large"
-          className="bg-white"
-          styles={{
-            body: {
-              paddingLeft: "10px",
-              paddingRight: "10px",
-              paddingTop: "10px",
-              paddingBottom: "0px",
-            },
-          }}
-        >
-          <NotingProvider setNotingBox={setNotingBox} id={formdata.data!.id} />
-        </Drawer>
-
-        <Drawer
-          placement="right"
-          onClose={() => setReportBox(false)}
-          open={reportBox}
-          closable={false}
-          width={400}
-          size="large"
-          className="bg-white"
-          styles={{
-            body: {
-              paddingLeft: "10px",
-              paddingRight: "10px",
-              paddingTop: "10px",
-              paddingBottom: "0px",
-            },
-          }}
-        >
-          <ReportProvider setReportBox={setReportBox} id={formdata.data!.id} />
-        </Drawer>
-        <Drawer
-          placement="right"
-          onClose={() => setPaymentHistoryBox(false)}
-          open={paymentHistoryBox}
-          closable={false}
-          width={400}
-          className="bg-white"
-          styles={{
-            body: {
-              paddingLeft: "10px",
-              paddingRight: "10px",
-              paddingTop: "10px",
-              paddingBottom: "0px",
-            },
-          }}
-        >
-          <div>
-            <PaymentHistoryProvider
-              setPaymentHistoryBox={setPaymentHistoryBox}
-              id={formdata.data!.id}
-            />
-          </div>
-        </Drawer>
-
-        <Modal
-          title="Reschedule Meeting"
-          closable={{ "aria-label": "Custom Close Button" }}
-          open={rescheduleBox}
-          onOk={() => setRescheduleBox(false)}
-          onCancel={() => setRescheduleBox(false)}
-        >
-          <p>Are you sure you want to reschedule.</p>
-          <div className="mt-2"></div>
-          <DatePicker style={{ width: "100%" }} />
-          <div className="mt-2"></div>
-          <TimePicker
-            format="HH:mm"
-            placeholder="Select Time"
-            minuteStep={15}
-            showNow={false}
-            use12Hours={false}
-            style={{ width: "100%" }}
-          />
-        </Modal>
+        )}
       </div>
+
       <div className="fixed top-2 left-2 z-50">
         <button
           className="bg-blue-500 text-white px-2 py-2 rounded-full hover:bg-blue-600 transition-colors text-xs"
@@ -833,28 +652,8 @@ const Meeting = () => {
 export default Meeting;
 
 interface CorrespondenceProviderProps {
-  setCorrespondenceBox: React.Dispatch<React.SetStateAction<boolean>>;
-  createdById: number;
   id: number;
 }
-
-const CorrespondenceProvider = (props: CorrespondenceProviderProps) => {
-  const methods = useForm<QueryForm>({
-    resolver: valibotResolver(QuerySchema),
-  });
-
-  return (
-    <>
-      <FormProvider {...methods}>
-        <CorrespondencePage
-          setCorrespondenceBox={props.setCorrespondenceBox}
-          createdById={props.createdById}
-          id={props.id}
-        />
-      </FormProvider>
-    </>
-  );
-};
 
 const CorrespondencePage = (props: CorrespondenceProviderProps) => {
   const chatdata = useQuery({
@@ -884,22 +683,9 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
 
   return (
     <>
-      <div className="flex items-center gap-2">
-        <p className="text-gray-700 text-lg ">Correspondence</p>
-        <div className="grow"></div>
-
-        <button
-          type="button"
-          onClick={() => props.setCorrespondenceBox(false)}
-          className="py-1 rounded-md bg-rose-500 px-4 text-sm text-white cursor-pointer w-28 text-nowrap"
-        >
-          Close
-        </button>
-      </div>
-
       {chatdata.data?.length === 0 && (
-        <div className="mt-2">
-          <Alert message="No Query Found." type="error" showIcon />
+        <div>
+          <Alert message="No Correspondence Found." type="error" showIcon />
         </div>
       )}
 
@@ -1030,6 +816,7 @@ const ShowEditor = (props: ShowEditorProps) => {
         </div>
         <div className="px-2 py-1 bg-gray-100 rounded-md pb-2 my-1">
           <p className="text-xs text-gray-500 border-b">
+            {/* {props.name} ({props.role}) */}
             {props.fromrole} to {props.torole}
           </p>
           <ViewEditor data={props.data} />
@@ -1043,29 +830,14 @@ const ShowEditor = (props: ShowEditorProps) => {
 };
 
 interface NotingProviderProps {
-  setNotingBox: React.Dispatch<React.SetStateAction<boolean>>;
   id: number;
 }
-
-const NotingProvider = (props: NotingProviderProps) => {
-  const methods = useForm<NotingForm>({
-    resolver: valibotResolver(NotingSchema),
-  });
-
-  return (
-    <>
-      <FormProvider {...methods}>
-        <NotingPage setNotingBox={props.setNotingBox} id={props.id} />
-      </FormProvider>
-    </>
-  );
-};
 
 const NotingPage = (props: NotingProviderProps) => {
   const userid = getCookie("id");
 
   const notingdata = useQuery({
-    queryKey: ["getQueryByType", props.id],
+    queryKey: ["getQueryByType", Number(props.id)],
     queryFn: async () => {
       const response = await ApiCall({
         query:
@@ -1091,21 +863,8 @@ const NotingPage = (props: NotingProviderProps) => {
 
   return (
     <>
-      <div className="flex items-center gap-2">
-        <p className="text-gray-700 text-lg ">Notings</p>
-        <div className="grow"></div>
-
-        <button
-          type="button"
-          onClick={() => props.setNotingBox(false)}
-          className="py-1 rounded-md bg-rose-500 px-4 text-sm text-white cursor-pointer w-28 text-nowrap"
-        >
-          Close
-        </button>
-      </div>
-
       {notingdata.data?.length === 0 && (
-        <div className="mt-2">
+        <div>
           <Alert message="No Notings found." type="error" showIcon />
         </div>
       )}
@@ -1164,6 +923,47 @@ const NotingPage = (props: NotingProviderProps) => {
           }
         });
       })()}
+
+      {/* {notingdata.data?.map((field, index) => {
+        if (field.type === "PRENOTE") {
+          return (
+            <ShowEditor
+              key={index}
+              data={field.query}
+              fromrole={field.from_user.role}
+              torole={field.to_user.role}
+              name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+              time={new Date(field.createdAt)}
+            />
+          );
+        } else {
+          if (field.from_user.id == Number(userid)) {
+            return (
+              <UserChat
+                key={index}
+                name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+                fromrole={field.from_user.role}
+                torole={field.to_user.role}
+                message={field.query}
+                time={new Date(field.createdAt)}
+                url={field.upload_url_1}
+              />
+            );
+          } else {
+            return (
+              <DeptChat
+                key={index}
+                name={`${field.to_user.firstName} ${field.to_user.lastName}`}
+                fromrole={field.from_user.role}
+                torole={field.to_user.role}
+                message={field.query}
+                time={new Date(field.createdAt)}
+                url={field.upload_url_1}
+              />
+            );
+          }
+        }
+      })} */}
     </>
   );
 };
@@ -1178,26 +978,8 @@ interface FeesHistoryResponseData {
 }
 
 interface PaymentHistoryProviderProps {
-  setPaymentHistoryBox: React.Dispatch<React.SetStateAction<boolean>>;
   id: number;
 }
-
-const PaymentHistoryProvider = (props: PaymentHistoryProviderProps) => {
-  const methods = useForm<RequestPaymentForm>({
-    resolver: valibotResolver(RequestPaymentSchema),
-  });
-
-  return (
-    <>
-      <FormProvider {...methods}>
-        <PaymentHistoryPage
-          setPaymentHistoryBox={props.setPaymentHistoryBox}
-          id={props.id}
-        />
-      </FormProvider>
-    </>
-  );
-};
 
 const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
   const paymenthistorydata = useQuery({
@@ -1258,20 +1040,8 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
 
   return (
     <>
-      <div className="flex items-center gap-2">
-        <p className="text-gray-700 text-lg ">Payment History</p>
-        <div className="grow"></div>
-        <button
-          type="button"
-          onClick={() => props.setPaymentHistoryBox(false)}
-          className="py-1 rounded-md bg-rose-500 px-4 text-sm text-white cursor-pointer w-24 text-nowrap"
-        >
-          Close
-        </button>
-      </div>
-
       {paymenthistorydata.data?.length === 0 && (
-        <div className="mt-2">
+        <div>
           <Alert message="No Payment Request Found." type="error" showIcon />
         </div>
       )}
@@ -1301,23 +1071,8 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
 };
 
 interface ReportProviderProps {
-  setReportBox: React.Dispatch<React.SetStateAction<boolean>>;
   id: number;
 }
-
-const ReportProvider = (props: ReportProviderProps) => {
-  const methods = useForm<NotingForm>({
-    resolver: valibotResolver(NotingSchema),
-  });
-
-  return (
-    <>
-      <FormProvider {...methods}>
-        <ReportPage setReportBox={props.setReportBox} id={props.id} />
-      </FormProvider>
-    </>
-  );
-};
 
 const ReportPage = (props: ReportProviderProps) => {
   const userid = getCookie("id");
@@ -1349,21 +1104,8 @@ const ReportPage = (props: ReportProviderProps) => {
 
   return (
     <>
-      <div className="flex items-center gap-2">
-        <p className="text-gray-700 text-lg ">Report</p>
-        <div className="grow"></div>
-
-        <button
-          type="button"
-          onClick={() => props.setReportBox(false)}
-          className="py-1 rounded-md bg-rose-500 px-4 text-sm text-white cursor-pointer w-28 text-nowrap"
-        >
-          Close
-        </button>
-      </div>
-
       {reportdata.data?.length === 0 && (
-        <div className="mt-2">
+        <div>
           <Alert message="No Notings found." type="error" showIcon />
         </div>
       )}

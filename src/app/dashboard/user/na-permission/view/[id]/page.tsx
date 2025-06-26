@@ -449,7 +449,7 @@ const ViewPermission = () => {
             (14) Is there a road from where the land is easily accessible ?
             State the name of the road and whether it is Highway, Major district
             road or village road. What is the distance of the proposed building
-            or other work from the ienter ofthe road.
+            or other work from the center of the road.
           </p>
           <div className="flex-1">{formdata.data!.q16}</div>
         </div>
@@ -665,13 +665,15 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
       <div className="flex items-center gap-2">
         <p className="text-gray-700 text-lg ">Correspondence</p>
         <div className="grow"></div>
-        <button
-          type="button"
-          onClick={() => setQueryBox(true)}
-          className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-28 text-nowrap"
-        >
-          Reply to Query
-        </button>
+        {chatdata.data && chatdata.data?.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setQueryBox(true)}
+            className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-28 text-nowrap"
+          >
+            Reply to Query
+          </button>
+        )}
         <button
           type="button"
           onClick={() => props.setCorrespondenceBox(false)}
@@ -686,31 +688,35 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
         </div>
       )}
 
-      {chatdata.data?.map((field, index) => {
-        if (field.from_user.role === "USER") {
-          return (
-            <UserChat
-              key={index}
-              name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-              role={field.from_user.role}
-              message={field.query}
-              time={new Date(field.createdAt)}
-              url={field.upload_url_1}
-            />
-          );
-        } else {
-          return (
-            <DeptChat
-              key={index}
-              name={`${field.to_user.firstName} ${field.to_user.lastName}`}
-              role={field.to_user.role}
-              message={field.query}
-              time={new Date(field.createdAt)}
-              url={field.upload_url_1}
-            />
-          );
-        }
-      })}
+      {chatdata.data
+        ?.filter((val) => val.request_type == "APPLTODEPT")
+        .map((field, index) => {
+          if (field.from_user.role === "USER") {
+            return (
+              <UserChat
+                key={index}
+                name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+                fromrole={field.from_user.role}
+                torole={field.to_user.role}
+                message={field.query}
+                time={new Date(field.createdAt)}
+                url={field.upload_url_1}
+              />
+            );
+          } else {
+            return (
+              <DeptChat
+                key={index}
+                name={`${field.to_user.firstName} ${field.to_user.lastName}`}
+                fromrole={field.to_user.role}
+                torole={field.from_user.role}
+                message={field.query}
+                time={new Date(field.createdAt)}
+                url={field.upload_url_1}
+              />
+            );
+          }
+        })}
 
       <Drawer
         width={320}
@@ -791,7 +797,8 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
 };
 interface DeptChatProps {
   name: string;
-  role: string;
+  fromrole: string;
+  torole: string;
   message: string;
   time: Date;
   url?: string | null;
@@ -806,7 +813,8 @@ const DeptChat = (props: DeptChatProps) => {
         </div>
         <div className="px-2 py-1 bg-gray-100 rounded-md pb-2 my-1">
           <p className="text-xs text-gray-500 border-b">
-            {props.name} ({props.role})
+            {/* {props.name} ({props.role}) */}
+            {props.fromrole} to {props.torole}
           </p>
           <p className="text-sm leading-4 mt-1">{props.message}</p>
           {props.url && (
@@ -829,7 +837,8 @@ const DeptChat = (props: DeptChatProps) => {
 
 interface UserChatProps {
   name: string;
-  role: string;
+  fromrole: string;
+  torole: string;
   message: string;
   time: Date;
   url?: string | null;
@@ -841,7 +850,8 @@ const UserChat = (props: UserChatProps) => {
       <div className="flex items-center gap-1 max-w-5/6">
         <div className="px-2 py-1 bg-blue-500 rounded-md pb-2 my-1">
           <p className="text-xs text-white border-b">
-            {props.name} ({props.role})
+            {/* {props.name} ({props.role}) */}
+            {props.fromrole} to {props.torole}
           </p>
           <p className="text-sm leading-4 mt-1 text-white">{props.message}</p>
           {props.url && (

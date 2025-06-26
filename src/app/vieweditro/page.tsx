@@ -6,11 +6,9 @@ import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
-import ToolBar from "./ToolBar";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { CodeHighlightNode, CodeNode } from "@lexical/code";
 import { TableNode, TableCellNode, TableRowNode } from "@lexical/table";
-import TreeViewPlugin from "./ThreeViewPlugin";
 import LoadState from "./LoadState";
 
 // Catch any errors that occur during Lexical updates and log them
@@ -34,7 +32,11 @@ function onError(error: Error) {
 //   return null;
 // }
 
-function Editor() {
+interface EditorProps {
+  data: string;
+}
+
+const ViewEditor = (props: EditorProps) => {
   const initialConfig = {
     namespace: "MyEditor",
     theme: exampleTheme,
@@ -52,31 +54,27 @@ function Editor() {
   };
 
   return (
-    <div className="pt-20 w-full min-h-screen bg-slate-100">
-      <div className="bg-white shadow rounded-lg p-4 mx-auto max-w-4xl ">
-        <LexicalComposer initialConfig={initialConfig}>
-          <LoadState />
-          <ToolBar />
-          <RichTextPlugin
-            contentEditable={
-              <ContentEditable
-                className="focus:outline-none"
-                aria-placeholder={"Enter some text..."}
-                placeholder={<div>Enter some text...</div>}
-              />
-            }
-            ErrorBoundary={LexicalErrorBoundary}
-          />
-          <HistoryPlugin />
-          <AutoFocusPlugin />
-          <TreeViewPlugin />
-        </LexicalComposer>
-      </div>
+    <div className="">
+      <LexicalComposer initialConfig={initialConfig}>
+        <LoadState data={props.data} />
+        <RichTextPlugin
+          contentEditable={
+            <ContentEditable
+              className="focus:outline-none"
+              aria-placeholder={"Enter some text..."}
+              placeholder={<div>Enter some text...</div>}
+            />
+          }
+          ErrorBoundary={LexicalErrorBoundary}
+        />
+        <HistoryPlugin />
+        <AutoFocusPlugin />
+      </LexicalComposer>
     </div>
   );
-}
+};
 
-export default Editor;
+export default ViewEditor;
 
 const exampleTheme = {
   ltr: "ltr",
@@ -84,12 +82,6 @@ const exampleTheme = {
   paragraph: "editor-paragraph",
   quote: "editor-quote",
   heading: {
-    // h1: "editor-heading-h1",
-    // h2: "editor-heading-h2",
-    // h3: "editor-heading-h3",
-    // h4: "editor-heading-h4",
-    // h5: "editor-heading-h5",
-    // h6: "editor-heading-h6",
     h1: "text-3xl font-bold",
     h2: "text-2xl font-bold",
     h3: "text-xl",

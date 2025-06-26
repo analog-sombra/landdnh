@@ -9,6 +9,7 @@ import {
   boolean,
   array,
   optional,
+  nullish,
 } from "valibot";
 
 const NAApplicantSchema = object({
@@ -57,7 +58,8 @@ const NASchema = object({
   q5: pipe(string("Please enter q5."), minLength(1, "Please enter q5.")),
   q6: pipe(string("Please enter q6."), minLength(1, "Please enter q6.")),
   q7: pipe(string("Please enter q7."), minLength(1, "Please enter q7.")),
-  q8: pipe(string("Please enter q8."), minLength(1, "Please enter q8.")),
+  // q8: pipe(string("Please enter q8."), minLength(1, "Please enter q8.")),
+  q8: nullish(string("Please enter q8."), "Please enter q8."),
   q9: pipe(string("Please enter q9."), minLength(1, "Please enter q9.")),
   q10: pipe(string("Please enter q10."), minLength(1, "Please enter q10.")),
   q11: pipe(string("Please enter q11."), minLength(1, "Please enter q11.")),

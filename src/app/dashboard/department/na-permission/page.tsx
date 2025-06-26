@@ -131,7 +131,7 @@ const NaPermission = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {naformdata.data?.data.map((naform, index) => (
+                  {naformdata.data?.data.filter((val)=> val.form_status != "DRAFT").map((naform, index) => (
                     <tr key={index} className="hover:bg-gray-50">
                       <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
                         {pagination.skip + index + 1}

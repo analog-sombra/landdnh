@@ -37,7 +37,7 @@
 // export const na_mamlatdar_downmark = ["RAK"];
 // export const na_rak_downmark = ["LDCMAMLATDAR"];
 
-export const mamlatdarid = 6;
+export const mamlatdarid = 5;
 
 export const na_downmark = {
   COLLECTOR: "DEPUTYCOLLECTOR",

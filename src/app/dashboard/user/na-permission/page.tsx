@@ -161,11 +161,19 @@ const NaPermission = () => {
                         <button
                           className="bg-blue-500 text-white px-4 py-1 rounded-md cursor-pointer"
                           onClick={() => {
-                            router.push(
-                              `/dashboard/user/na-permission/view/${encryptURLData(
-                                naform.id.toString()
-                              )}`
-                            );
+                            if (naform.form_status == "DRAFT") {
+                              router.push(
+                                `/dashboard/user/na-permission/view/${encryptURLData(
+                                  naform.id.toString()
+                                )}/preview`
+                              );
+                            } else {
+                              router.push(
+                                `/dashboard/user/na-permission/view/${encryptURLData(
+                                  naform.id.toString()
+                                )}`
+                              );
+                            }
                           }}
                         >
                           View

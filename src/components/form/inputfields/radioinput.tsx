@@ -10,6 +10,7 @@ type RabioInputProps<T extends FieldValues> = {
   options: OptionValue[];
   extratax?: JSX.Element;
   disable?: boolean;
+  defaultValue?: string | number;
 };
 
 export function RabioInput<T extends FieldValues>(props: RabioInputProps<T>) {
@@ -24,6 +25,7 @@ export function RabioInput<T extends FieldValues>(props: RabioInputProps<T>) {
     <Controller
       control={control}
       name={props.name}
+      defaultValue={props.defaultValue as Path<T> | undefined}
       render={({ field }) => (
         <>
           <div className="w-full flex flex-wrap">
