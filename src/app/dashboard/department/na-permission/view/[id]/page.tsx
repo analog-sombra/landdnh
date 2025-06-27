@@ -25,8 +25,8 @@ import { toast } from "react-toastify";
 import { encryptURLData } from "@/utils/methods";
 import { HiddenInput } from "@/components/form/inputfields/hiddenfield";
 import { RabioInput } from "@/components/form/inputfields/radioinput";
-import ViewEditor from "@/app/vieweditro/page";
 import { routeModule } from "next/dist/build/templates/pages";
+import { ViewEditor } from "@/components/editors/vieweditro/page";
 
 interface NaFormResponse {
   id: number;

@@ -6,6 +6,7 @@ import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
+import ToolBar from "./ToolBar";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { CodeHighlightNode, CodeNode } from "@lexical/code";
 import { TableNode, TableCellNode, TableRowNode } from "@lexical/table";
@@ -32,11 +33,11 @@ function onError(error: Error) {
 //   return null;
 // }
 
-interface EditorProps {
-  data: string;
+interface NotingEditorProps {
+  id: number;
 }
 
-const ViewEditor = (props: EditorProps) => {
+export const NotingEditor = ({ id }: NotingEditorProps) => {
   const initialConfig = {
     namespace: "MyEditor",
     theme: exampleTheme,
@@ -56,7 +57,8 @@ const ViewEditor = (props: EditorProps) => {
   return (
     <div className="">
       <LexicalComposer initialConfig={initialConfig}>
-        <LoadState data={props.data} />
+        <LoadState id={id} />
+        <ToolBar id={id} />
         <RichTextPlugin
           contentEditable={
             <ContentEditable
@@ -74,7 +76,6 @@ const ViewEditor = (props: EditorProps) => {
   );
 };
 
-export default ViewEditor;
 
 const exampleTheme = {
   ltr: "ltr",

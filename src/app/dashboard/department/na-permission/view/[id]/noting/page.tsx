@@ -9,10 +9,9 @@ import Link from "next/link";
 import { baseurl } from "@/utils/const";
 import { Alert } from "antd";
 import { getCookie } from "cookies-next/client";
-import Editor from "@/app/notingtexteditor/page";
-import ViewEditor from "@/app/vieweditro/page";
 import { IcBaselineArrowBack } from "@/components/icons";
-import NotingEditor from "@/app/notingtexteditor/page";
+import { NotingEditor } from "@/components/editors/notingtexteditor/page";
+import { ViewEditor } from "@/components/editors/vieweditro/page";
 
 interface NaFormResponse {
   id: number;

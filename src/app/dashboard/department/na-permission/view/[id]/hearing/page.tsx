@@ -27,7 +27,7 @@ import {
   QuerySchema,
 } from "@/schema/forms/query";
 import { IcBaselineArrowBack } from "@/components/icons";
-import ViewEditor from "@/app/vieweditro/page";
+import { ViewEditor } from "@/components/editors/vieweditro/page";
 
 interface NaFormResponse {
   id: number;

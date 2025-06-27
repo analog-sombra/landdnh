@@ -6,12 +6,10 @@ import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
-import ToolBar from "./ToolBar";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { CodeHighlightNode, CodeNode } from "@lexical/code";
 import { TableNode, TableCellNode, TableRowNode } from "@lexical/table";
 import LoadState from "./LoadState";
-import { Dispatch, SetStateAction } from "react";
 
 // Catch any errors that occur during Lexical updates and log them
 // or throw them as needed. If you don't throw them, Lexical will
@@ -34,11 +32,11 @@ function onError(error: Error) {
 //   return null;
 // }
 
-interface NotingEditorProps {
-  id: number;
+interface EditorProps {
+  data: string;
 }
 
-function NotingEditor({ id }: NotingEditorProps) {
+export const ViewEditor = (props: EditorProps) => {
   const initialConfig = {
     namespace: "MyEditor",
     theme: exampleTheme,
@@ -58,8 +56,7 @@ function NotingEditor({ id }: NotingEditorProps) {
   return (
     <div className="">
       <LexicalComposer initialConfig={initialConfig}>
-        <LoadState id={id} />
-        <ToolBar id={id} />
+        <LoadState data={props.data} />
         <RichTextPlugin
           contentEditable={
             <ContentEditable
@@ -75,9 +72,7 @@ function NotingEditor({ id }: NotingEditorProps) {
       </LexicalComposer>
     </div>
   );
-}
-
-export default NotingEditor;
+};
 
 const exampleTheme = {
   ltr: "ltr",
