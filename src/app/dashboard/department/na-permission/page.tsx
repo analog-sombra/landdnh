@@ -30,6 +30,7 @@ const NaPermission = () => {
       q4: string;
       status: string;
       office_status: string;
+      dept_status: string;
       form_status: string;
       dept_user: {
         role: string;
@@ -46,7 +47,7 @@ const NaPermission = () => {
     queryFn: async () => {
       const response = await ApiCall({
         query:
-          "query GetAllNa($take: Int!, $skip: Int!) { getAllNa(take: $take, skip: $skip) {total, skip, take, data {id, q4, status, form_status, office_status, dept_user {role}, village {name}}}}",
+          "query GetAllNa($take: Int!, $skip: Int!) { getAllNa(take: $take, skip: $skip) {total, skip, take, data {id, q4, status, form_status, office_status, dept_status, dept_user {role}, village {name}}}}",
         variables: {
           take: pagination.take,
           skip: pagination.skip,
@@ -81,22 +82,6 @@ const NaPermission = () => {
       <div className="flex gap-2 items-center">
         <h1 className="text-[#162f57] text-2xl font-semibold">NA Permission</h1>
         <div className="grow"></div>
-
-        {/* <Input
-          placeholder="search"
-          style={{ width: 200 }}
-          value={search}
-          allowClear
-          onChange={(e) => {
-            setPaginatin({
-              ...pagination,
-              skip: 0,
-              take: pagination.take,
-            });
-            setSearch(e.target.value);
-            cowdata.refetch();
-          }}
-        /> */}
       </div>
 
       {naformdata.data?.data.length === 0 ? (
@@ -131,40 +116,42 @@ const NaPermission = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {naformdata.data?.data.filter((val)=> val.form_status != "DRAFT").map((naform, index) => (
-                    <tr key={index} className="hover:bg-gray-50">
-                      <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
-                        {pagination.skip + index + 1}
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
-                        {naform.q4}
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
-                        {naform.village.name}
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
-                        {naform.office_status}
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
-                        {naform.form_status}
-                      </td>
+                  {naformdata.data?.data
+                    .filter((val) => val.form_status != "DRAFT")
+                    .map((naform, index) => (
+                      <tr key={index} className="hover:bg-gray-50">
+                        <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                          {pagination.skip + index + 1}
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                          {naform.q4}
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                          {naform.village.name}
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                          {naform.dept_user.role}
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                          {naform.dept_status}
+                        </td>
 
-                      <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
-                        <button
-                          className="bg-blue-500 text-white px-4 py-1 rounded-md cursor-pointer"
-                          onClick={() => {
-                            router.push(
-                              `/dashboard/department/na-permission/view/${encryptURLData(
-                                naform.id.toString()
-                              )}`
-                            );
-                          }}
-                        >
-                          View
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                        <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                          <button
+                            className="bg-blue-500 text-white px-4 py-1 rounded-md cursor-pointer"
+                            onClick={() => {
+                              router.push(
+                                `/dashboard/department/na-permission/view/${encryptURLData(
+                                  naform.id.toString()
+                                )}`
+                              );
+                            }}
+                          >
+                            View
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>

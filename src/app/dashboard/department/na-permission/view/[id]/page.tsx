@@ -9,13 +9,17 @@ import {
   NotingForm,
   NotingSchema,
   QueryForm,
+  ReportSubmitForm,
+  ReportSubmitSchema,
+  ScheduleHearingForm,
+  ScheduleHearingSchema,
 } from "@/schema/forms/query";
 import { ApiCall, UploadFile } from "@/services/api";
 import { baseurl } from "@/utils/const";
 import { decryptURLData, formatDateTime, onFormError } from "@/utils/methods";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Alert, Drawer } from "antd";
+import { Alert, DatePicker, Drawer, Modal, TimePicker } from "antd";
 import { getCookie } from "cookies-next/client";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -25,11 +29,13 @@ import { toast } from "react-toastify";
 import { encryptURLData } from "@/utils/methods";
 import { HiddenInput } from "@/components/form/inputfields/hiddenfield";
 import { RabioInput } from "@/components/form/inputfields/radioinput";
-import { routeModule } from "next/dist/build/templates/pages";
 import { ViewEditor } from "@/components/editors/vieweditro/page";
+import { CheckBoxInput } from "@/components/form/inputfields/checkboxinput";
+import dayjs from "dayjs";
 
 interface NaFormResponse {
   id: number;
+  last_name: string;
   q1: boolean;
   q2: string;
   q3: string;
@@ -56,6 +62,7 @@ interface NaFormResponse {
   createdById: number;
   seek_report: boolean;
   dept_user_id: number;
+  dept_status: string;
   village: {
     id: number;
     name: string;
@@ -85,6 +92,9 @@ interface UserResponseData {
 }
 
 interface QueryResponseData {
+  id: number;
+}
+interface ReportSubmitData {
   id: number;
 }
 
@@ -122,7 +132,7 @@ const ViewPermission = () => {
     queryFn: async () => {
       const response = await ApiCall({
         query:
-          "query GetNaById($id:Int!) { getNaById(id: $id) { id, q1, q2, q3, q4, anx1, anx2, anx3, anx4, anx5, q4, q5, q6, q7, q8, q9, q10, q11, q12, q13, q14, q15, q16, q17, q18, createdById, dept_user_id, seek_report, village{ id, name }, na_applicant { firstName, lastName, contact,relation, signature_url }, na_survey { area, sub_division, survey_no, village { name }}}}",
+          "query GetNaById($id:Int!) { getNaById(id: $id) { id, last_name, q1, q2, q3, q4, anx1, anx2, anx3, anx4, anx5, q4, q5, q6, q7, q8, q9, q10, q11, q12, q13, q14, q15, q16, q17, q18, createdById, dept_user_id, seek_report, dept_status, village{ id, name }, na_applicant { firstName, lastName, contact,relation, signature_url }, na_survey { area, sub_division, survey_no, village { name }}}}",
         variables: {
           id: formid,
         },
@@ -144,6 +154,7 @@ const ViewPermission = () => {
   const [correspondenceBox, setCorrespondenceBox] = useState(false);
   const [notingBox, setNotingBox] = useState(false);
   const [reportBox, setReportBox] = useState(false);
+  const [rescheduleBox, setRescheduleBox] = useState<boolean>(false);
 
   const [paymentHistoryBox, setPaymentHistoryBox] = useState(false);
   const [requestPaymentBox, setRequestPaymentBox] = useState(false);
@@ -216,6 +227,32 @@ const ViewPermission = () => {
           View NA Permission
         </h1>
         <div className="grow"></div>
+
+        {userdata.data &&
+          formdata.data &&
+          ["PATOCOLLECTOR"].includes(userdata.data.role) &&
+          formdata.data.dept_status == "ALLOT_HEARING" && (
+            <button
+              onClick={() => setRescheduleBox(true)}
+              className="bg-[#162f57] text-white py-1 px-4 rounded-md text-sm grid place-items-center cursor-pointer"
+            >
+              Schedule Hearing
+            </button>
+          )}
+
+        <Modal
+          title="Schedule Hearing"
+          closable={{ "aria-label": "Custom Close Button" }}
+          open={rescheduleBox}
+          footer={null}
+        >
+          <p>Are you sure you want to reschedule.</p>
+          <div className="mt-2"></div>
+          <HearingScheduleProvider
+            id={formid}
+            setHearingScheduleBox={setRescheduleBox}
+          />
+        </Modal>
         {[
           "LDCMAMLATDAR",
           "MAMLATDAR",
@@ -416,20 +453,26 @@ const ViewPermission = () => {
 
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
           <p className="flex-1 text-sm text-gray-500">
-            1. Full Name of the Applicant.
+            (1). First Name of the Applicant.
           </p>
           <div className="flex-1">{formdata.data!.q4}</div>
+        </div>
+        <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
+          <p className="flex-1 text-sm text-gray-500">
+            (2). Last Name of the Applicant.
+          </p>
+          <div className="flex-1">{formdata.data!.last_name}</div>
         </div>
 
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
           <p className="flex-1 text-sm text-gray-500">
-            2. Full Postal Address.
+            (3). Full Postal Address.
           </p>
           <div className="flex-1">{formdata.data!.q5}</div>
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
           <p className="flex-1 text-sm text-gray-500">
-            3. Contact no of the applicant.
+            (4). Contact no of the applicant.
           </p>
           <div className="flex-1">{formdata.data!.q6}</div>
         </div>
@@ -489,24 +532,24 @@ const ViewPermission = () => {
         </div>
 
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16 ">
-          <p className="flex-1 text-sm text-gray-500">(4) Village</p>
+          <p className="flex-1 text-sm text-gray-500">(5) Village</p>
           <div className="flex-1">{formdata.data!.village.name}</div>
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
-          <p className="flex-1 text-sm text-gray-500">(5) Survey No</p>
+          <p className="flex-1 text-sm text-gray-500">(6) Survey No</p>
           <div className="flex-1">{formdata.data!.q7}</div>
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
-          <p className="flex-1 text-sm text-gray-500">(6) Sub Division</p>
+          <p className="flex-1 text-sm text-gray-500">(7) Sub Division</p>
           <div className="flex-1">{formdata.data!.q8}</div>
         </div>
 
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
-          <p className="flex-1 text-sm text-gray-500">(7) Area in Sq.mt.</p>
+          <p className="flex-1 text-sm text-gray-500">(8) Area in Sq.mt.</p>
           <div className="flex-1">{formdata.data!.q9}</div>
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
-          <p className="flex-1 text-sm text-gray-500">(8) Old Survey No</p>
+          <p className="flex-1 text-sm text-gray-500">(9) Old Survey No</p>
           <div className="flex-1">{formdata.data!.q10}</div>
         </div>
 
@@ -553,26 +596,26 @@ const ViewPermission = () => {
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
           <p className="flex-1 text-sm text-gray-500">
-            (9) Area of the site out of (5) above to be used for.
+            (10) Area of the site out of (6) above to be used for.
           </p>
           <div className="flex-1">{formdata.data!.q11}</div>
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
           <p className="flex-1 text-sm text-gray-500">
-            (10) Type (Residential/Commercial/Industrial)
+            (11) Type (Residential/Commercial/Industrial)
           </p>
           <div className="flex-1">{formdata.data!.q12}</div>
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
           <p className="flex-1 text-sm text-gray-500">
-            (11) Present use of the land and whether any building exists thereon
-            and if so, iti use.
+            (12) Present use of the land and whether any building exists thereon
+            and if so, it's use.
           </p>
           <div className="flex-1">{formdata.data!.q13}</div>
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
           <p className="flex-1 text-sm text-gray-500">
-            (12) Whether electrical light transmission lines pass over tle land
+            (13) Whether electrical light transmission lines pass over tle land
             and if so, the distance thereof from the proposed building other
             works.
           </p>
@@ -580,13 +623,13 @@ const ViewPermission = () => {
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
           <p className="flex-1 text-sm text-gray-500">
-            (13) Is, the land under acquisition ..If so, state details.
+            (14) Is, the land under acquisition ..If so, state details.
           </p>
           <div className="flex-1">{formdata.data!.q15}</div>
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
           <p className="flex-1 text-sm text-gray-500">
-            (14) Is there a road from where the land is easily accessible ?
+            (15) Is there a road from where the land is easily accessible ?
             State the name of the road and whether it is Highway, Major district
             road or village road. What is the distance of the proposed building
             or other work from the center of the road.
@@ -595,14 +638,14 @@ const ViewPermission = () => {
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
           <p className="flex-1 text-sm text-gray-500">
-            (15) If there is no road adjoining the land, how is it proposed to
+            (16) If there is no road adjoining the land, how is it proposed to
             be provided for access to the site.
           </p>
           <div className="flex-1">{formdata.data!.q17}</div>
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
           <p className="flex-1 text-sm text-gray-500">
-            (16) Was a similar application made in the past for non-agricultural
+            (17) Was a similar application made in the past for non-agricultural
             use of this land and was it rejected If yes, give details.
           </p>
           <div className="flex-1">{formdata.data!.q18}</div>
@@ -670,11 +713,33 @@ const ViewPermission = () => {
           },
         }}
       >
-        <ReportProvider
-          setReportBox={setReportBox}
-          id={formdata.data!.id}
-          role={userdata.data?.role ?? ""}
-        />
+        {formdata.data &&
+        userdata.data &&
+        formdata.data.dept_status === "SEEK_REPORT" &&
+        userdata.data.role === "MAMLATDAR" ? (
+          <SubmitReportProvider
+            setReportBox={setReportBox}
+            id={formdata.data!.id}
+            role={userdata.data?.role ?? ""}
+          />
+        ) : formdata.data &&
+          userdata.data &&
+          formdata.data.dept_status === "NOTING_DRAFT" &&
+          userdata.data.role === "COLLECTOR" ? (
+          <>
+            <AllotHearingProvider
+              setReportBox={setReportBox}
+              id={formdata.data!.id}
+              role={userdata.data?.role ?? ""}
+            />
+          </>
+        ) : (
+          <ReportProvider
+            setReportBox={setReportBox}
+            id={formdata.data!.id}
+            role={userdata.data?.role ?? ""}
+          />
+        )}
       </Drawer>
       <Drawer
         placement="right"
@@ -745,7 +810,13 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
           "query GetQueryByType($id: Int!, $querytype: [QueryType!]!) {getQueryByType(id: $id, querytype: $querytype) {id,query,upload_url_1,type,request_type,createdAt,from_user {id, firstName,lastName,role},to_user {id, firstName,lastName,role},}}",
         variables: {
           id: props.id,
-          querytype: ["QUERY", "CORESPONDENCE"],
+          querytype: [
+            "QUERY",
+            "CORESPONDENCE",
+            "UPDATES",
+            "REPORT",
+            "SUBMITREPORT",
+          ],
         },
       });
 
@@ -803,23 +874,6 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
         return;
       }
 
-      console.log({
-        createNaQueryInput: {
-          createdById: parseInt(userid.toString()),
-          from_userId: parseInt(userid.toString()),
-          to_userId: parseInt(data.userid!.toString()),
-          query: data.query,
-          type: data.request_type,
-          na_formId: props.id,
-          query_status: "PENDING",
-          request_type: "DEPTTOAPPL",
-          ...(data.upload_url_1 && {
-            upload_url_1: data.upload_url_1,
-          }),
-          dept_update: true,
-        },
-      });
-
       const response = await ApiCall({
         query:
           "mutation CreateNaQuery($createNaQueryInput: CreateNaQueryInput!) {createNaQuery(createNaQueryInput: $createNaQueryInput) {id}}",
@@ -865,7 +919,6 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
     handleSubmit,
     formState: { isSubmitting },
     setValue,
-    getValues,
   } = useFormContext<MarkToForm>();
 
   const uploadRef = useRef<HTMLInputElement>(null);
@@ -1308,6 +1361,7 @@ const NotingPage = (props: NotingProviderProps) => {
             ...(getValues("upload_url_1") && {
               upload_url_1: getValues("upload_url_1"),
             }),
+            dept_update: true,
           },
         },
       });
@@ -1377,7 +1431,7 @@ const NotingPage = (props: NotingProviderProps) => {
           }}
           className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-28 text-nowrap"
         >
-          Mark to
+          Add Noting
         </button>
         <button
           type="button"
@@ -1908,6 +1962,7 @@ const ReportPage = (props: ReportProviderProps) => {
               upload_url_1: data.upload_url_1,
             }),
             seek_report: true,
+            dept_update: true,
           },
         },
       });
@@ -1961,6 +2016,7 @@ const ReportPage = (props: ReportProviderProps) => {
             ...(getValues("upload_url_1") && {
               upload_url_1: getValues("upload_url_1"),
             }),
+            dept_update: true,
           },
         },
       });
@@ -2274,6 +2330,935 @@ const ReportPage = (props: ReportProviderProps) => {
           </button>
         </form>
       </Drawer>
+    </>
+  );
+};
+
+interface SubmitReportProviderProps {
+  setReportBox: React.Dispatch<React.SetStateAction<boolean>>;
+  role: string;
+  id: number;
+}
+
+const SubmitReportProvider = (props: SubmitReportProviderProps) => {
+  const methods = useForm<ReportSubmitForm>({
+    resolver: valibotResolver(ReportSubmitSchema),
+  });
+
+  return (
+    <>
+      <FormProvider {...methods}>
+        <SubmitReportPage
+          setReportBox={props.setReportBox}
+          id={props.id}
+          role={props.role}
+        />
+      </FormProvider>
+    </>
+  );
+};
+
+const SubmitReportPage = (props: ReportProviderProps) => {
+  const [queryBox, setQueryBox] = useState<boolean>(false);
+  const [submitBox, setSubmitBox] = useState<boolean>(false);
+  const [id, setId] = useState<number>(0);
+  const userid = getCookie("id");
+
+  // report submit check section start here
+
+  interface UserResponse {
+    id: number;
+    firstName: string;
+    lastName: string;
+    role: string;
+  }
+
+  const reportsubmitdata = useQuery({
+    queryKey: ["allReportReceived"],
+    refetchOnWindowFocus: false,
+    queryFn: async () => {
+      const response = await ApiCall({
+        query:
+          "query AllReportReceived($id: Int!) { allReportReceived(id: $id) { id }}",
+        variables: {
+          id: props.id,
+        },
+      });
+
+      if (!response.status) {
+        throw new Error(response.message);
+      }
+
+      // if value is not in response.data then return the error
+      if (!(response.data as Record<string, unknown>)["allReportReceived"]) {
+        throw new Error("Value not found in response");
+      }
+      return (response.data as Record<string, unknown>)[
+        "allReportReceived"
+      ] as ReportSubmitData[];
+    },
+  });
+
+  // report submit check section end here
+
+  const reportdata = useQuery({
+    queryKey: ["getQueryByType", props.id],
+    queryFn: async () => {
+      const response = await ApiCall({
+        query:
+          "query GetQueryByType($id: Int!, $querytype: [QueryType!]!) {getQueryByType(id: $id, querytype: $querytype) {id,query,upload_url_1,type,request_type,query_status,createdAt,from_user {id, firstName,lastName,role},to_user {id, firstName,lastName,role},}}",
+        variables: {
+          id: props.id,
+          querytype: ["REPORT"],
+        },
+      });
+
+      if (!response.status) {
+        throw new Error(response.message);
+      }
+
+      if (!(response.data as Record<string, unknown>)["getQueryByType"]) {
+        throw new Error("Value not found in response");
+      }
+      return (response.data as Record<string, unknown>)[
+        "getQueryByType"
+      ] as QueryTypeResponseData[];
+    },
+  });
+
+  const userdata = useQuery({
+    queryKey: ["getUserByRoles"],
+    queryFn: async () => {
+      const response = await ApiCall({
+        query:
+          "query GetUserByRoles($role: [Role!]!) { getUserByRoles(role: $role) { id, firstName, lastName, role }}",
+        variables: {
+          role: [
+            "TALATHI",
+            "CIRCLEOFFICER",
+            "LRO",
+            "LAQ",
+            "RTSMAMLATDAR",
+            "SURVEYSETTLEMENT",
+            "DNHPDA",
+            "SNSSO",
+            "SURVEYOR",
+          ],
+        },
+      });
+
+      if (!response.status) {
+        throw new Error(response.message);
+      }
+
+      if (!(response.data as Record<string, unknown>)["getUserByRoles"]) {
+        throw new Error("Value not found in response");
+      }
+      return (response.data as Record<string, unknown>)[
+        "getUserByRoles"
+      ] as UserResponseData[];
+    },
+  });
+
+  const {
+    handleSubmit,
+    formState: { isSubmitting },
+    setValue,
+  } = useFormContext<ReportSubmitForm>();
+
+  const uploadRef = useRef<HTMLInputElement>(null);
+  const [upload, setUpload] = useState<File | null>(null);
+
+  const createquery = useMutation({
+    mutationKey: ["createNaQuery"],
+    mutationFn: async (data: ReportSubmitForm) => {
+      if (!userid) {
+        toast.error("User ID not found");
+        return;
+      }
+
+      const response = await ApiCall({
+        query:
+          "mutation CreateNaQuery($createNaQueryInput: CreateNaQueryInput!) {createNaQuery(createNaQueryInput: $createNaQueryInput) {id}}",
+        variables: {
+          createNaQueryInput: {
+            createdById: parseInt(userid.toString()),
+            from_userId: parseInt(userid.toString()),
+            to_userId: parseInt(data.userid.toString()),
+            query: data.query,
+            type: "REPORT",
+            na_formId: props.id,
+            query_status: "PENDING",
+            request_type: "DEPTTODEPT",
+            ...(data.upload_url_1 && {
+              upload_url_1: data.upload_url_1,
+            }),
+            submit_report: data.all_report_submit,
+            dept_update: true,
+          },
+        },
+      });
+
+      if (!response.status) {
+        throw new Error(response.message);
+      }
+
+      if (!(response.data as Record<string, unknown>)["createNaQuery"]) {
+        throw new Error("Value not found in response");
+      }
+      return (response.data as Record<string, unknown>)[
+        "createNaQuery"
+      ] as QueryResponseData;
+    },
+    onSuccess: () => {
+      toast.success("Noting created successfully");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const onSubmit = async (data: ReportSubmitForm) => {
+    createquery.mutate(data);
+    setQueryBox(false);
+    reportdata.refetch();
+  };
+
+  const handleFileUpload = (ref: React.RefObject<HTMLInputElement | null>) => {
+    if (ref!.current) {
+      ref!.current.click();
+    }
+  };
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+    setFile: React.Dispatch<React.SetStateAction<File | null>>,
+    ref: React.RefObject<HTMLInputElement | null>
+  ) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setFile(file);
+      const resposne = await UploadFile(file, userid!);
+      if (!resposne.status) {
+        toast.error(resposne.message);
+        return;
+      }
+
+      setValue(ref.current!.name as keyof QueryForm, resposne.data as string);
+    }
+  };
+
+  return (
+    <>
+      <div className="flex items-center gap-2">
+        <p className="text-gray-700 text-lg ">Report</p>
+        <div className="grow"></div>
+
+        {["MAMLATDAR", "LDCMAMLATDAR"].includes(props.role) && (
+          <button
+            type="button"
+            onClick={() => setQueryBox(true)}
+            className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-28 text-nowrap"
+          >
+            Seek
+          </button>
+        )}
+
+        {reportdata.data &&
+          reportdata.data.filter(
+            (val) =>
+              val.to_user?.id === Number(userid) &&
+              val.query_status === "PENDING"
+          ).length > 0 && (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  setSubmitBox(true);
+                  setId(
+                    reportdata.data.filter(
+                      (val) =>
+                        val.to_user?.id === Number(userid) &&
+                        val.query_status === "PENDING"
+                    )[0].id
+                  );
+                }}
+                className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-32 text-nowrap"
+              >
+                Submit Report
+              </button>
+            </>
+          )}
+
+        <button
+          type="button"
+          onClick={() => props.setReportBox(false)}
+          className="py-1 rounded-md bg-rose-500 px-4 text-sm text-white cursor-pointer w-28 text-nowrap"
+        >
+          Close
+        </button>
+      </div>
+
+      {reportdata.data?.length === 0 && (
+        <div className="mt-2">
+          <Alert message="No Notings found." type="error" showIcon />
+        </div>
+      )}
+
+      {reportdata.data?.map((field, index) => {
+        if (field.from_user.id == Number(userid)) {
+          return (
+            <UserChat
+              key={index}
+              name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+              fromrole={field.from_user.role}
+              torole={field.to_user.role}
+              message={field.query}
+              time={new Date(field.createdAt)}
+              url={field.upload_url_1}
+            />
+          );
+        } else {
+          return (
+            <DeptChat
+              key={index}
+              name={`${field.to_user.firstName} ${field.to_user.lastName}`}
+              fromrole={field.from_user.role}
+              torole={field.to_user.role}
+              message={field.query}
+              time={new Date(field.createdAt)}
+              url={field.upload_url_1}
+            />
+          );
+        }
+      })}
+
+      <Drawer
+        width={320}
+        closable={false}
+        onClose={() => setQueryBox(false)}
+        open={queryBox}
+        styles={{
+          body: {
+            paddingLeft: "10px",
+            paddingRight: "10px",
+            paddingTop: "10px",
+            paddingBottom: "0px",
+          },
+        }}
+      >
+        <h1 className="text-lg font-semibold text-[#162f57] mb-2">Mark to</h1>
+        {reportsubmitdata.data && reportsubmitdata.data.length > 0 ? (
+          <></>
+        ) : (
+          // <Alert
+          //   message="Report already submitted by user"
+          //   type="warning"
+          //   showIcon
+          // />
+          <Alert message="Report not submitted by user" type="info" showIcon />
+        )}
+        <form onSubmit={handleSubmit(onSubmit, onFormError)}>
+          <div>
+            <MultiSelect<ReportSubmitForm>
+              title="Select User"
+              required={true}
+              name="userid"
+              placeholder="Select User"
+              options={
+                userdata.data
+                  ? userdata.data
+                      .filter((val) => val.id !== Number(userid))
+                      .map((user) => ({
+                        label: `${user.firstName} ${user.lastName} [${user.role}]`,
+                        value: user.id.toString(),
+                      }))
+                  : []
+              }
+            />
+          </div>
+          <div>
+            <CheckBoxInput<ReportSubmitForm>
+              title="All Report Submit"
+              name="all_report_submit"
+              required={true}
+            />
+          </div>
+          <div>
+            <TaxtAreaInput<ReportSubmitForm>
+              title="Query"
+              required={true}
+              name="query"
+              placeholder="Enter Details"
+            />
+          </div>
+          <div className="flex items-center mt-2 p-2 rounded-lg bg-gray-100">
+            <p className="text-sm text-gray-700">Upload File</p>
+            <div className="grow"></div>
+            {upload ? (
+              <button
+                type="button"
+                onClick={() => setUpload(null)}
+                className="py-1 rounded-md bg-red-500 px-4 text-sm text-white cursor-pointer w-28"
+              >
+                Remove
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => handleFileUpload(uploadRef)}
+                className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-28 text-nowrap"
+              >
+                Upload File
+              </button>
+            )}
+
+            <input
+              type="file"
+              ref={uploadRef}
+              name="upload_url_1"
+              onChange={(e) => handleFileChange(e, setUpload, uploadRef)}
+              className="hidden"
+            />
+
+            {upload && (
+              <div className="flex gap-2 items-center">
+                <Link
+                  target="_blank"
+                  href={URL.createObjectURL(upload!)}
+                  className="bg-gray-200 text-black py-1 px-4 rounded-md text-sm h-7 grid place-items-center w-28 text-nowrap"
+                >
+                  View File
+                </Link>
+              </div>
+            )}
+          </div>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white mt-2 cursor-pointer"
+          >
+            {isSubmitting ? "Loading...." : "Submit"}
+          </button>
+        </form>
+      </Drawer>
+    </>
+  );
+};
+
+interface AllotHearingProviderProps {
+  setReportBox: React.Dispatch<React.SetStateAction<boolean>>;
+  role: string;
+  id: number;
+}
+
+const AllotHearingProvider = (props: AllotHearingProviderProps) => {
+  const methods = useForm<ReportSubmitForm>({
+    resolver: valibotResolver(ReportSubmitSchema),
+  });
+
+  return (
+    <>
+      <FormProvider {...methods}>
+        <AllotHearingPage
+          setReportBox={props.setReportBox}
+          id={props.id}
+          role={props.role}
+        />
+      </FormProvider>
+    </>
+  );
+};
+
+const AllotHearingPage = (props: ReportProviderProps) => {
+  const [queryBox, setQueryBox] = useState<boolean>(false);
+  const [submitBox, setSubmitBox] = useState<boolean>(false);
+  const [id, setId] = useState<number>(0);
+  const userid = getCookie("id");
+
+  const reportdata = useQuery({
+    queryKey: ["getQueryByType", props.id],
+    queryFn: async () => {
+      const response = await ApiCall({
+        query:
+          "query GetQueryByType($id: Int!, $querytype: [QueryType!]!) {getQueryByType(id: $id, querytype: $querytype) {id,query,upload_url_1,type,request_type,query_status,createdAt,from_user {id, firstName,lastName,role},to_user {id, firstName,lastName,role},}}",
+        variables: {
+          id: props.id,
+          querytype: ["REPORT"],
+        },
+      });
+
+      if (!response.status) {
+        throw new Error(response.message);
+      }
+
+      if (!(response.data as Record<string, unknown>)["getQueryByType"]) {
+        throw new Error("Value not found in response");
+      }
+      return (response.data as Record<string, unknown>)[
+        "getQueryByType"
+      ] as QueryTypeResponseData[];
+    },
+  });
+
+  const userdata = useQuery({
+    queryKey: ["getUserByRoles"],
+    queryFn: async () => {
+      const response = await ApiCall({
+        query:
+          "query GetUserByRoles($role: [Role!]!) { getUserByRoles(role: $role) { id, firstName, lastName, role }}",
+        variables: {
+          role: [
+            "TALATHI",
+            "CIRCLEOFFICER",
+            "LRO",
+            "LAQ",
+            "RTSMAMLATDAR",
+            "SURVEYSETTLEMENT",
+            "DNHPDA",
+            "SNSSO",
+            "SURVEYOR",
+          ],
+        },
+      });
+
+      if (!response.status) {
+        throw new Error(response.message);
+      }
+
+      if (!(response.data as Record<string, unknown>)["getUserByRoles"]) {
+        throw new Error("Value not found in response");
+      }
+      return (response.data as Record<string, unknown>)[
+        "getUserByRoles"
+      ] as UserResponseData[];
+    },
+  });
+
+  const {
+    handleSubmit,
+    formState: { isSubmitting },
+    setValue,
+  } = useFormContext<ReportSubmitForm>();
+
+  const uploadRef = useRef<HTMLInputElement>(null);
+  const [upload, setUpload] = useState<File | null>(null);
+
+  const createquery = useMutation({
+    mutationKey: ["createNaQuery"],
+    mutationFn: async (data: ReportSubmitForm) => {
+      if (!userid) {
+        toast.error("User ID not found");
+        return;
+      }
+
+      const response = await ApiCall({
+        query:
+          "mutation CreateNaQuery($createNaQueryInput: CreateNaQueryInput!) {createNaQuery(createNaQueryInput: $createNaQueryInput) {id}}",
+        variables: {
+          createNaQueryInput: {
+            createdById: parseInt(userid.toString()),
+            from_userId: parseInt(userid.toString()),
+            to_userId: parseInt(data.userid.toString()),
+            query: data.query,
+            type: "REPORT",
+            na_formId: props.id,
+            query_status: "PENDING",
+            request_type: "DEPTTODEPT",
+            ...(data.upload_url_1 && {
+              upload_url_1: data.upload_url_1,
+            }),
+            allot_hearing: data.all_report_submit,
+            dept_update: true,
+          },
+        },
+      });
+
+      if (!response.status) {
+        throw new Error(response.message);
+      }
+
+      if (!(response.data as Record<string, unknown>)["createNaQuery"]) {
+        throw new Error("Value not found in response");
+      }
+      return (response.data as Record<string, unknown>)[
+        "createNaQuery"
+      ] as QueryResponseData;
+    },
+    onSuccess: () => {
+      toast.success("Noting created successfully");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const onSubmit = async (data: ReportSubmitForm) => {
+    createquery.mutate(data);
+    setQueryBox(false);
+    reportdata.refetch();
+  };
+
+  const handleFileUpload = (ref: React.RefObject<HTMLInputElement | null>) => {
+    if (ref!.current) {
+      ref!.current.click();
+    }
+  };
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+    setFile: React.Dispatch<React.SetStateAction<File | null>>,
+    ref: React.RefObject<HTMLInputElement | null>
+  ) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setFile(file);
+      const resposne = await UploadFile(file, userid!);
+      if (!resposne.status) {
+        toast.error(resposne.message);
+        return;
+      }
+
+      setValue(ref.current!.name as keyof QueryForm, resposne.data as string);
+    }
+  };
+
+  return (
+    <>
+      <div className="flex items-center gap-2">
+        <p className="text-gray-700 text-lg ">Report</p>
+        <div className="grow"></div>
+
+        {["MAMLATDAR", "LDCMAMLATDAR"].includes(props.role) && (
+          <button
+            type="button"
+            onClick={() => setQueryBox(true)}
+            className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-28 text-nowrap"
+          >
+            Seek
+          </button>
+        )}
+
+        {reportdata.data &&
+          reportdata.data.filter(
+            (val) =>
+              val.to_user?.id === Number(userid) &&
+              val.query_status === "PENDING"
+          ).length > 0 && (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  setSubmitBox(true);
+                  setId(
+                    reportdata.data.filter(
+                      (val) =>
+                        val.to_user?.id === Number(userid) &&
+                        val.query_status === "PENDING"
+                    )[0].id
+                  );
+                }}
+                className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-32 text-nowrap"
+              >
+                Submit Report
+              </button>
+            </>
+          )}
+
+        <button
+          type="button"
+          onClick={() => props.setReportBox(false)}
+          className="py-1 rounded-md bg-rose-500 px-4 text-sm text-white cursor-pointer w-28 text-nowrap"
+        >
+          Close
+        </button>
+      </div>
+
+      {reportdata.data?.length === 0 && (
+        <div className="mt-2">
+          <Alert message="No Notings found." type="error" showIcon />
+        </div>
+      )}
+
+      {reportdata.data?.map((field, index) => {
+        if (field.from_user.id == Number(userid)) {
+          return (
+            <UserChat
+              key={index}
+              name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+              fromrole={field.from_user.role}
+              torole={field.to_user.role}
+              message={field.query}
+              time={new Date(field.createdAt)}
+              url={field.upload_url_1}
+            />
+          );
+        } else {
+          return (
+            <DeptChat
+              key={index}
+              name={`${field.to_user.firstName} ${field.to_user.lastName}`}
+              fromrole={field.from_user.role}
+              torole={field.to_user.role}
+              message={field.query}
+              time={new Date(field.createdAt)}
+              url={field.upload_url_1}
+            />
+          );
+        }
+      })}
+
+      <Drawer
+        width={320}
+        closable={false}
+        onClose={() => setQueryBox(false)}
+        open={queryBox}
+        styles={{
+          body: {
+            paddingLeft: "10px",
+            paddingRight: "10px",
+            paddingTop: "10px",
+            paddingBottom: "0px",
+          },
+        }}
+      >
+        <h1 className="text-lg font-semibold text-[#162f57] mb-2">Mark to</h1>
+
+        <form onSubmit={handleSubmit(onSubmit, onFormError)}>
+          <div>
+            <MultiSelect<ReportSubmitForm>
+              title="Select User"
+              required={true}
+              name="userid"
+              placeholder="Select User"
+              options={
+                userdata.data
+                  ? userdata.data
+                      .filter((val) => val.id !== Number(userid))
+                      .map((user) => ({
+                        label: `${user.firstName} ${user.lastName} [${user.role}]`,
+                        value: user.id.toString(),
+                      }))
+                  : []
+              }
+            />
+          </div>
+          <div>
+            <CheckBoxInput<ReportSubmitForm>
+              title="All Report Submit"
+              name="all_report_submit"
+              required={true}
+            />
+          </div>
+          <div>
+            <TaxtAreaInput<ReportSubmitForm>
+              title="Query"
+              required={true}
+              name="query"
+              placeholder="Enter Details"
+            />
+          </div>
+          <div className="flex items-center mt-2 p-2 rounded-lg bg-gray-100">
+            <p className="text-sm text-gray-700">Upload File</p>
+            <div className="grow"></div>
+            {upload ? (
+              <button
+                type="button"
+                onClick={() => setUpload(null)}
+                className="py-1 rounded-md bg-red-500 px-4 text-sm text-white cursor-pointer w-28"
+              >
+                Remove
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => handleFileUpload(uploadRef)}
+                className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-28 text-nowrap"
+              >
+                Upload File
+              </button>
+            )}
+
+            <input
+              type="file"
+              ref={uploadRef}
+              name="upload_url_1"
+              onChange={(e) => handleFileChange(e, setUpload, uploadRef)}
+              className="hidden"
+            />
+
+            {upload && (
+              <div className="flex gap-2 items-center">
+                <Link
+                  target="_blank"
+                  href={URL.createObjectURL(upload!)}
+                  className="bg-gray-200 text-black py-1 px-4 rounded-md text-sm h-7 grid place-items-center w-28 text-nowrap"
+                >
+                  View File
+                </Link>
+              </div>
+            )}
+          </div>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white mt-2 cursor-pointer"
+          >
+            {isSubmitting ? "Loading...." : "Submit"}
+          </button>
+        </form>
+      </Drawer>
+    </>
+  );
+};
+
+interface HearingScheduleProviderProps {
+  setHearingScheduleBox: React.Dispatch<React.SetStateAction<boolean>>;
+  id: number;
+}
+
+const HearingScheduleProvider = (props: HearingScheduleProviderProps) => {
+  const methods = useForm<ScheduleHearingForm>({
+    resolver: valibotResolver(ScheduleHearingSchema),
+  });
+
+  return (
+    <>
+      <FormProvider {...methods}>
+        <HearingSchedulePage
+          setHearingScheduleBox={props.setHearingScheduleBox}
+          id={props.id}
+        />
+      </FormProvider>
+    </>
+  );
+};
+
+const HearingSchedulePage = (props: HearingScheduleProviderProps) => {
+  const userid = getCookie("id");
+  const [selectedDate, setSelectedDate] = useState<string>("");
+  const [selectedTime, setSelectedTime] = useState<string>("");
+
+  const {
+    handleSubmit,
+    formState: { isSubmitting },
+    setValue,
+    watch,
+  } = useFormContext<ScheduleHearingForm>();
+
+  const createquery = useMutation({
+    mutationKey: ["createNaQuery"],
+    mutationFn: async (data: ScheduleHearingForm) => {
+      if (!userid) {
+        toast.error("User ID not found");
+        return;
+      }
+
+      // Format the date and time as "DD-MM-YYYY HH:mm"
+      const formattedDateTime = `${data.date} ${data.time}`;
+
+      const response = await ApiCall({
+        query:
+          "mutation HearingScheduleNaQuery($createNaQueryInput: CreateNaQueryInput!) {hearingScheduleNaQuery(createNaQueryInput: $createNaQueryInput) {id}}",
+        variables: {
+          createNaQueryInput: {
+            createdById: parseInt(userid.toString()),
+            from_userId: parseInt(userid.toString()),
+            to_userId: 5,
+            query: formattedDateTime,
+            type: "HEARING_SCHEDULED",
+            na_formId: props.id,
+            query_status: "PENDING",
+            request_type: "DEPTTODEPT",
+            dept_update: true,
+          },
+        },
+      });
+
+      if (!response.status) {
+        throw new Error(response.message);
+      }
+
+      if (
+        !(response.data as Record<string, unknown>)["hearingScheduleNaQuery"]
+      ) {
+        throw new Error("Value not found in response");
+      }
+      return (response.data as Record<string, unknown>)[
+        "hearingScheduleNaQuery"
+      ] as QueryResponseData;
+    },
+    onSuccess: () => {
+      toast.success("Hearing scheduled successfully");
+      props.setHearingScheduleBox(false);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const onSubmit = async (data: ScheduleHearingForm) => {
+    if (!data.date || !data.time) {
+      toast.error("Please select both date and time");
+      return;
+    }
+    createquery.mutate(data);
+  };
+
+  const handleDateChange = (date: any, dateString: string | string[]) => {
+    const formattedDate = Array.isArray(dateString)
+      ? dateString[0]
+      : dateString;
+    setSelectedDate(formattedDate);
+    setValue("date", formattedDate);
+  };
+
+  const handleTimeChange = (time: any, timeString: string | string[]) => {
+    const formattedTime = Array.isArray(timeString)
+      ? timeString[0]
+      : timeString;
+    setSelectedTime(formattedTime);
+    setValue("time", formattedTime);
+  };
+
+  return (
+    <>
+      <form onSubmit={handleSubmit(onSubmit, onFormError)}>
+        <div className="mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Select Date
+          </label>
+          <DatePicker
+            format="DD-MM-YYYY"
+            placeholder="Select Date"
+            style={{ width: "100%" }}
+            onChange={handleDateChange}
+            value={selectedDate ? dayjs(selectedDate, "DD-MM-YYYY") : null}
+          />
+        </div>
+        <div className="mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Select Time
+          </label>
+          <TimePicker
+            format="HH:mm"
+            placeholder="Select Time"
+            minuteStep={15}
+            showNow={false}
+            use12Hours={false}
+            style={{ width: "100%" }}
+            onChange={handleTimeChange}
+            value={selectedTime ? dayjs(selectedTime, "HH:mm") : null}
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={isSubmitting || !selectedDate || !selectedTime}
+          className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white mt-2 cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed"
+        >
+          {isSubmitting ? "Scheduling..." : "Schedule Hearing"}
+        </button>
+      </form>
     </>
   );
 };

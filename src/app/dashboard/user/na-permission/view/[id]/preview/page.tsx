@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 
 interface NaFormResponse {
   id: number;
+  last_name: string;
   q1: boolean;
   q2: string;
   q3: string;
@@ -65,7 +66,7 @@ const ViewPermission = () => {
     queryFn: async () => {
       const response = await ApiCall({
         query:
-          "query GetNaById($id:Int!) { getNaById(id: $id) { id, q1, q2, q3, q4, anx1, anx2, anx3, anx4, anx5, q4, q5, q6, q7, q8, q9, q10, q11, q12, q13, q14, q15, q16, q17, q18, createdById, village{ id, name }, na_applicant { firstName, lastName, contact,relation, signature_url }, na_survey { area, sub_division, survey_no, village { name }}}}",
+          "query GetNaById($id:Int!) { getNaById(id: $id) { id, last_name, q1, q2, q3, q4, anx1, anx2, anx3, anx4, anx5, q4, q5, q6, q7, q8, q9, q10, q11, q12, q13, q14, q15, q16, q17, q18, createdById, village{ id, name }, na_applicant { firstName, lastName, contact,relation, signature_url }, na_survey { area, sub_division, survey_no, village { name }}}}",
         variables: {
           id: formid,
         },
@@ -267,20 +268,26 @@ const ViewPermission = () => {
 
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
           <p className="flex-1 text-sm text-gray-500">
-            1. Full Name of the Applicant.
+            (1). First Name of the Applicant.
           </p>
           <div className="flex-1">{formdata.data!.q4}</div>
+        </div>
+        <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
+          <p className="flex-1 text-sm text-gray-500">
+            (2). Last Name of the Applicant.
+          </p>
+          <div className="flex-1">{formdata.data!.last_name}</div>
         </div>
 
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
           <p className="flex-1 text-sm text-gray-500">
-            2. Full Postal Address.
+            (3). Full Postal Address.
           </p>
           <div className="flex-1">{formdata.data!.q5}</div>
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
           <p className="flex-1 text-sm text-gray-500">
-            3. Contact no of the applicant.
+            (4). Contact no of the applicant.
           </p>
           <div className="flex-1">{formdata.data!.q6}</div>
         </div>
@@ -340,24 +347,24 @@ const ViewPermission = () => {
         </div>
 
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16 ">
-          <p className="flex-1 text-sm text-gray-500">(4) Village</p>
+          <p className="flex-1 text-sm text-gray-500">(5) Village</p>
           <div className="flex-1">{formdata.data!.village.name}</div>
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
-          <p className="flex-1 text-sm text-gray-500">(5) Survey No</p>
+          <p className="flex-1 text-sm text-gray-500">(6) Survey No</p>
           <div className="flex-1">{formdata.data!.q7}</div>
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
-          <p className="flex-1 text-sm text-gray-500">(6) Sub Division</p>
+          <p className="flex-1 text-sm text-gray-500">(7) Sub Division</p>
           <div className="flex-1">{formdata.data!.q8}</div>
         </div>
 
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
-          <p className="flex-1 text-sm text-gray-500">(7) Area in Sq.mt.</p>
+          <p className="flex-1 text-sm text-gray-500">(8) Area in Sq.mt.</p>
           <div className="flex-1">{formdata.data!.q9}</div>
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
-          <p className="flex-1 text-sm text-gray-500">(8) Old Survey No</p>
+          <p className="flex-1 text-sm text-gray-500">(9) Old Survey No</p>
           <div className="flex-1">{formdata.data!.q10}</div>
         </div>
 
@@ -404,26 +411,26 @@ const ViewPermission = () => {
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
           <p className="flex-1 text-sm text-gray-500">
-            (9) Area of the site out of (5) above to be used for.
+            (10) Area of the site out of (6) above to be used for.
           </p>
           <div className="flex-1">{formdata.data!.q11}</div>
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
           <p className="flex-1 text-sm text-gray-500">
-            (10) Type (Residential/Commercial/Industrial)
+            (11) Type (Residential/Commercial/Industrial)
           </p>
           <div className="flex-1">{formdata.data!.q12}</div>
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
           <p className="flex-1 text-sm text-gray-500">
-            (11) Present use of the land and whether any building exists thereon
-            and if so, iti use.
+            (12) Present use of the land and whether any building exists thereon
+            and if so, it's use.
           </p>
           <div className="flex-1">{formdata.data!.q13}</div>
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
           <p className="flex-1 text-sm text-gray-500">
-            (12) Whether electrical light transmission lines pass over tle land
+            (13) Whether electrical light transmission lines pass over the land
             and if so, the distance thereof from the proposed building other
             works.
           </p>
@@ -431,13 +438,13 @@ const ViewPermission = () => {
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
           <p className="flex-1 text-sm text-gray-500">
-            (13) Is, the land under acquisition ..If so, state details.
+            (14) Is, the land under acquisition ..If so, state details.
           </p>
           <div className="flex-1">{formdata.data!.q15}</div>
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
           <p className="flex-1 text-sm text-gray-500">
-            (14) Is there a road from where the land is easily accessible ?
+            (15) Is there a road from where the land is easily accessible ?
             State the name of the road and whether it is Highway, Major district
             road or village road. What is the distance of the proposed building
             or other work from the center of the road.
@@ -446,14 +453,14 @@ const ViewPermission = () => {
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
           <p className="flex-1 text-sm text-gray-500">
-            (15) If there is no road adjoining the land, how is it proposed to
+            (16) If there is no road adjoining the land, how is it proposed to
             be provided for access to the site.
           </p>
           <div className="flex-1">{formdata.data!.q17}</div>
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
           <p className="flex-1 text-sm text-gray-500">
-            (16) Was a similar application made in the past for non-agricultural
+            (17) Was a similar application made in the past for non-agricultural
             use of this land and was it rejected If yes, give details.
           </p>
           <div className="flex-1">{formdata.data!.q18}</div>

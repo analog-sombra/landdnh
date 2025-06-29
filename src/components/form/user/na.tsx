@@ -574,7 +574,7 @@ const NaPage = () => {
 
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
               <p className="flex-1 text-sm text-gray-500">
-                1. Full Name of the Applicant.
+                (1). First Name of the Applicant.
               </p>
               <div className="flex-1">
                 <TextInput<NAForm>
@@ -584,10 +584,22 @@ const NaPage = () => {
                 />
               </div>
             </div>
+            <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
+              <p className="flex-1 text-sm text-gray-500">
+                (2). Last Name of the Applicant.
+              </p>
+              <div className="flex-1">
+                <TextInput<NAForm>
+                  required={true}
+                  name="last_name"
+                  placeholder="Enter Details"
+                />
+              </div>
+            </div>
 
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
               <p className="flex-1 text-sm text-gray-500">
-                2. Full Postal Address.
+                (3). Full Postal Address.
               </p>
               <div className="flex-1">
                 <TextInput<NAForm>
@@ -599,7 +611,7 @@ const NaPage = () => {
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
               <p className="flex-1 text-sm text-gray-500">
-                3. Contact no of the applicant.
+                (4). Contact no of the applicant.
               </p>
               <div className="flex-1">
                 <TextInput<NAForm>
@@ -774,7 +786,7 @@ const NaPage = () => {
               )}
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16 ">
-              <p className="flex-1 text-sm text-gray-500">(4) Village</p>
+              <p className="flex-1 text-sm text-gray-500">(5) Village</p>
               <div className="flex-1">
                 <MultiSelect<NAForm>
                   placeholder="Select Village"
@@ -788,7 +800,7 @@ const NaPage = () => {
               </div>
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
-              <p className="flex-1 text-sm text-gray-500">(5) Survey No</p>
+              <p className="flex-1 text-sm text-gray-500">(6) Survey No</p>
               <div className="flex-1">
                 <TextInput<NAForm>
                   required={true}
@@ -798,7 +810,7 @@ const NaPage = () => {
               </div>
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
-              <p className="flex-1 text-sm text-gray-500">(6) Sub Division</p>
+              <p className="flex-1 text-sm text-gray-500">(7) Sub Division</p>
               <div className="flex-1 flex gap-2">
                 <TextInput<NAForm>
                   required={true}
@@ -828,7 +840,7 @@ const NaPage = () => {
             </div>
 
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
-              <p className="flex-1 text-sm text-gray-500">(7) Area in Sq.mt.</p>
+              <p className="flex-1 text-sm text-gray-500">(8) Area in Sq.mt.</p>
               <div className="flex-1">
                 <TextInput<NAForm>
                   required={true}
@@ -838,7 +850,7 @@ const NaPage = () => {
               </div>
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
-              <p className="flex-1 text-sm text-gray-500">(8) Old Survey No</p>
+              <p className="flex-1 text-sm text-gray-500">(9) Old Survey No</p>
               <div className="flex-1">
                 <TextInput<NAForm>
                   required={true}
@@ -946,7 +958,7 @@ const NaPage = () => {
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
               <p className="flex-1 text-sm text-gray-500">
-                (9) Area of the site out of (5) above to be used for.
+                (10) Area of the site out of (6) above to be used for.
               </p>
               <div className="flex-1">
                 <TextInput<NAForm>
@@ -958,7 +970,7 @@ const NaPage = () => {
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
               <p className="flex-1 text-sm text-gray-500">
-                (10) Type (Residential/Commercial/Industrial)
+                (11) Type (Residential/Commercial/Industrial)
               </p>
               <div className="flex-1">
                 <TextInput<NAForm>
@@ -970,7 +982,7 @@ const NaPage = () => {
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
               <p className="flex-1 text-sm text-gray-500">
-                (11) Present use of the land and whether any building exists
+                (12) Present use of the land and whether any building exists
                 thereon and if so, it&apos;s use.
               </p>
               <div className="flex-1 flex gap-2">
@@ -1002,7 +1014,7 @@ const NaPage = () => {
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
               <p className="flex-1 text-sm text-gray-500">
-                (12) Whether electrical light transmission lines pass over tle
+                (13) Whether electrical light transmission lines pass over tle
                 land and if so, the distance thereof from the proposed building
                 other works.
               </p>
@@ -1035,7 +1047,7 @@ const NaPage = () => {
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
               <p className="flex-1 text-sm text-gray-500">
-                (13) Is, the land under acquisition ..If so, state details.
+                (14) Is, the land under acquisition ..If so, state details.
               </p>
               <div className="flex-1 flex gap-2">
                 <TextInput<NAForm>
@@ -1066,7 +1078,7 @@ const NaPage = () => {
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
               <p className="flex-1 text-sm text-gray-500">
-                (14) Is there a road from where the land is easily accessible ?
+                (15) Is there a road from where the land is easily accessible ?
                 State the name of the road and whether it is Highway, Major
                 district road or village road. What is the distance of the
                 proposed building or other work from the center of the road.
@@ -1100,7 +1112,7 @@ const NaPage = () => {
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
               <p className="flex-1 text-sm text-gray-500">
-                (15) If there is no road adjoining the land, how is it proposed
+                (16) If there is no road adjoining the land, how is it proposed
                 to be provided for access to the site.
               </p>
               <div className="flex-1 flex gap-2">
@@ -1132,7 +1144,7 @@ const NaPage = () => {
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
               <p className="flex-1 text-sm text-gray-500">
-                (16) Was a similar application made in the past for
+                (17) Was a similar application made in the past for
                 non-agricultural use of this land and was it rejected If yes,
                 give details.
               </p>

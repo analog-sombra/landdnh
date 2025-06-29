@@ -1,4 +1,5 @@
 import {
+  boolean,
   InferInput,
   minLength,
   object,
@@ -51,3 +52,27 @@ const MarkToSchema = object({
 
 type MarkToForm = InferInput<typeof MarkToSchema>;
 export { MarkToSchema, type MarkToForm };
+
+const ReportSubmitSchema = object({
+  query: pipe(
+    string("Please enter your first name."),
+    minLength(1, "Please enter your first name.")
+  ),
+  all_report_submit: pipe(boolean("Please select if all report submitted.")),
+  userid: pipe(
+    string("Please select user."),
+    minLength(1, "Please select user.")
+  ),
+  upload_url_1: optional(string("Please enter your contact number.")),
+});
+
+type ReportSubmitForm = InferInput<typeof ReportSubmitSchema>;
+export { ReportSubmitSchema, type ReportSubmitForm };
+
+const ScheduleHearingSchema = object({
+  date: pipe(string("Please enter date."), minLength(1, "Please enter date.")),
+  time: pipe(string("Please enter time."), minLength(1, "Please enter time.")),
+});
+
+type ScheduleHearingForm = InferInput<typeof ScheduleHearingSchema>;
+export { ScheduleHearingSchema, type ScheduleHearingForm };

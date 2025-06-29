@@ -670,7 +670,7 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
   return (
     <>
       <div className="flex items-center gap-2">
-        <p className="text-gray-700 text-lg ">Query</p>
+        <p className="text-gray-700 text-lg ">Correspondence</p>
         <div className="grow"></div>
         {chatdata.data && chatdata.data?.length > 0 && (
           <button

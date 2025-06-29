@@ -35,16 +35,17 @@ const NASurveySchema = object({
     string("Please enter your area in Sq.mt."),
     minLength(1, "Please enter your area in Sq.mt.")
   ),
-  sub_division: pipe(
-    string("Please enter your Sub Division"),
-    minLength(1, "Please enter your Sub Division")
-  ),
+  sub_division: nullish(string("Please enter your Sub Division")),
 });
 
 const NASchema = object({
   villageId: pipe(
     number("Please select your village."),
     minValue(1, "Please select your village.")
+  ),
+  last_name: pipe(
+    string("Please enter Last Name."),
+    minLength(1, "Please enter Last Name.")
   ),
   q1: pipe(boolean("Please enter q1.")),
   q2: pipe(string("Please enter q2."), minLength(1, "Please enter q2.")),
