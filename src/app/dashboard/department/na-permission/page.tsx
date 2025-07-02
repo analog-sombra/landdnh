@@ -2,12 +2,14 @@
 import { ApiCall } from "@/services/api";
 import { encryptURLData } from "@/utils/methods";
 import { useQuery } from "@tanstack/react-query";
-import { Alert, Pagination } from "antd";
+import { Alert, Pagination, Switch } from "antd";
+import { getCookie } from "cookies-next/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const NaPermission = () => {
   const router = useRouter();
+  const [allFiles, setAllfiles] = useState<boolean>(true);
 
   const [pagination, setPaginatin] = useState<{
     take: number;
@@ -34,6 +36,7 @@ const NaPermission = () => {
       form_status: string;
       dept_user: {
         role: string;
+        id: number;
       };
       village: {
         name: string;
@@ -47,7 +50,7 @@ const NaPermission = () => {
     queryFn: async () => {
       const response = await ApiCall({
         query:
-          "query GetAllNa($take: Int!, $skip: Int!) { getAllNa(take: $take, skip: $skip) {total, skip, take, data {id, q4, status, form_status, office_status, dept_status, dept_user {role}, village {name}}}}",
+          "query GetAllNa($take: Int!, $skip: Int!) { getAllNa(take: $take, skip: $skip) {total, skip, take, data {id, q4, status, form_status, office_status, dept_status, dept_user {role, id}, village {name}}}}",
         variables: {
           take: pagination.take,
           skip: pagination.skip,
@@ -82,6 +85,12 @@ const NaPermission = () => {
       <div className="flex gap-2 items-center">
         <h1 className="text-[#162f57] text-2xl font-semibold">NA Permission</h1>
         <div className="grow"></div>
+        <Switch
+          onChange={() => setAllfiles(!allFiles)}
+          value={allFiles}
+          checkedChildren="All Applications"
+          unCheckedChildren="Current Applications"
+        />
       </div>
 
       {naformdata.data?.data.length === 0 ? (
@@ -116,42 +125,92 @@ const NaPermission = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {naformdata.data?.data
-                    .filter((val) => val.form_status != "DRAFT")
-                    .map((naform, index) => (
-                      <tr key={index} className="hover:bg-gray-50">
-                        <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
-                          {pagination.skip + index + 1}
-                        </td>
-                        <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
-                          {naform.q4}
-                        </td>
-                        <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
-                          {naform.village.name}
-                        </td>
-                        <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
-                          {naform.dept_user.role}
-                        </td>
-                        <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
-                          {naform.dept_status}
-                        </td>
+                  {allFiles ? (
+                    <>
+                      {naformdata.data?.data
+                        .filter((val) => val.form_status != "DRAFT")
+                        .map((naform, index) => (
+                          <tr key={index} className="hover:bg-gray-50">
+                            <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                              {pagination.skip + index + 1}
+                            </td>
+                            <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                              {naform.q4}
+                            </td>
+                            <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                              {naform.village.name}
+                            </td>
+                            <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                              {naform.dept_user && naform.dept_user.role
+                                ? naform.dept_user.role
+                                : "N/A"}
+                            </td>
+                            <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                              {naform.dept_status}
+                            </td>
 
-                        <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
-                          <button
-                            className="bg-blue-500 text-white px-4 py-1 rounded-md cursor-pointer"
-                            onClick={() => {
-                              router.push(
-                                `/dashboard/department/na-permission/view/${encryptURLData(
-                                  naform.id.toString()
-                                )}`
-                              );
-                            }}
-                          >
-                            View
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                            <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                              <button
+                                className="bg-blue-500 text-white px-4 py-1 rounded-md cursor-pointer"
+                                onClick={() => {
+                                  router.push(
+                                    `/dashboard/department/na-permission/view/${encryptURLData(
+                                      naform.id.toString()
+                                    )}`
+                                  );
+                                }}
+                              >
+                                View
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                    </>
+                  ) : (
+                    <>
+                      {naformdata.data?.data
+                        .filter(
+                          (val) =>
+                            val.form_status != "DRAFT" &&
+                            val.dept_user.id ==
+                              parseInt(getCookie("id") as string)
+                        )
+                        .map((naform, index) => (
+                          <tr key={index} className="hover:bg-gray-50">
+                            <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                              {pagination.skip + index + 1}
+                            </td>
+                            <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                              {naform.q4}
+                            </td>
+                            <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                              {naform.village.name}
+                            </td>
+                            <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                              {naform.dept_user.role}
+                            </td>
+                            <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                              {naform.dept_status}
+                            </td>
+
+                            <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                              <button
+                                className="bg-blue-500 text-white px-4 py-1 rounded-md cursor-pointer"
+                                onClick={() => {
+                                  router.push(
+                                    `/dashboard/department/na-permission/view/${encryptURLData(
+                                      naform.id.toString()
+                                    )}`
+                                  );
+                                }}
+                              >
+                                View
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                    </>
+                  )}
                 </tbody>
               </table>
             </div>
