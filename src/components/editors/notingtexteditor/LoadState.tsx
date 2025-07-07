@@ -58,12 +58,15 @@ const LoadState = ({ id }: LoadStateProps) => {
 
   useEffect(() => {
     // when the notingdata is fetched sort by createdAt and get the first item and set the query text
-    if (notingdata.isLoading || notingdata.isError || !notingdata.data) {
+    if (notingdata.isLoading || notingdata.isError || !notingdata.data || notingdata.data.length === 0) {
       return;
     }
-    const text = notingdata.data.sort((a, b) => {
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    })[0].query;
+    const text =
+      notingdata.data.sort((a, b) => {
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      })[0].query;
     const newState = editor.parseEditorState(text);
     editor.setEditorState(newState);
     editor.setEditable(true);

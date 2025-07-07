@@ -1047,7 +1047,7 @@ const NaPage = () => {
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
               <p className="flex-1 text-sm text-gray-500">
-                (14) Is, the land under acquisition ..If so, state details.
+                (14) Is, the land under acquisition. If so, state details.
               </p>
               <div className="flex-1 flex gap-2">
                 <TextInput<NAForm>

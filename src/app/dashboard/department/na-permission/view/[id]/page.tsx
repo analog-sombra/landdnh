@@ -325,6 +325,20 @@ const ViewPermission = () => {
             Hearing
           </button>
         )}
+        {["LDCMAMLATDAR"].includes(userdata.data!.role) && (
+          <button
+            onClick={() => {
+              router.push(
+                `/dashboard/department/na-permission/view/${encryptURLData(
+                  formid.toString()
+                )}/report`
+              );
+            }}
+            className="bg-[#162f57] text-white py-1 px-4 rounded-md text-sm grid place-items-center cursor-pointer"
+          >
+            Prepare Report
+          </button>
+        )}
 
         <div className="w-2"></div>
       </div>
@@ -623,7 +637,7 @@ const ViewPermission = () => {
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
           <p className="flex-1 text-sm text-gray-500">
-            (14) Is, the land under acquisition ..If so, state details.
+            (14) Is, the land under acquisition. If so, state details.
           </p>
           <div className="flex-1">{formdata.data!.q15}</div>
         </div>
