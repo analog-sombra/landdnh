@@ -986,7 +986,8 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
       toast.error(error.message);
     },
     onSuccess: () => {
-      toast.success("Payment request created successfully");
+      toast.success("Payment successful");
+      paymenthistorydata.refetch();
     },
   });
 

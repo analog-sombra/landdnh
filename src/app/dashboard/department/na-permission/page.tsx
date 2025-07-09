@@ -9,7 +9,8 @@ import { useState } from "react";
 
 const NaPermission = () => {
   const router = useRouter();
-  const [allFiles, setAllfiles] = useState<boolean>(true);
+  const [allFiles, setAllfiles] = useState<boolean>(false);
+  const currentuserrole: string = getCookie("role") as string;
 
   const [pagination, setPaginatin] = useState<{
     take: number;
@@ -60,7 +61,7 @@ const NaPermission = () => {
       if (!response.status) {
         throw new Error(response.message);
       }
-
+      console.log(response.data);
       // if value is not in response.data then return the error
       if (!(response.data as Record<string, unknown>)["getAllNa"]) {
         throw new Error("Value not found in response");
@@ -85,12 +86,16 @@ const NaPermission = () => {
       <div className="flex gap-2 items-center">
         <h1 className="text-[#162f57] text-2xl font-semibold">NA Permission</h1>
         <div className="grow"></div>
-        <Switch
-          onChange={() => setAllfiles(!allFiles)}
-          value={allFiles}
-          checkedChildren="All Applications"
-          unCheckedChildren="Current Applications"
-        />
+        {["LDCMAMLATDAR", "MAMLATDAR", "DEPUTYCOLLECTOR", "COLLECTOR"].includes(
+          currentuserrole
+        ) && (
+          <Switch
+            onChange={() => setAllfiles(!allFiles)}
+            value={allFiles}
+            checkedChildren="All Applications"
+            unCheckedChildren="Current Applications"
+          />
+        )}
       </div>
 
       {naformdata.data?.data.length === 0 ? (
@@ -172,8 +177,12 @@ const NaPermission = () => {
                         .filter(
                           (val) =>
                             val.form_status != "DRAFT" &&
-                            val.dept_user.id ==
-                              parseInt(getCookie("id") as string)
+                            (val.dept_user.id ==
+                              parseInt(getCookie("id") as string) ||
+                              (val.dept_status == "SEEK_REPORT" &&
+                                ["TALATHI", "DNHPDA", "LAQ", "LRO"].includes(
+                                  currentuserrole
+                                )))
                         )
                         .map((naform, index) => (
                           <tr key={index} className="hover:bg-gray-50">

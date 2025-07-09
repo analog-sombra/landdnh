@@ -306,6 +306,7 @@ const ToolBar = ({ id }: ToolBarProps) => {
           },
         }
       );
+
     });
   };
 
@@ -338,7 +339,6 @@ const ToolBar = ({ id }: ToolBarProps) => {
             na_formId: id,
             query_status: "PENDING",
             request_type: "DEPTTODEPT",
-            noting_draft: true,
           },
         },
       });

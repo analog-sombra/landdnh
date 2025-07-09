@@ -43,6 +43,7 @@ import { toast } from "react-toastify";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getCookie } from "cookies-next/client";
 import { ApiCall } from "@/services/api";
+import { useRouter } from "next/navigation";
 
 const headingOptions = [
   { label: "H1", value: "h1" },
@@ -316,6 +317,7 @@ const ToolBar = ({ id }: ToolBarProps) => {
   interface QueryResponseData {
     id: number;
   }
+  const router = useRouter();
 
   const createquery = useMutation({
     mutationKey: ["createNaQuery"],
@@ -334,11 +336,10 @@ const ToolBar = ({ id }: ToolBarProps) => {
             from_userId: parseInt(userid.toString()),
             to_userId: parseInt(userid.toString()),
             query: data.query,
-            type: "PRENOTE",
+            type: "SANAD",
             na_formId: id,
             query_status: "PENDING",
             request_type: "DEPTTODEPT",
-            noting_draft: true,
           },
         },
       });
@@ -355,7 +356,8 @@ const ToolBar = ({ id }: ToolBarProps) => {
       ] as QueryResponseData;
     },
     onSuccess: () => {
-      toast.success("Noting created successfully");
+      toast.success("Zimni created successfully");
+      router.back();
     },
     onError: (error) => {
       toast.error(error.message);

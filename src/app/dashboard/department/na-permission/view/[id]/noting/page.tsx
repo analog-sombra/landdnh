@@ -1202,6 +1202,7 @@ interface ReportProviderProps {
 
 const ReportPage = (props: ReportProviderProps) => {
   const userid = getCookie("id");
+  const currentuserrole: string = getCookie("role") as string;
 
   const reportdata = useQuery({
     queryKey: ["getQueryByType", props.id],
@@ -1211,7 +1212,7 @@ const ReportPage = (props: ReportProviderProps) => {
           "query GetQueryByType($id: Int!, $querytype: [QueryType!]!) {getQueryByType(id: $id, querytype: $querytype) {id,query,upload_url_1,type,request_type,createdAt,from_user {id, firstName,lastName,role},to_user {id, firstName,lastName,role},}}",
         variables: {
           id: props.id,
-          querytype: ["REPORT"],
+          querytype: ["REPORT", "SUBMITREPORT"],
         },
       });
 
@@ -1235,34 +1236,66 @@ const ReportPage = (props: ReportProviderProps) => {
           <Alert message="No Notings found." type="error" showIcon />
         </div>
       )}
-
-      {reportdata.data?.map((field, index) => {
-        if (field.from_user.id == Number(userid)) {
-          return (
-            <UserChat
-              key={index}
-              name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-              fromrole={field.from_user.role}
-              torole={field.to_user.role}
-              message={field.query}
-              time={new Date(field.createdAt)}
-              url={field.upload_url_1}
-            />
-          );
-        } else {
-          return (
-            <DeptChat
-              key={index}
-              name={`${field.to_user.firstName} ${field.to_user.lastName}`}
-              fromrole={field.from_user.role}
-              torole={field.to_user.role}
-              message={field.query}
-              time={new Date(field.createdAt)}
-              url={field.upload_url_1}
-            />
-          );
-        }
-      })}
+      {["TALATHI", "DNHPDA", "LAQ", "LRO"].includes(currentuserrole)
+        ? reportdata.data?.map((field, index) => {
+            if (
+              field.to_user.id == Number(userid) ||
+              field.from_user.id == Number(userid)
+            ) {
+              if (field.from_user.id == Number(userid)) {
+                return (
+                  <UserChat
+                    key={index}
+                    name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+                    fromrole={field.from_user.role}
+                    torole={field.to_user.role}
+                    message={field.query}
+                    time={new Date(field.createdAt)}
+                    url={field.upload_url_1}
+                  />
+                );
+              } else {
+                return (
+                  <DeptChat
+                    key={index}
+                    name={`${field.to_user.firstName} ${field.to_user.lastName}`}
+                    fromrole={field.from_user.role}
+                    torole={field.to_user.role}
+                    message={field.query}
+                    time={new Date(field.createdAt)}
+                    url={field.upload_url_1}
+                  />
+                );
+              }
+            }
+          })
+        : reportdata.data?.map((field, index) => {
+            if (field.from_user.id == Number(userid)) {
+              return (
+                <UserChat
+                  key={index}
+                  name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+                  fromrole={field.from_user.role}
+                  torole={field.to_user.role}
+                  message={field.query}
+                  time={new Date(field.createdAt)}
+                  url={field.upload_url_1}
+                />
+              );
+            } else {
+              return (
+                <DeptChat
+                  key={index}
+                  name={`${field.to_user.firstName} ${field.to_user.lastName}`}
+                  fromrole={field.from_user.role}
+                  torole={field.to_user.role}
+                  message={field.query}
+                  time={new Date(field.createdAt)}
+                  url={field.upload_url_1}
+                />
+              );
+            }
+          })}
     </>
   );
 };

@@ -9,6 +9,7 @@ import {
   NotingForm,
   NotingSchema,
   QueryForm,
+  QuerySchema,
   ReportSubmitForm,
   ReportSubmitSchema,
   ScheduleHearingForm,
@@ -19,7 +20,16 @@ import { baseurl } from "@/utils/const";
 import { decryptURLData, formatDateTime, onFormError } from "@/utils/methods";
 import { valibotResolver } from "@hookform/resolvers/valibot";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Alert, DatePicker, Drawer, Modal, TimePicker } from "antd";
+import {
+  Alert,
+  DatePicker,
+  Drawer,
+  Input,
+  InputNumber,
+  Modal,
+  Radio,
+  TimePicker,
+} from "antd";
 import { getCookie } from "cookies-next/client";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -32,6 +42,7 @@ import { RabioInput } from "@/components/form/inputfields/radioinput";
 import { ViewEditor } from "@/components/editors/vieweditro/page";
 import { CheckBoxInput } from "@/components/form/inputfields/checkboxinput";
 import dayjs from "dayjs";
+import { CheckboxGroupProps } from "antd/es/checkbox";
 
 interface NaFormResponse {
   id: number;
@@ -126,6 +137,7 @@ const ViewPermission = () => {
   const idString = Array.isArray(id) ? id[0] : id;
   const formid: number = parseInt(decryptURLData(idString, router));
   const userid = getCookie("id");
+  const currentuserrole: string = getCookie("role") as string;
 
   const formdata = useQuery({
     queryKey: ["getnaform", formid],
@@ -230,13 +242,29 @@ const ViewPermission = () => {
 
         {userdata.data &&
           formdata.data &&
-          ["PATOCOLLECTOR"].includes(userdata.data.role) &&
-          formdata.data.dept_status == "ALLOT_HEARING" && (
+          ["COLLECTOR"].includes(userdata.data.role) &&
+          formdata.data.dept_status == "NOTING_DRAFT" && (
             <button
               onClick={() => setRescheduleBox(true)}
               className="bg-[#162f57] text-white py-1 px-4 rounded-md text-sm grid place-items-center cursor-pointer"
             >
               Schedule Hearing
+            </button>
+          )}
+        {userdata.data &&
+          formdata.data &&
+          ["LDCMAMLATDAR"].includes(userdata.data.role) && (
+            <button
+              onClick={() => {
+                router.push(
+                  `/dashboard/department/na-permission/view/${encryptURLData(
+                    formid.toString()
+                  )}/sanad`
+                );
+              }}
+              className="bg-[#162f57] text-white py-1 px-4 rounded-md text-sm grid place-items-center cursor-pointer"
+            >
+              SANAD
             </button>
           )}
 
@@ -246,7 +274,7 @@ const ViewPermission = () => {
           open={rescheduleBox}
           footer={null}
         >
-          <p>Are you sure you want to reschedule.</p>
+          <p>Are you sure you want to schedule.</p>
           <div className="mt-2"></div>
           <HearingScheduleProvider
             id={formid}
@@ -259,6 +287,7 @@ const ViewPermission = () => {
           "DEPUTYCOLLECTOR",
           "COLLECTOR",
           "DNHPDA",
+          "RAK",
         ].includes(userdata.data!.role) && (
           <button
             onClick={() => setPaymentHistoryBox(true)}
@@ -272,6 +301,7 @@ const ViewPermission = () => {
           "MAMLATDAR",
           "DEPUTYCOLLECTOR",
           "COLLECTOR",
+          "RAK",
         ].includes(userdata.data!.role) ||
           formdata.data?.dept_user_id == Number(userid)) && (
           <button
@@ -282,9 +312,13 @@ const ViewPermission = () => {
           </button>
         )}
 
-        {["LDCMAMLATDAR", "MAMLATDAR", "DEPUTYCOLLECTOR", "COLLECTOR"].includes(
-          userdata.data!.role
-        ) && (
+        {[
+          "LDCMAMLATDAR",
+          "MAMLATDAR",
+          "DEPUTYCOLLECTOR",
+          "COLLECTOR",
+          "RAK",
+        ].includes(userdata.data!.role) && (
           <button
             onClick={() => setNotingBox(true)}
             className="bg-[#162f57] text-white py-1 px-4 rounded-md text-sm grid place-items-center cursor-pointer"
@@ -298,9 +332,11 @@ const ViewPermission = () => {
           "MAMLATDAR",
           "DEPUTYCOLLECTOR",
           "COLLECTOR",
+          "RAK",
         ].includes(userdata.data!.role) ||
           (formdata.data?.seek_report &&
-            formdata.data?.dept_user_id == Number(userid))) && (
+            ["TALATHI", "DNHPDA", "LAQ", "LRO"].includes(currentuserrole)) ||
+          formdata.data?.dept_user_id == Number(userid)) && (
           <button
             onClick={() => setReportBox(true)}
             className="bg-[#162f57] text-white py-1 px-4 rounded-md text-sm grid place-items-center cursor-pointer"
@@ -309,9 +345,13 @@ const ViewPermission = () => {
           </button>
         )}
 
-        {["LDCMAMLATDAR", "MAMLATDAR", "DEPUTYCOLLECTOR", "COLLECTOR"].includes(
-          userdata.data!.role
-        ) && (
+        {[
+          "LDCMAMLATDAR",
+          "MAMLATDAR",
+          "DEPUTYCOLLECTOR",
+          "COLLECTOR",
+          "RAK",
+        ].includes(userdata.data!.role) && (
           <button
             onClick={() => {
               router.push(
@@ -924,7 +964,7 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
       toast.error(error.message);
     },
     onSuccess: () => {
-      toast.success("Query Created Successfully");
+      toast.success("Message Sent Successfully");
       router.push("/dashboard/department/na-permission");
     },
   });
@@ -1650,6 +1690,7 @@ const PaymentHistoryProvider = (props: PaymentHistoryProviderProps) => {
 
 const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
   const userid = getCookie("id");
+  const [penaltyBox, setPenaltyBox] = useState(false);
 
   const paymenthistorydata = useQuery({
     queryKey: ["getPaymentHistory"],
@@ -1701,7 +1742,7 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
 
   const createPaymentRequest = useMutation({
     mutationKey: ["createNaFee"],
-    mutationFn: async () => {
+    mutationFn: async (data: RequestPaymentForm) => {
       if (!userid) {
         toast.error("User ID not found");
         return;
@@ -1714,8 +1755,8 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
           createNaFeeInput: {
             createdById: parseInt(userid.toString()),
             na_formId: props.id,
-            purpose: getValues("purpose"),
-            amount: getValues("amount"),
+            purpose: data.purpose,
+            amount: data.amount,
           },
         },
       });
@@ -1736,6 +1777,8 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
     },
     onSuccess: () => {
       toast.success("Payment request created successfully");
+      paymenthistorydata.refetch();
+      pendingpaymentdata.refetch();
     },
   });
 
@@ -1745,22 +1788,43 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
     getValues,
   } = useFormContext<RequestPaymentForm>();
 
-  const onSubmit = async () => {
-    createPaymentRequest.mutate();
+  const onSubmit = async (data: RequestPaymentForm) => {
+    createPaymentRequest.mutate(data);
     props.setRequestPaymentBox(false);
   };
 
-  if (paymenthistorydata.isLoading || pendingpaymentdata.isLoading) {
-    return (
-      <p className="text-gray-500 text-center">Loading payment history...</p>
-    );
+  // if (paymenthistorydata.isLoading || pendingpaymentdata.isLoading) {
+  //   return (
+  //     <p className="text-gray-500 text-center">Loading payment history...</p>
+  //   );
+  // }
+
+  const options: CheckboxGroupProps<string>["options"] = [
+    // { label: "Unauthorized Construction Penalty", value: "unauth" },
+    { label: "Unauthorized", value: "unauth" },
+    // { label: "Damanganga Irrigation Fees", value: "damanganga" },
+    { label: "Damanganga Irrigation", value: "damanganga" },
+  ];
+
+  const [selectedOptions, setSelectedOptions] = useState<string>("unauth");
+
+  interface PenaltyData {
+    year: number;
+    area: number;
   }
+  const [penaltyData, setPenaltyData] = useState<PenaltyData>({
+    year: 0,
+    area: 0,
+  });
+
+  const [iscal, setiscal] = useState<boolean>(false);
 
   return (
     <>
       <div className="flex items-center gap-2">
         <p className="text-gray-700 text-lg">Payment History</p>
         <div className="grow"></div>
+
         {pendingpaymentdata.data && pendingpaymentdata.data.length === 0 && (
           <button
             type="button"
@@ -1779,6 +1843,14 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
           Close
         </button>
       </div>
+
+      <button
+        type="button"
+        onClick={() => setPenaltyBox(true)}
+        className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-38 text-nowrap"
+      >
+        Add Penalty
+      </button>
 
       {paymenthistorydata.data?.length === 0 && (
         <div className="mt-2">
@@ -1848,6 +1920,198 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
           </button>
         </form>
       </Drawer>
+
+      <Drawer
+        closable={false}
+        onClose={() => setPenaltyBox(false)}
+        open={penaltyBox}
+        styles={{
+          body: {
+            paddingLeft: "10px",
+            paddingRight: "10px",
+            paddingTop: "10px",
+            paddingBottom: "0px",
+          },
+        }}
+      >
+        <Radio.Group
+          block
+          options={options}
+          defaultValue={selectedOptions}
+          optionType="button"
+          buttonStyle="solid"
+          onChange={(e) => setSelectedOptions(e.target.value)}
+        />
+
+        {selectedOptions === "unauth" && (
+          <>
+            <h1 className="text-lg font-semibold text-[#162f57] mb-2">
+              Unauthorized Construction Penalty
+            </h1>
+
+            <div className="w-full">
+              <p className="text-sm">Year</p>
+              <InputNumber
+                className="w-full"
+                style={{ width: "100%" }}
+                disabled={iscal}
+                placeholder="Enter Year"
+                onChange={(value) => {
+                  setPenaltyData((prev) => ({ ...prev, year: value || 0 }));
+                }}
+                value={penaltyData.year}
+              />
+            </div>
+            <div className="mt-2 w-full">
+              <p className="text-sm">Area in Sq.Mtrs</p>
+              <InputNumber
+                className="w-full"
+                style={{ width: "100%" }}
+                placeholder="Enter Area"
+                disabled={iscal}
+                onChange={(value) => {
+                  setPenaltyData((prev) => ({ ...prev, area: value || 0 }));
+                }}
+                value={penaltyData.area}
+              />
+            </div>
+            <button
+              className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white mt-2 cursor-pointer w-full"
+              onClick={() => {
+                if (penaltyData.year <= 0 || penaltyData.area <= 0) {
+                  toast.error("Please enter valid year and area");
+                  return;
+                }
+                setiscal(true);
+              }}
+            >
+              Calculate
+            </button>
+            {iscal && (
+              <>
+                <div className="overflow-x-auto">
+                  <table className="w-full mt-2 border-collapse border border-gray-200">
+                    <tbody>
+                      <tr className="hover:bg-gray-50">
+                        <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                          Penalty
+                        </td>
+                        <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                          {penaltyData.year * penaltyData.area * 0.02}
+                        </td>
+                      </tr>
+                      <tr className="hover:bg-gray-50">
+                        <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                          Assessment
+                        </td>
+                        <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                          {penaltyData.year * penaltyData.area * 0.02 * 400}
+                        </td>
+                      </tr>
+                      <tr className="hover:bg-gray-50">
+                        <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                          Total
+                        </td>
+                        <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                          {penaltyData.year * penaltyData.area * 0.02 * 400 +
+                            penaltyData.year * penaltyData.area * 0.02}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <button
+                  className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white mt-2 cursor-pointer w-full"
+                  onClick={() => {
+                    createPaymentRequest.mutate({
+                      amount: (
+                        penaltyData.year * penaltyData.area * 0.02 * 400 +
+                        penaltyData.year * penaltyData.area * 0.02
+                      ).toString(),
+                      purpose: `Unauthorized Construction Penalty for ${penaltyData.year} year and ${penaltyData.area} Sq.Mtrs area`,
+                    });
+                    setPenaltyBox(false);
+                  }}
+                >
+                  Request Payment
+                </button>
+              </>
+            )}
+          </>
+        )}
+
+        {selectedOptions === "damanganga" && (
+          <>
+            <h1 className="text-lg font-semibold text-[#162f57] mb-2">
+              Damanganga Irrigation Fees
+            </h1>
+            <div className="mt-2 w-full">
+              <p className="text-sm">Area in Sq.Mtrs</p>
+              <InputNumber
+                className="w-full"
+                style={{ width: "100%" }}
+                placeholder="Enter Area"
+                disabled={iscal}
+                onChange={(value) => {
+                  setPenaltyData((prev) => ({ ...prev, area: value || 0 }));
+                }}
+                value={penaltyData.area}
+              />
+            </div>
+            <button
+              className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white mt-2 cursor-pointer w-full"
+              onClick={() => {
+                if (penaltyData.area <= 0) {
+                  toast.error("Please enter valid area");
+                  return;
+                }
+                setiscal(true);
+              }}
+            >
+              Calculate
+            </button>
+            {iscal && (
+              <>
+                <div className="overflow-x-auto">
+                  <table className="w-full mt-2 border-collapse border border-gray-200">
+                    <tbody>
+                      <tr className="hover:bg-gray-50">
+                        <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                          Fees
+                        </td>
+                        <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                          {7}
+                        </td>
+                      </tr>
+
+                      <tr className="hover:bg-gray-50">
+                        <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                          Total
+                        </td>
+                        <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                          {penaltyData.area * 7}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <button
+                  className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white mt-2 cursor-pointer w-full"
+                  onClick={() => {
+                    createPaymentRequest.mutate({
+                      amount: (penaltyData.area * 7).toString(),
+                      purpose: `Damanganga Irrigation Fees for ${penaltyData.area} Sq.Mtrs area`,
+                    });
+                    setPenaltyBox(false);
+                  }}
+                >
+                  Request Payment
+                </button>
+              </>
+            )}
+          </>
+        )}
+      </Drawer>
     </>
   );
 };
@@ -1859,8 +2123,8 @@ interface ReportProviderProps {
 }
 
 const ReportProvider = (props: ReportProviderProps) => {
-  const methods = useForm<NotingForm>({
-    resolver: valibotResolver(NotingSchema),
+  const methods = useForm<QueryForm>({
+    resolver: valibotResolver(QuerySchema),
   });
 
   return (
@@ -1877,10 +2141,12 @@ const ReportProvider = (props: ReportProviderProps) => {
 };
 
 const ReportPage = (props: ReportProviderProps) => {
-  const [queryBox, setQueryBox] = useState<boolean>(false);
+  // const [queryBox, setQueryBox] = useState<boolean>(false);
   const [submitBox, setSubmitBox] = useState<boolean>(false);
   const [id, setId] = useState<number>(0);
   const userid = getCookie("id");
+  const currentuserrole: string = getCookie("role") as string;
+  const router = useRouter();
 
   const reportdata = useQuery({
     queryKey: ["getQueryByType", props.id],
@@ -1890,7 +2156,7 @@ const ReportPage = (props: ReportProviderProps) => {
           "query GetQueryByType($id: Int!, $querytype: [QueryType!]!) {getQueryByType(id: $id, querytype: $querytype) {id,query,upload_url_1,type,request_type,query_status,createdAt,from_user {id, firstName,lastName,role},to_user {id, firstName,lastName,role},}}",
         variables: {
           id: props.id,
-          querytype: ["REPORT"],
+          querytype: ["REPORT", "SUBMITREPORT"],
         },
       });
 
@@ -1907,53 +2173,19 @@ const ReportPage = (props: ReportProviderProps) => {
     },
   });
 
-  const userdata = useQuery({
-    queryKey: ["getUserByRoles"],
-    queryFn: async () => {
-      const response = await ApiCall({
-        query:
-          "query GetUserByRoles($role: [Role!]!) { getUserByRoles(role: $role) { id, firstName, lastName, role }}",
-        variables: {
-          role: [
-            "TALATHI",
-            "CIRCLEOFFICER",
-            "LRO",
-            "LAQ",
-            "RTSMAMLATDAR",
-            "SURVEYSETTLEMENT",
-            "DNHPDA",
-            "SNSSO",
-            "SURVEYOR",
-          ],
-        },
-      });
-
-      if (!response.status) {
-        throw new Error(response.message);
-      }
-
-      if (!(response.data as Record<string, unknown>)["getUserByRoles"]) {
-        throw new Error("Value not found in response");
-      }
-      return (response.data as Record<string, unknown>)[
-        "getUserByRoles"
-      ] as UserResponseData[];
-    },
-  });
-
   const {
     handleSubmit,
     formState: { isSubmitting },
     setValue,
     getValues,
-  } = useFormContext<NotingForm>();
+  } = useFormContext<QueryForm>();
 
   const uploadRef = useRef<HTMLInputElement>(null);
   const [upload, setUpload] = useState<File | null>(null);
 
-  const createquery = useMutation({
-    mutationKey: ["createNaQuery"],
-    mutationFn: async (data: NotingForm) => {
+  const submitseekreport = useMutation({
+    mutationKey: ["submitSeekReport"],
+    mutationFn: async () => {
       if (!userid) {
         toast.error("User ID not found");
         return;
@@ -1961,23 +2193,10 @@ const ReportPage = (props: ReportProviderProps) => {
 
       const response = await ApiCall({
         query:
-          "mutation CreateNaQuery($createNaQueryInput: CreateNaQueryInput!) {createNaQuery(createNaQueryInput: $createNaQueryInput) {id}}",
+          "mutation SubmitSeekReport($naid: Int!,$userid: Int!) {submitSeekReport(naid: $naid, userid: $userid) {id}}",
         variables: {
-          createNaQueryInput: {
-            createdById: parseInt(userid.toString()),
-            from_userId: parseInt(userid.toString()),
-            to_userId: parseInt(data.userid.toString()),
-            query: data.query,
-            type: "REPORT",
-            na_formId: props.id,
-            query_status: "PENDING",
-            request_type: "DEPTTODEPT",
-            ...(data.upload_url_1 && {
-              upload_url_1: data.upload_url_1,
-            }),
-            seek_report: true,
-            dept_update: true,
-          },
+          naid: props.id,
+          userid: parseInt(userid.toString()),
         },
       });
 
@@ -1985,15 +2204,16 @@ const ReportPage = (props: ReportProviderProps) => {
         throw new Error(response.message);
       }
 
-      if (!(response.data as Record<string, unknown>)["createNaQuery"]) {
+      if (!(response.data as Record<string, unknown>)["submitSeekReport"]) {
         throw new Error("Value not found in response");
       }
       return (response.data as Record<string, unknown>)[
-        "createNaQuery"
+        "submitSeekReport"
       ] as QueryResponseData;
     },
     onSuccess: () => {
-      toast.success("Noting created successfully");
+      toast.success("Report request created successfully");
+      reportdata.refetch();
     },
     onError: (error) => {
       toast.error(error.message);
@@ -2002,7 +2222,7 @@ const ReportPage = (props: ReportProviderProps) => {
 
   const submitreport = useMutation({
     mutationKey: ["submitNaQuery"],
-    mutationFn: async () => {
+    mutationFn: async (data: QueryForm) => {
       if (!userid) {
         toast.error("User ID not found");
         return;
@@ -2022,15 +2242,14 @@ const ReportPage = (props: ReportProviderProps) => {
             createdById: parseInt(userid.toString()),
             from_userId: parseInt(userid.toString()),
             to_userId: 5,
-            query: getValues("query"),
+            query: data.query,
             type: "SUBMITREPORT",
             na_formId: props.id,
             query_status: "PENDING",
             request_type: "DEPTTODEPT",
-            ...(getValues("upload_url_1") && {
-              upload_url_1: getValues("upload_url_1"),
+            ...(data.upload_url_1 && {
+              upload_url_1: data.upload_url_1,
             }),
-            dept_update: true,
           },
         },
       });
@@ -2047,22 +2266,17 @@ const ReportPage = (props: ReportProviderProps) => {
       ] as QueryResponseData;
     },
     onSuccess: () => {
-      toast.success("Noting created successfully");
+      toast.success("Report sent successfully");
+      reportdata.refetch();
     },
     onError: (error) => {
       toast.error(error.message);
     },
   });
 
-  const onSubmit = async (data: NotingForm) => {
-    createquery.mutate(data);
-    setQueryBox(false);
-    reportdata.refetch();
-  };
-  const onReportSubmit = async () => {
-    submitreport.mutate();
+  const onReportSubmit = async (data: QueryForm) => {
+    submitreport.mutate(data);
     setSubmitBox(false);
-    reportdata.refetch();
   };
 
   const handleFileUpload = (ref: React.RefObject<HTMLInputElement | null>) => {
@@ -2098,10 +2312,12 @@ const ReportPage = (props: ReportProviderProps) => {
         {["MAMLATDAR", "LDCMAMLATDAR"].includes(props.role) && (
           <button
             type="button"
-            onClick={() => setQueryBox(true)}
+            onClick={() => {
+              submitseekreport.mutate();
+            }}
             className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-28 text-nowrap"
           >
-            Seek
+            Seek Report
           </button>
         )}
 
@@ -2115,6 +2331,11 @@ const ReportPage = (props: ReportProviderProps) => {
               <button
                 type="button"
                 onClick={() => {
+                  // router.push(
+                  //   `/dashboard/department/na-permission/view/${encryptURLData(
+                  //     props.id.toString()
+                  //   )}/submitreport`
+                  // );
                   setSubmitBox(true);
                   setId(
                     reportdata.data.filter(
@@ -2142,39 +2363,72 @@ const ReportPage = (props: ReportProviderProps) => {
 
       {reportdata.data?.length === 0 && (
         <div className="mt-2">
-          <Alert message="No Notings found." type="error" showIcon />
+          <Alert message="No Report found." type="error" showIcon />
         </div>
       )}
 
-      {reportdata.data?.map((field, index) => {
-        if (field.from_user.id == Number(userid)) {
-          return (
-            <UserChat
-              key={index}
-              name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-              fromrole={field.from_user.role}
-              torole={field.to_user.role}
-              message={field.query}
-              time={new Date(field.createdAt)}
-              url={field.upload_url_1}
-            />
-          );
-        } else {
-          return (
-            <DeptChat
-              key={index}
-              name={`${field.to_user.firstName} ${field.to_user.lastName}`}
-              fromrole={field.from_user.role}
-              torole={field.to_user.role}
-              message={field.query}
-              time={new Date(field.createdAt)}
-              url={field.upload_url_1}
-            />
-          );
-        }
-      })}
+      {["TALATHI", "DNHPDA", "LAQ", "LRO"].includes(currentuserrole)
+        ? reportdata.data?.map((field, index) => {
+            if (
+              field.to_user.id == Number(userid) ||
+              field.from_user.id == Number(userid)
+            ) {
+              if (field.from_user.id == Number(userid)) {
+                return (
+                  <UserChat
+                    key={index}
+                    name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+                    fromrole={field.from_user.role}
+                    torole={field.to_user.role}
+                    message={field.query}
+                    time={new Date(field.createdAt)}
+                    url={field.upload_url_1}
+                  />
+                );
+              } else {
+                return (
+                  <DeptChat
+                    key={index}
+                    name={`${field.to_user.firstName} ${field.to_user.lastName}`}
+                    fromrole={field.from_user.role}
+                    torole={field.to_user.role}
+                    message={field.query}
+                    time={new Date(field.createdAt)}
+                    url={field.upload_url_1}
+                  />
+                );
+              }
+            }
+          })
+        : reportdata.data?.map((field, index) => {
+            if (field.from_user.id == Number(userid)) {
+              return (
+                <UserChat
+                  key={index}
+                  name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+                  fromrole={field.from_user.role}
+                  torole={field.to_user.role}
+                  message={field.query}
+                  time={new Date(field.createdAt)}
+                  url={field.upload_url_1}
+                />
+              );
+            } else {
+              return (
+                <DeptChat
+                  key={index}
+                  name={`${field.to_user.firstName} ${field.to_user.lastName}`}
+                  fromrole={field.from_user.role}
+                  torole={field.to_user.role}
+                  message={field.query}
+                  time={new Date(field.createdAt)}
+                  url={field.upload_url_1}
+                />
+              );
+            }
+          })}
 
-      <Drawer
+      {/* <Drawer
         width={320}
         closable={false}
         onClose={() => setQueryBox(false)}
@@ -2265,7 +2519,7 @@ const ReportPage = (props: ReportProviderProps) => {
             {isSubmitting ? "Loading...." : "Submit"}
           </button>
         </form>
-      </Drawer>
+      </Drawer> */}
       <Drawer
         width={320}
         closable={false}
@@ -2283,11 +2537,7 @@ const ReportPage = (props: ReportProviderProps) => {
         <h1 className="text-lg font-semibold text-[#162f57] mb-2">Mark to</h1>
         <form onSubmit={handleSubmit(onReportSubmit, onFormError)}>
           <div>
-            <HiddenInput<NotingForm> name="userid" value={"5"} />
-            {/* <input type="hidden" name="userid" value={"5"} /> */}
-          </div>
-          <div>
-            <TaxtAreaInput<NotingForm>
+            <TaxtAreaInput<QueryForm>
               title="Query"
               required={true}
               name="query"
@@ -2355,8 +2605,8 @@ interface SubmitReportProviderProps {
 }
 
 const SubmitReportProvider = (props: SubmitReportProviderProps) => {
-  const methods = useForm<ReportSubmitForm>({
-    resolver: valibotResolver(ReportSubmitSchema),
+  const methods = useForm<NotingForm>({
+    resolver: valibotResolver(NotingSchema),
   });
 
   return (
@@ -2374,8 +2624,7 @@ const SubmitReportProvider = (props: SubmitReportProviderProps) => {
 
 const SubmitReportPage = (props: ReportProviderProps) => {
   const [queryBox, setQueryBox] = useState<boolean>(false);
-  const [submitBox, setSubmitBox] = useState<boolean>(false);
-  const [id, setId] = useState<number>(0);
+  // const [id, setId] = useState<number>(0);
   const userid = getCookie("id");
 
   // report submit check section start here
@@ -2485,7 +2734,7 @@ const SubmitReportPage = (props: ReportProviderProps) => {
 
   const createquery = useMutation({
     mutationKey: ["createNaQuery"],
-    mutationFn: async (data: ReportSubmitForm) => {
+    mutationFn: async (data: NotingForm) => {
       if (!userid) {
         toast.error("User ID not found");
         return;
@@ -2507,7 +2756,6 @@ const SubmitReportPage = (props: ReportProviderProps) => {
             ...(data.upload_url_1 && {
               upload_url_1: data.upload_url_1,
             }),
-            submit_report: data.all_report_submit,
             dept_update: true,
           },
         },
@@ -2525,18 +2773,54 @@ const SubmitReportPage = (props: ReportProviderProps) => {
       ] as QueryResponseData;
     },
     onSuccess: () => {
-      toast.success("Noting created successfully");
+      toast.success("Report sent successfully");
+      reportdata.refetch();
     },
     onError: (error) => {
       toast.error(error.message);
     },
   });
 
-  const onSubmit = async (data: ReportSubmitForm) => {
+  const onSubmit = async (data: NotingForm) => {
     createquery.mutate(data);
     setQueryBox(false);
-    reportdata.refetch();
   };
+
+  const approvereport = useMutation({
+    mutationKey: ["approveReport"],
+    mutationFn: async () => {
+      if (reportsubmitdata.data && reportsubmitdata.data.length > 0) {
+      } else {
+        throw new Error("Report not submitted by user");
+      }
+
+      const response = await ApiCall({
+        query:
+          "mutation ApproveReport($naid: Int!) {approveReport(naid: $naid) {id}}",
+        variables: {
+          naid: props.id,
+        },
+      });
+
+      if (!response.status) {
+        throw new Error(response.message);
+      }
+
+      if (!(response.data as Record<string, unknown>)["approveReport"]) {
+        throw new Error("Value not found in response");
+      }
+      return (response.data as Record<string, unknown>)[
+        "approveReport"
+      ] as QueryResponseData;
+    },
+    onSuccess: () => {
+      toast.success("Report approved successfully");
+      props.setReportBox(false);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
 
   const handleFileUpload = (ref: React.RefObject<HTMLInputElement | null>) => {
     if (ref!.current) {
@@ -2569,16 +2853,28 @@ const SubmitReportPage = (props: ReportProviderProps) => {
         <div className="grow"></div>
 
         {["MAMLATDAR", "LDCMAMLATDAR"].includes(props.role) && (
-          <button
-            type="button"
-            onClick={() => setQueryBox(true)}
-            className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-28 text-nowrap"
-          >
-            Seek
-          </button>
+          <>
+            <button
+              type="button"
+              onClick={() => setQueryBox(true)}
+              className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-20 text-nowrap"
+            >
+              Seek
+            </button>
+
+            <button
+              onClick={() => {
+                approvereport.mutate();
+              }}
+              type="button"
+              className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-32 text-nowrap"
+            >
+              Approve Report
+            </button>
+          </>
         )}
 
-        {reportdata.data &&
+        {/* {reportdata.data &&
           reportdata.data.filter(
             (val) =>
               val.to_user?.id === Number(userid) &&
@@ -2588,7 +2884,6 @@ const SubmitReportPage = (props: ReportProviderProps) => {
               <button
                 type="button"
                 onClick={() => {
-                  setSubmitBox(true);
                   setId(
                     reportdata.data.filter(
                       (val) =>
@@ -2602,12 +2897,12 @@ const SubmitReportPage = (props: ReportProviderProps) => {
                 Submit Report
               </button>
             </>
-          )}
+          )} */}
 
         <button
           type="button"
           onClick={() => props.setReportBox(false)}
-          className="py-1 rounded-md bg-rose-500 px-4 text-sm text-white cursor-pointer w-28 text-nowrap"
+          className="py-1 rounded-md bg-rose-500 px-4 text-sm text-white cursor-pointer w-20 text-nowrap"
         >
           Close
         </button>
@@ -2661,20 +2956,9 @@ const SubmitReportPage = (props: ReportProviderProps) => {
           },
         }}
       >
-        <h1 className="text-lg font-semibold text-[#162f57] mb-2">Mark to</h1>
-        {reportsubmitdata.data && reportsubmitdata.data.length > 0 ? (
-          <></>
-        ) : (
-          // <Alert
-          //   message="Report already submitted by user"
-          //   type="warning"
-          //   showIcon
-          // />
-          <Alert message="Report not submitted by user" type="info" showIcon />
-        )}
         <form onSubmit={handleSubmit(onSubmit, onFormError)}>
           <div>
-            <MultiSelect<ReportSubmitForm>
+            <MultiSelect<NotingForm>
               title="Select User"
               required={true}
               name="userid"
@@ -2691,15 +2975,8 @@ const SubmitReportPage = (props: ReportProviderProps) => {
               }
             />
           </div>
-          <div>
-            <CheckBoxInput<ReportSubmitForm>
-              title="All Report Submit"
-              name="all_report_submit"
-              required={true}
-            />
-          </div>
-          <div>
-            <TaxtAreaInput<ReportSubmitForm>
+          <div className="mt-2">
+            <TaxtAreaInput<NotingForm>
               title="Query"
               required={true}
               name="query"
@@ -3185,6 +3462,7 @@ const HearingSchedulePage = (props: HearingScheduleProviderProps) => {
             query_status: "PENDING",
             request_type: "DEPTTODEPT",
             dept_update: true,
+            hearing_schedule: true,
           },
         },
       });

@@ -46,8 +46,8 @@ const UserServicesPage = () => {
           <table border={1} className="mx-auto w-full">
             <tbody className="w-full">
               <tr className="w-full bg-blue-500 text-white">
-                <td className="px-2 text-xs leading-6 w-[10%]">Sr No</td>
-                <td className="px-2 text-xs leading-6 w-[10%]">Code</td>
+                <td className="px-2 text-xs leading-6 w-[10%] text-center">Sr No</td>
+                <td className="px-2 text-xs leading-6 w-[10%] text-center">Code</td>
                 <td className="px-2 text-xs leading-6 w-[60%]">
                   Land Section Service(s)
                 </td>
