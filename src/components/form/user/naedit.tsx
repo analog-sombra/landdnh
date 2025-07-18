@@ -570,7 +570,7 @@ const NaEditPage = ({ id }: { id: number }) => {
 
             <div className="flex p-2 px-16 items-center mt-2 gap-2 border-b border-gray-200">
               <p className="text-sm text-gray-700">
-                Annexure 3: Writter/ consent ofthe tenant/ occupant.
+                Annexure 3: Written consent of the tenant/ occupant.
               </p>
               <div className="grow"></div>
               {anx3 ? (

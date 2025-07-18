@@ -2,7 +2,12 @@
 import { Collapse, Popover, Tabs } from "antd";
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { decryptURLData, formatDateTime, formateDate } from "@/utils/methods";
+import {
+  decryptURLData,
+  formatDateTime,
+  formateDate,
+  roleToString,
+} from "@/utils/methods";
 import { ApiCall } from "@/services/api";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
@@ -13,6 +18,7 @@ import { IcBaselineArrowBack } from "@/components/icons";
 import { NotingEditor } from "@/components/editors/notingtexteditor/page";
 import { ViewEditor } from "@/components/editors/vieweditro/page";
 import { toast } from "react-toastify";
+import { queryStatus } from "@/utils/utilscompoment";
 
 interface NaFormResponse {
   id: number;
@@ -368,33 +374,55 @@ const Meeting = () => {
               Annexure Details
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
-              <p className="text-sm text-gray-700">
-                Annexure 1: Application for Non-Agricultural Permission
-              </p>
+              <div>
+                <p className="text-sm text-gray-700">
+                  Annexure 1: A certified copy of record of rights in respect of
+                  rights in respect of the land as existed at right the time of
+                  application.
+                  <span className="text-red-500">
+                    (to be attached in form of pdf)
+                  </span>
+                </p>
+                <p className="ml-4">1. 7x12 Extract</p>
+                <p className="ml-4">2. V.F No.6</p>
+                <p className="ml-4">3. V.F No.8-A</p>
+                <p className="ml-4">4. Adesh granting occupancy rights.</p>
+              </div>
               <div className="grow"></div>
 
               <Link
                 target="_blank"
                 href={`${baseurl}/${formdata.data!.anx1}`}
-                className="bg-gray-200 text-black py-1 px-4 rounded-md text-sm h-8 grid place-items-center"
+                className="shrink-0 bg-gray-200 text-black py-1 px-4 rounded-md text-sm h-8 grid place-items-center"
               >
                 View File
               </Link>
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
-              <p className="text-sm text-gray-700">Annexure 2: Land Records</p>
+              <div>
+                <p className="text-sm text-gray-700">
+                  Annexure 2: A sketch or layout of the site in question (in
+                  triplicate) showing the location of the proposed building or
+                  other works for which permission is sought and the nearest
+                  roads or means or access.
+                </p>
+                <p className="ml-4">1. Certified Site Plan</p>
+                <p className="ml-4">2. NA Proposal Plan</p>
+              </div>
               <div className="grow"></div>
 
               <Link
                 target="_blank"
                 href={`${baseurl}/${formdata.data!.anx2}`}
-                className="bg-gray-200 text-black py-1 px-4 rounded-md text-sm h-8 grid place-items-center"
+                className="shrink-0 bg-gray-200 text-black py-1 px-4 rounded-md text-sm h-8 grid place-items-center"
               >
                 View File
               </Link>
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
-              <p className="text-sm text-gray-700">Annexure 3: Land Records</p>
+              <p className="text-sm text-gray-700">
+                Annexure 3: Written consent of the tenant/ occupant.
+              </p>
               <div className="grow"></div>
 
               <Link
@@ -406,9 +434,10 @@ const Meeting = () => {
               </Link>
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
-              <p className="text-sm text-gray-700">Annexure 4: Land Records</p>
+              <p className="text-sm text-gray-700">
+                Annexure 4: Other Document
+              </p>
               <div className="grow"></div>
-
               <Link
                 target="_blank"
                 href={`${baseurl}/${formdata.data!.anx4}`}
@@ -418,7 +447,10 @@ const Meeting = () => {
               </Link>
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
-              <p className="text-sm text-gray-700">Annexure 5: Land Records</p>
+              <p className="text-sm text-gray-700">
+                Annexure 5: Other Document
+              </p>
+
               <div className="grow"></div>
 
               <Link
@@ -676,7 +708,7 @@ const Meeting = () => {
             >
               {isNoting ? "Hide Noting" : "Add Noting"}
             </button>
-            {formdata.data &&
+            {/* {formdata.data &&
               userdata.data &&
               userdata.data.role == "LDCMAMLATDAR" &&
               (formdata.data.dept_status == "REPORT_VERIFIED" ||
@@ -710,7 +742,7 @@ const Meeting = () => {
                     Noting Drafted
                   </button>
                 </Popover>
-              )}
+              )} */}
           </div>
           <NotingPage id={formdata.data!.id} />
         </>
@@ -738,11 +770,11 @@ const Meeting = () => {
     <>
       <div className="p-2 grid grid-cols-12 gap-1 min-h-screen">
         <div
-          className={`bg-white shadow rounded p-2 ${
+          className={`shadow rounded p-2  bg-[#f4f8fb] ${
             isNoting ? "col-span-6" : "col-span-12"
           }  flex flex-col`}
         >
-          <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col ">
             <Tabs defaultActiveKey="1" items={items} onChange={onChange} />
           </div>
         </div>
@@ -777,7 +809,11 @@ interface CorrespondenceProviderProps {
 
 const CorrespondencePage = (props: CorrespondenceProviderProps) => {
   const chatdata = useQuery({
-    queryKey: ["getQueryByType", props.id],
+    queryKey: [
+      "getQueryByType",
+      props.id,
+      ["QUERY", "CORESPONDENCE", "UPDATES", "REPORT", "SUBMITREPORT"],
+    ],
     queryFn: async () => {
       const response = await ApiCall({
         query:
@@ -816,7 +852,8 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
       )}
 
       {chatdata.data?.map((field, index) => {
-        if (field.from_user.role === "USER") {
+        // if (field.from_user.role === "USER") {
+        if (field.type === "CORESPONDENCE") {
           return (
             <UserChat
               key={index}
@@ -826,6 +863,7 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
               message={field.query}
               time={new Date(field.createdAt)}
               url={field.upload_url_1}
+              type={field.type}
             />
           );
         } else {
@@ -838,120 +876,12 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
               message={field.query}
               time={new Date(field.createdAt)}
               url={field.upload_url_1}
+              type={field.type}
             />
           );
         }
       })}
     </>
-  );
-};
-
-interface DeptChatProps {
-  name: string;
-  fromrole: string;
-  torole: string;
-  message: string;
-  time: Date;
-  url?: string | null;
-}
-
-const DeptChat = (props: DeptChatProps) => {
-  return (
-    <div className="mt-4">
-      <div className="flex items-center gap-1 max-w-5/6">
-        <div className="shrink-0 h-6 w-6 rounded-full bg-rose-500 grid place-items-center text-xs text-white font-semibold">
-          {props.name.charAt(0).toUpperCase()}
-        </div>
-        <div className="px-2 py-1 bg-gray-100 rounded-md pb-2 my-1">
-          <p className="text-xs text-gray-500 border-b">
-            {/* {props.name} ({props.role}) */}
-            {props.fromrole} to {props.torole}
-          </p>
-          <p className="text-sm leading-4 mt-1">{props.message}</p>
-          {props.url && (
-            <Link
-              target="_blank"
-              href={props.url}
-              className="text-left text-sm text-nowrap inline-block text-white"
-            >
-              View File
-            </Link>
-          )}
-        </div>
-      </div>
-      <p className="text-xs text-left pl-9 text-gray-500 leading-2 max-w-5/6">
-        {formatDateTime(props.time)}
-      </p>
-    </div>
-  );
-};
-
-interface UserChatProps {
-  name: string;
-  fromrole: string;
-  torole: string;
-  message: string;
-  time: Date;
-  url?: string | null;
-}
-
-const UserChat = (props: UserChatProps) => {
-  return (
-    <div className="mt-4 flex items-end flex-col">
-      <div className="flex items-center gap-1 max-w-5/6">
-        <div className="px-2 py-1 bg-blue-500 rounded-md pb-2 my-1">
-          <p className="text-xs text-white border-b">
-            {props.fromrole} to {props.torole}
-          </p>
-          <p className="text-sm leading-4 mt-1 text-white">{props.message}</p>
-          {props.url && (
-            <Link
-              target="_blank"
-              href={props.url}
-              className="text-left text-sm text-nowrap inline-block text-white border border-white px-2 rounded mt-2"
-            >
-              <p className="text-white inline-block">View File</p>
-            </Link>
-          )}
-        </div>
-        <div className="shrink-0 h-6 w-6 rounded-full bg-rose-500 grid place-items-center text-xs text-white font-semibold">
-          {props.name.charAt(0).toUpperCase()}
-        </div>
-      </div>
-      <p className="text-xs text-left text-gray-500 leading-2 max-w-5/6 pr-9">
-        {formatDateTime(props.time)}
-      </p>
-    </div>
-  );
-};
-
-interface ShowEditorProps {
-  name: string;
-  fromrole: string;
-  torole: string;
-  data: string;
-  time: Date;
-}
-
-const ShowEditor = (props: ShowEditorProps) => {
-  return (
-    <div className="mt-4">
-      <div className="flex items-center gap-1 max-w-5/6">
-        <div className="shrink-0 h-6 w-6 rounded-full bg-rose-500 grid place-items-center text-xs text-white font-semibold">
-          {props.name.charAt(0).toUpperCase()}
-        </div>
-        <div className="px-2 py-1 bg-gray-100 rounded-md pb-2 my-1">
-          <p className="text-xs text-gray-500 border-b">
-            {/* {props.name} ({props.role}) */}
-            {props.fromrole} to {props.torole}
-          </p>
-          <ViewEditor data={props.data} />
-        </div>
-      </div>
-      <p className="text-xs text-left pl-9 text-gray-500 leading-2 max-w-5/6">
-        {formatDateTime(props.time)}
-      </p>
-    </div>
   );
 };
 
@@ -963,7 +893,7 @@ const NotingPage = (props: NotingProviderProps) => {
   const userid = getCookie("id");
 
   const notingdata = useQuery({
-    queryKey: ["getQueryByType", Number(props.id)],
+    queryKey: ["getQueryByType", Number(props.id), ["NOTING", "PRENOTE"]],
     queryFn: async () => {
       const response = await ApiCall({
         query:
@@ -1018,6 +948,7 @@ const NotingPage = (props: NotingProviderProps) => {
                 torole={field.to_user.role}
                 name={`${field.from_user.firstName} ${field.from_user.lastName}`}
                 time={new Date(field.createdAt)}
+                type={field.type}
               />
             );
           }
@@ -1032,6 +963,7 @@ const NotingPage = (props: NotingProviderProps) => {
                 message={field.query}
                 time={new Date(field.createdAt)}
                 url={field.upload_url_1}
+                type={field.type}
               />
             );
           } else {
@@ -1044,52 +976,12 @@ const NotingPage = (props: NotingProviderProps) => {
                 message={field.query}
                 time={new Date(field.createdAt)}
                 url={field.upload_url_1}
+                type={field.type}
               />
             );
           }
         });
       })()}
-
-      {/* {notingdata.data?.map((field, index) => {
-        if (field.type === "PRENOTE") {
-          return (
-            <ShowEditor
-              key={index}
-              data={field.query}
-              fromrole={field.from_user.role}
-              torole={field.to_user.role}
-              name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-              time={new Date(field.createdAt)}
-            />
-          );
-        } else {
-          if (field.from_user.id == Number(userid)) {
-            return (
-              <UserChat
-                key={index}
-                name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-                fromrole={field.from_user.role}
-                torole={field.to_user.role}
-                message={field.query}
-                time={new Date(field.createdAt)}
-                url={field.upload_url_1}
-              />
-            );
-          } else {
-            return (
-              <DeptChat
-                key={index}
-                name={`${field.to_user.firstName} ${field.to_user.lastName}`}
-                fromrole={field.from_user.role}
-                torole={field.to_user.role}
-                message={field.query}
-                time={new Date(field.createdAt)}
-                url={field.upload_url_1}
-              />
-            );
-          }
-        }
-      })} */}
     </>
   );
 };
@@ -1156,13 +1048,13 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
     },
   });
 
-  if (paymenthistorydata.isLoading || pendingpaymentdata.isLoading) {
-    return (
-      <>
-        <p className="text-gray-500 text-center">Loading payment history...</p>
-      </>
-    );
-  }
+  // if (paymenthistorydata.isLoading || pendingpaymentdata.isLoading) {
+  //   return (
+  //     <>
+  //       <p className="text-gray-500 text-center">Loading payment history...</p>
+  //     </>
+  //   );
+  // }
 
   return (
     <>
@@ -1173,22 +1065,31 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
       )}
 
       {paymenthistorydata.data?.map((field, index) => (
-        <div
-          key={index}
-          className="bg-gradient-to-l from-blue-400 to-blue-500 shadow rounded-lg p-2 mt-3"
-        >
-          <p className="text-sm border-b border-white text-white">Purpose</p>
-          <p className="text-xs text-white">{field.purpose}</p>
-          <div className="flex items-center mt-2">
-            <p className="text-white text-sm border border-white rounded-l-md flex-1 text-center">
+        <div key={index} className="bg-white px-4 py-2 rounded shadow-md mt-3">
+          <p className="text-sm text-gray-700 font-semibold leading-2 border-b border-gray-200 pb-1">
+            Purpose
+          </p>
+          <p className="text-sm leading-4 mt-1">{field.purpose}</p>
+
+          <div className="flex items-center mt-2 gap-4">
+            <p className="text-sm rounded px-4 text-center border border-gray-500 bg-gray-500/10 text-gray-500">
               Amount: ₹{field.amount}
             </p>
-            <p className="text-white text-sm border border-white flex-1 text-center">
+            <p className="text-sm rounded px-4 text-center border border-orange-500 bg-orange-500/10 text-orange-500">
               {field.payment_type}
             </p>
-            <p className="text-white text-sm border border-white rounded-r-md flex-1 text-center">
-              {field.is_paid ? "Paid" : "Unpaid"}
-            </p>
+
+            {field.is_paid ? (
+              <>
+                <p className="text-sm rounded px-4 text-center border border-green-500 bg-green-500/10 text-green-500">
+                  Paid
+                </p>
+              </>
+            ) : (
+              <p className="text-sm rounded px-4 text-center border border-red-500 bg-red-500/10 text-red-500">
+                Unpaid
+              </p>
+            )}
           </div>
         </div>
       ))}
@@ -1205,7 +1106,7 @@ const ReportPage = (props: ReportProviderProps) => {
   const currentuserrole: string = getCookie("role") as string;
 
   const reportdata = useQuery({
-    queryKey: ["getQueryByType", props.id],
+    queryKey: ["getQueryByType", props.id, ["REPORT", "SUBMITREPORT"]],
     queryFn: async () => {
       const response = await ApiCall({
         query:
@@ -1242,7 +1143,8 @@ const ReportPage = (props: ReportProviderProps) => {
               field.to_user.id == Number(userid) ||
               field.from_user.id == Number(userid)
             ) {
-              if (field.from_user.id == Number(userid)) {
+              // if (field.from_user.id == Number(userid)) {
+              if (field.type == "SUBMITREPORT") {
                 return (
                   <UserChat
                     key={index}
@@ -1252,6 +1154,7 @@ const ReportPage = (props: ReportProviderProps) => {
                     message={field.query}
                     time={new Date(field.createdAt)}
                     url={field.upload_url_1}
+                    type={field.type}
                   />
                 );
               } else {
@@ -1264,13 +1167,15 @@ const ReportPage = (props: ReportProviderProps) => {
                     message={field.query}
                     time={new Date(field.createdAt)}
                     url={field.upload_url_1}
+                    type={field.type}
                   />
                 );
               }
             }
           })
         : reportdata.data?.map((field, index) => {
-            if (field.from_user.id == Number(userid)) {
+            // if (field.from_user.id == Number(userid)) {
+            if (field.type == "SUBMITREPORT") {
               return (
                 <UserChat
                   key={index}
@@ -1280,6 +1185,7 @@ const ReportPage = (props: ReportProviderProps) => {
                   message={field.query}
                   time={new Date(field.createdAt)}
                   url={field.upload_url_1}
+                  type={field.type}
                 />
               );
             } else {
@@ -1292,10 +1198,137 @@ const ReportPage = (props: ReportProviderProps) => {
                   message={field.query}
                   time={new Date(field.createdAt)}
                   url={field.upload_url_1}
+                  type={field.type}
                 />
               );
             }
           })}
     </>
+  );
+};
+
+interface DeptChatProps {
+  name: string;
+  fromrole: string;
+  torole: string;
+  message: string;
+  time: Date;
+  url?: string | null;
+  type: string;
+}
+
+const DeptChat = (props: DeptChatProps) => {
+  return (
+    <div className="bg-white px-4 py-2 rounded shadow-md mt-3 w-5/6">
+      <div className="flex items-center border-b border-gray-200 pb-1">
+        <div className="shrink-0 h-8 w-8 rounded-full bg-rose-500 grid place-items-center text-xs text-white font-semibold">
+          {props.name.charAt(0).toUpperCase()}
+        </div>
+        <div className="px-2">
+          <p className="text-sm text-gray-700 font-semibold leading-2">
+            {roleToString(props.fromrole)} to {roleToString(props.torole)}
+          </p>
+          <p className="text-xs leading-4 mt-1 text-gray-600">
+            {formatDateTime(props.time)}
+          </p>
+        </div>
+        <div className="grow"></div>
+        {queryStatus(props.type)}
+      </div>
+      {/* <p className="text-sm leading-4 mt-2">{props.message}</p> */}
+      <ViewEditor data={props.message} />
+
+      {props.url && (
+        <div className="flex">
+          <div className="grow"></div>
+          <button
+            // target="_blank"
+            // href={props.url}
+            onClick={() => window.open(props.url ?? "", "_blank")}
+            className="w-20 py-1 text-center text-sm text-nowrap block text-white bg-blue-500 px-2 rounded mt-2"
+          >
+            View File
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+interface UserChatProps {
+  name: string;
+  fromrole: string;
+  torole: string;
+  message: string;
+  time: Date;
+  url?: string | null;
+  type: string;
+}
+
+const UserChat = (props: UserChatProps) => {
+  return (
+    <div className="bg-white px-4 py-2 rounded shadow-md mt-3 w-5/6 ml-auto">
+      <div className="flex items-center border-b border-gray-200 pb-1">
+        <div className="shrink-0 h-8 w-8 rounded-full bg-rose-500 grid place-items-center text-xs text-white font-semibold">
+          {props.name.charAt(0).toUpperCase()}
+        </div>
+        <div className="px-2">
+          <p className="text-sm text-gray-700 font-semibold leading-2">
+            {roleToString(props.fromrole)} to {roleToString(props.torole)}
+          </p>
+          <p className="text-xs leading-4 mt-1 text-gray-600">
+            {formatDateTime(props.time)}
+          </p>
+        </div>
+        <div className="grow"></div>
+        {queryStatus(props.type)}
+      </div>
+      {/* <p className="text-sm leading-4 mt-2">{props.message}</p> */}
+      <ViewEditor data={props.message} />
+
+      {props.url && (
+        <div className="flex">
+          <div className="grow"></div>
+          <button
+            onClick={() => window.open(props.url ?? "", "_blank")}
+            className="w-20 py-1 text-center text-sm text-nowrap block text-white bg-blue-500 px-2 rounded mt-2"
+          >
+            View File
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+interface ShowEditorProps {
+  name: string;
+  fromrole: string;
+  torole: string;
+  data: string;
+  time: Date;
+  type: string;
+}
+
+const ShowEditor = (props: ShowEditorProps) => {
+  return (
+    <div className="bg-white px-4 py-2 rounded shadow-md mt-3">
+      <div className="flex items-center border-b border-gray-200 pb-1">
+        <div className="shrink-0 h-8 w-8 rounded-full bg-rose-500 grid place-items-center text-xs text-white font-semibold">
+          {props.name.charAt(0).toUpperCase()}
+        </div>
+        <div className="px-2">
+          <p className="text-sm text-gray-700 font-semibold leading-2">
+            {roleToString(props.fromrole)} to {roleToString(props.torole)}
+          </p>
+          <p className="text-xs leading-4 mt-1 text-gray-600">
+            {formatDateTime(props.time)}
+          </p>
+        </div>
+        <div className="grow"></div>
+        {queryStatus(props.type)}
+      </div>
+      <ViewEditor data={props.data} />
+    </div>
   );
 };

@@ -201,33 +201,55 @@ const ViewPermission = () => {
           Annexure Details
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
-          <p className="text-sm text-gray-700">
-            Annexure 1: Application for Non-Agricultural Permission
-          </p>
+          <div>
+            <p className="text-sm text-gray-700">
+              Annexure 1: A certified copy of record of rights in respect of
+              rights in respect of the land as existed at right the time of
+              application.{" "}
+              <span className="text-red-500">
+                (to be attached in form of pdf)
+              </span>
+            </p>
+            <p className="ml-4">1. 7x12 Extract</p>
+            <p className="ml-4">2. V.F No.6</p>
+            <p className="ml-4">3. V.F No.8-A</p>
+            <p className="ml-4">4. Adesh granting occupancy rights.</p>
+          </div>
           <div className="grow"></div>
 
           <Link
             target="_blank"
             href={`${baseurl}/${formdata.data!.anx1}`}
-            className="bg-gray-200 text-black py-1 px-4 rounded-md text-sm h-8 grid place-items-center"
+            className="shrink-0 bg-gray-200 text-black py-1 px-4 rounded-md text-sm h-8 grid place-items-center"
           >
             View File
           </Link>
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
-          <p className="text-sm text-gray-700">Annexure 2: Land Records</p>
+          <div>
+            <p className="text-sm text-gray-700">
+              Annexure 2: A sketch or layout of the site in question (in
+              triplicate) showing the location of the proposed building or other
+              works for which permission is sought and the nearest roads or
+              means or access.
+            </p>
+            <p className="ml-4">1. Certified Site Plan</p>
+            <p className="ml-4">2. NA Proposal Plan</p>
+          </div>
           <div className="grow"></div>
 
           <Link
             target="_blank"
             href={`${baseurl}/${formdata.data!.anx2}`}
-            className="bg-gray-200 text-black py-1 px-4 rounded-md text-sm h-8 grid place-items-center"
+            className="shrink-0 bg-gray-200 text-black py-1 px-4 rounded-md text-sm h-8 grid place-items-center"
           >
             View File
           </Link>
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
-          <p className="text-sm text-gray-700">Annexure 3: Land Records</p>
+          <p className="text-sm text-gray-700">
+            Annexure 3: Written consent of the tenant/ occupant.
+          </p>
           <div className="grow"></div>
 
           <Link
@@ -239,7 +261,7 @@ const ViewPermission = () => {
           </Link>
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
-          <p className="text-sm text-gray-700">Annexure 4: Land Records</p>
+          <p className="text-sm text-gray-700">Annexure 4: Other Document</p>
           <div className="grow"></div>
 
           <Link
@@ -251,7 +273,7 @@ const ViewPermission = () => {
           </Link>
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
-          <p className="text-sm text-gray-700">Annexure 5: Land Records</p>
+          <p className="text-sm text-gray-700">Annexure 5: Other Document</p>
           <div className="grow"></div>
 
           <Link
@@ -335,7 +357,7 @@ const ViewPermission = () => {
                     <Link
                       target="_blank"
                       href={`${baseurl}/${field.signature_url}`}
-                      className="bg-gray-200 text-black py-1 px-4 rounded-md text-sm h-8 grid place-items-center"
+                      className="bg-gray-200 text-black py-1 px-4 rounded-md text-sm h-8 grid place-items-center shrink-0"
                     >
                       View Signature
                     </Link>
@@ -466,7 +488,7 @@ const ViewPermission = () => {
           <div className="flex-1">{formdata.data!.q18}</div>
         </div>
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 mx-4">
         <div className="grow"></div>
         <button
           type="reset"

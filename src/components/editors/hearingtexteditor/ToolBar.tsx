@@ -96,9 +96,10 @@ const fontFamilies = [
 
 interface ToolBarProps {
   id: number;
+  isRescheduled: boolean;
 }
 
-const ToolBar = ({ id }: ToolBarProps) => {
+const ToolBar = ({ id, isRescheduled }: ToolBarProps) => {
   const userid = getCookie("id");
 
   const [editor] = useLexicalComposerContext();
@@ -334,7 +335,7 @@ const ToolBar = ({ id }: ToolBarProps) => {
           createNaQueryInput: {
             createdById: parseInt(userid.toString()),
             from_userId: parseInt(userid.toString()),
-            to_userId: parseInt(userid.toString()),
+            to_userId: isRescheduled ? 20 : 4,
             query: data.query,
             type: "JIMNI",
             na_formId: id,

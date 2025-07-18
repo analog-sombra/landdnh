@@ -54,10 +54,7 @@ type MarkToForm = InferInput<typeof MarkToSchema>;
 export { MarkToSchema, type MarkToForm };
 
 const ReportSubmitSchema = object({
-  query: pipe(
-    string("Please enter your first name."),
-    minLength(1, "Please enter your first name.")
-  ),
+  query: pipe(string("Enter query."), minLength(1, "Enter query.")),
   all_report_submit: pipe(boolean("Please select if all report submitted.")),
   userid: pipe(
     string("Please select user."),

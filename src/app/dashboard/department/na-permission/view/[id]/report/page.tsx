@@ -2,7 +2,12 @@
 import { Collapse, Popover, Tabs } from "antd";
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { decryptURLData, formatDateTime, formateDate } from "@/utils/methods";
+import {
+  decryptURLData,
+  formatDateTime,
+  formateDate,
+  roleToString,
+} from "@/utils/methods";
 import { ApiCall } from "@/services/api";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
@@ -368,33 +373,55 @@ const Meeting = () => {
               Annexure Details
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
-              <p className="text-sm text-gray-700">
-                Annexure 1: Application for Non-Agricultural Permission
-              </p>
+              <div>
+                <p className="text-sm text-gray-700">
+                  Annexure 1: A certified copy of record of rights in respect of
+                  rights in respect of the land as existed at right the time of
+                  application.
+                  <span className="text-red-500">
+                    (to be attached in form of pdf)
+                  </span>
+                </p>
+                <p className="ml-4">1. 7x12 Extract</p>
+                <p className="ml-4">2. V.F No.6</p>
+                <p className="ml-4">3. V.F No.8-A</p>
+                <p className="ml-4">4. Adesh granting occupancy rights.</p>
+              </div>
               <div className="grow"></div>
 
               <Link
                 target="_blank"
                 href={`${baseurl}/${formdata.data!.anx1}`}
-                className="bg-gray-200 text-black py-1 px-4 rounded-md text-sm h-8 grid place-items-center"
+                className="shrink-0 bg-gray-200 text-black py-1 px-4 rounded-md text-sm h-8 grid place-items-center"
               >
                 View File
               </Link>
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
-              <p className="text-sm text-gray-700">Annexure 2: Land Records</p>
+              <div>
+                <p className="text-sm text-gray-700">
+                  Annexure 2: A sketch or layout of the site in question (in
+                  triplicate) showing the location of the proposed building or
+                  other works for which permission is sought and the nearest
+                  roads or means or access.
+                </p>
+                <p className="ml-4">1. Certified Site Plan</p>
+                <p className="ml-4">2. NA Proposal Plan</p>
+              </div>
               <div className="grow"></div>
 
               <Link
                 target="_blank"
                 href={`${baseurl}/${formdata.data!.anx2}`}
-                className="bg-gray-200 text-black py-1 px-4 rounded-md text-sm h-8 grid place-items-center"
+                className="shrink-0 bg-gray-200 text-black py-1 px-4 rounded-md text-sm h-8 grid place-items-center"
               >
                 View File
               </Link>
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
-              <p className="text-sm text-gray-700">Annexure 3: Land Records</p>
+              <p className="text-sm text-gray-700">
+                Annexure 3: Written consent of the tenant/ occupant.
+              </p>
               <div className="grow"></div>
 
               <Link
@@ -406,7 +433,9 @@ const Meeting = () => {
               </Link>
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
-              <p className="text-sm text-gray-700">Annexure 4: Land Records</p>
+              <p className="text-sm text-gray-700">
+                Annexure 4: Other Document
+              </p>
               <div className="grow"></div>
 
               <Link
@@ -418,7 +447,9 @@ const Meeting = () => {
               </Link>
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
-              <p className="text-sm text-gray-700">Annexure 5: Land Records</p>
+              <p className="text-sm text-gray-700">
+                Annexure 5: Other Document
+              </p>
               <div className="grow"></div>
 
               <Link
@@ -865,9 +896,11 @@ const DeptChat = (props: DeptChatProps) => {
         <div className="px-2 py-1 bg-gray-100 rounded-md pb-2 my-1">
           <p className="text-xs text-gray-500 border-b">
             {/* {props.name} ({props.role}) */}
-            {props.fromrole} to {props.torole}
+            {roleToString(props.fromrole)} to {roleToString(props.torole)}
           </p>
-          <p className="text-sm leading-4 mt-1">{props.message}</p>
+          {/* <p className="text-sm leading-4 mt-1">{props.message}</p> */}
+          <ViewEditor data={props.message} />
+
           {props.url && (
             <Link
               target="_blank"
@@ -901,9 +934,10 @@ const UserChat = (props: UserChatProps) => {
       <div className="flex items-center gap-1 max-w-5/6">
         <div className="px-2 py-1 bg-blue-500 rounded-md pb-2 my-1">
           <p className="text-xs text-white border-b">
-            {props.fromrole} to {props.torole}
+            {roleToString(props.fromrole)} to {roleToString(props.torole)}
           </p>
-          <p className="text-sm leading-4 mt-1 text-white">{props.message}</p>
+          {/* <p className="text-sm leading-4 mt-1 text-white">{props.message}</p> */}
+          <ViewEditor data={props.message} />
           {props.url && (
             <Link
               target="_blank"
@@ -943,7 +977,7 @@ const ShowEditor = (props: ShowEditorProps) => {
         <div className="px-2 py-1 bg-gray-100 rounded-md pb-2 my-1">
           <p className="text-xs text-gray-500 border-b">
             {/* {props.name} ({props.role}) */}
-            {props.fromrole} to {props.torole}
+            {roleToString(props.fromrole)} to {roleToString(props.torole)}
           </p>
           <ViewEditor data={props.data} />
         </div>
@@ -1239,7 +1273,10 @@ const ReportPage = (props: ReportProviderProps) => {
 
       {["TALATHI", "DNHPDA", "LAQ", "LRO"].includes(currentuserrole)
         ? reportdata.data?.map((field, index) => {
-            if (field.to_user.id == Number(userid) || field.from_user.id == Number(userid)) {
+            if (
+              field.to_user.id == Number(userid) ||
+              field.from_user.id == Number(userid)
+            ) {
               if (field.from_user.id == Number(userid)) {
                 return (
                   <UserChat

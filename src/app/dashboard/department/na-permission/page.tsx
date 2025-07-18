@@ -1,6 +1,6 @@
 "use client";
 import { ApiCall } from "@/services/api";
-import { encryptURLData } from "@/utils/methods";
+import { departmentToString, encryptURLData, roleToString } from "@/utils/methods";
 import { useQuery } from "@tanstack/react-query";
 import { Alert, Pagination, Switch } from "antd";
 import { getCookie } from "cookies-next/client";
@@ -61,7 +61,6 @@ const NaPermission = () => {
       if (!response.status) {
         throw new Error(response.message);
       }
-      console.log(response.data);
       // if value is not in response.data then return the error
       if (!(response.data as Record<string, unknown>)["getAllNa"]) {
         throw new Error("Value not found in response");
@@ -92,8 +91,8 @@ const NaPermission = () => {
           <Switch
             onChange={() => setAllfiles(!allFiles)}
             value={allFiles}
-            checkedChildren="All Applications"
-            unCheckedChildren="Current Applications"
+            checkedChildren="All Files"
+            unCheckedChildren="My Files"
           />
         )}
       </div>
@@ -196,10 +195,10 @@ const NaPermission = () => {
                               {naform.village.name}
                             </td>
                             <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
-                              {naform.dept_user.role}
+                              {roleToString(naform.dept_user.role)}
                             </td>
                             <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
-                              {naform.dept_status}
+                              {departmentToString(naform.dept_status)}
                             </td>
 
                             <td className="border border-gray-300 px-4 py-2 font-normal text-sm">

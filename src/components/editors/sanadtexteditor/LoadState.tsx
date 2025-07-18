@@ -65,7 +65,6 @@ const LoadState = ({ id }: LoadStateProps) => {
       notingdata.data.length === 0
     ) {
       editor.setEditable(true);
-
       return;
     }
     const text = notingdata.data.sort((a, b) => {

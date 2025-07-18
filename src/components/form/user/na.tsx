@@ -346,11 +346,20 @@ const NaPage = () => {
               Annexure Details
             </div>
             <div className="flex p-2 px-16 items-center mt-2 gap-2 border-b border-gray-200">
-              <p className="text-sm text-gray-700">
-                Annexure 1: A certified copy of record of rights in respect of
-                rights in respect of the land as existed at right the time of
-                application.
-              </p>
+              <div>
+                <p className="text-sm text-gray-700">
+                  Annexure 1: A certified copy of record of rights in respect of
+                  rights in respect of the land as existed at right the time of
+                  application.{" "}
+                  <span className="text-red-500">
+                    (to be attached in form of pdf)
+                  </span>
+                </p>
+                <p className="ml-4">1. 7x12 Extract</p>
+                <p className="ml-4">2. V.F No.6</p>
+                <p className="ml-4">3. V.F No.8-A</p>
+                <p className="ml-4">4. Adesh granting occupancy rights.</p>
+              </div>
               <div className="grow"></div>
               {anx1 ? (
                 <button
@@ -393,12 +402,16 @@ const NaPage = () => {
             </div>
 
             <div className="flex p-2 px-16 items-center mt-2 gap-2 border-b border-gray-200">
-              <p className="text-sm text-gray-700">
-                Annexure 2: A sketch or layout of the site in question (in
-                triplicate) showing the location of the proposed building or
-                other works for which permission is sought and the nearest roads
-                or means or access.
-              </p>
+              <div>
+                <p className="text-sm text-gray-700">
+                  Annexure 2: A sketch or layout of the site in question (in
+                  triplicate) showing the location of the proposed building or
+                  other works for which permission is sought and the nearest
+                  roads or means or access.
+                </p>
+                <p className="ml-4">1. Certified Site Plan</p>
+                <p className="ml-4">2. NA Proposal Plan</p>
+              </div>
               <div className="grow"></div>
               {anx2 ? (
                 <button
@@ -442,7 +455,7 @@ const NaPage = () => {
 
             <div className="flex p-2 px-16 items-center mt-2 gap-2 border-b border-gray-200">
               <p className="text-sm text-gray-700">
-                Annexure 3: Writter/ consent ofthe tenant/ occupant.
+                Annexure 3: Written consent of the tenant/ occupant.
               </p>
               <div className="grow"></div>
               {anx3 ? (
@@ -485,7 +498,9 @@ const NaPage = () => {
               )}
             </div>
             <div className="flex p-2 px-16 items-center mt-2 gap-2 border-b border-gray-200">
-              <p className="text-sm text-gray-700">Annexure 4: V.F. No.8-A</p>
+              <p className="text-sm text-gray-700">
+                Annexure 4: Other Document
+              </p>
               <div className="grow"></div>
               {anx4 ? (
                 <button
@@ -527,7 +542,9 @@ const NaPage = () => {
               )}
             </div>
             <div className="flex p-2 px-16 items-center mt-2 gap-2 border-b border-gray-200">
-              <p className="text-sm text-gray-700">Annexure 5: 7x12 Extract.</p>
+              <p className="text-sm text-gray-700">
+                Annexure 5: Other Document
+              </p>
               <div className="grow"></div>
               {anx5 ? (
                 <button

@@ -10,7 +10,12 @@ import {
 } from "antd";
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { decryptURLData, formatDateTime, formateDate } from "@/utils/methods";
+import {
+  decryptURLData,
+  formatDateTime,
+  formateDate,
+  roleToString,
+} from "@/utils/methods";
 import { ApiCall } from "@/services/api";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
@@ -536,9 +541,10 @@ const DeptChat = (props: DeptChatProps) => {
         <div className="px-2 py-1 bg-gray-100 rounded-md pb-2 my-1">
           <p className="text-xs text-gray-500 border-b">
             {/* {props.name} ({props.role}) */}
-            {props.fromrole} to {props.torole}
+            {roleToString(props.fromrole)} to {roleToString(props.torole)}
           </p>
-          <p className="text-sm leading-4 mt-1">{props.message}</p>
+          {/* <p className="text-sm leading-4 mt-1">{props.message}</p> */}
+          <ViewEditor data={props.message} />
           {props.url && (
             <Link
               target="_blank"
@@ -572,9 +578,10 @@ const UserChat = (props: UserChatProps) => {
       <div className="flex items-center gap-1 max-w-5/6">
         <div className="px-2 py-1 bg-blue-500 rounded-md pb-2 my-1">
           <p className="text-xs text-white border-b">
-            {props.fromrole} to {props.torole}
+            {roleToString(props.fromrole)} to {roleToString(props.torole)}
           </p>
-          <p className="text-sm leading-4 mt-1 text-white">{props.message}</p>
+          {/* <p className="text-sm leading-4 mt-1 text-white">{props.message}</p> */}
+          <ViewEditor data={props.message} />
           {props.url && (
             <Link
               target="_blank"
@@ -613,7 +620,7 @@ const ShowEditor = (props: ShowEditorProps) => {
         </div>
         <div className="px-2 py-1 bg-gray-100 rounded-md pb-2 my-1">
           <p className="text-xs text-gray-500 border-b">
-            {props.fromrole} to {props.torole}
+            {roleToString(props.fromrole)} to {roleToString(props.torole)}
           </p>
           <ViewEditor data={props.data} />
         </div>

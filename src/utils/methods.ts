@@ -401,3 +401,83 @@ const isNegative = (value: number): boolean => {
 };
 
 export { isNegative };
+
+export const roleToString = (role: string): string => {
+  switch (role) {
+    case "SYSTEM":
+      return "System";
+    case "ADMIN":
+      return "Admin";
+    case "SUPTDCOLL":
+      return "Suptd. Collectorate";
+    case "LDCMAMLATDAR":
+      return "LDC Mamlatar";
+    case "LDCSINGLEWINDOW":
+      return "LDC Single Window";
+    case "MAMLATDAR":
+      return "Mamlatar";
+    case "TALATHI":
+      return "Talathi";
+    case "CIRCLEOFFICER":
+      return "Circle Officer";
+    case "LRO":
+      return "LRO";
+    case "LAQ":
+      return "LAQ";
+    case "RAK":
+      return "RAK";
+    case "DEPUTYCOLLECTOR":
+      return "Deputy Collector";
+    case "COLLECTOR":
+      return "Collector";
+    case "PATOCOLLECTOR":
+      return "PA To Collector";
+    case "RTSMAMLATDAR":
+      return "RTS Mamlatar";
+    case "SURVEYSETTLEMENT":
+      return "Survey Settlement";
+    case "DNHPDA":
+      return "PDA DNH";
+    case "SNSSO":
+      return "SNSSO";
+    case "SURVEYOR":
+      return "Surveyor";
+    default:
+      return role;
+  }
+};
+
+export const departmentToString = (department: string): string => {
+  switch (department) {
+    case "SUBMIT":
+      return "Submit";
+    case "SEEK_REPORT":
+      return "Seek Report";
+    case "REPORT_VERIFIED":
+      return "Report Verified";
+    case "NOTING_DRAFT":
+      return "Noting Draft";
+    case "ALLOT_HEARING":
+      return "Allot Hearing";
+    case "HEARING_SCHEDULED":
+      return "Hearing Scheduled";
+    case "HEARING":
+      return "Hearing";
+    case "INTIMATION_DRAFT":
+      return "Intimation Draft";
+    case "PAY_FEES":
+      return "Pay Fees";
+    case "FEES_PAID":
+      return "Fees Paid";
+    case "APPLY_SANAD":
+      return "Apply Sanad";
+    case "ORDER_GENERATE":
+      return "Order Generate";
+    case "ORDER_DOWNLOAD":
+      return "Order Download";
+    default:
+      return department;
+  }
+};
+
+

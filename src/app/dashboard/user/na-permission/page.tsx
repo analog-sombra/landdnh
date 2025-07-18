@@ -4,10 +4,13 @@ import { ApiCall } from "@/services/api";
 import { encryptURLData } from "@/utils/methods";
 import { useQuery } from "@tanstack/react-query";
 import { Alert, Pagination } from "antd";
+import { getCookie } from "cookies-next/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const NaPermission = () => {
+  const userid = getCookie("id");
+
   const router = useRouter();
   const [pagination, setPaginatin] = useState<{
     take: number;
@@ -41,15 +44,16 @@ const NaPermission = () => {
   }
 
   const naformdata = useQuery({
-    queryKey: ["naform", pagination.skip, pagination.take],
+    queryKey: ["getAllUserNa", pagination.skip, pagination.take],
     refetchOnWindowFocus: false,
     queryFn: async () => {
       const response = await ApiCall({
         query:
-          "query GetAllNa($take: Int!, $skip: Int!) { getAllNa(take: $take, skip: $skip) {total, skip, take, data {id, q4, status, form_status, office_status, dept_user {role}, village {name}}}}",
+          "query getAllUserNa($take: Int!, $skip: Int!, $id: Int!) { getAllUserNa(take: $take, skip: $skip, id: $id) {total, skip, take, data {id, q4, status, form_status, office_status, dept_user {role}, village {name}}}}",
         variables: {
           take: pagination.take,
           skip: pagination.skip,
+          id: parseInt(userid!.toString()),
         },
       });
 
@@ -58,11 +62,11 @@ const NaPermission = () => {
       }
 
       // if value is not in response.data then return the error
-      if (!(response.data as Record<string, unknown>)["getAllNa"]) {
+      if (!(response.data as Record<string, unknown>)["getAllUserNa"]) {
         throw new Error("Value not found in response");
       }
       return (response.data as Record<string, unknown>)[
-        "getAllNa"
+        "getAllUserNa"
       ] as NaResponse;
     },
   });
@@ -127,9 +131,7 @@ const NaPermission = () => {
                     <th className="border border-gray-300 px-4 py-2 text-left text-md font-normal">
                       Village
                     </th>
-                    <th className="border border-gray-300 px-4 py-2 text-left text-md font-normal">
-                      Department
-                    </th>
+
                     <th className="border border-gray-300 px-4 py-2 text-left text-md font-normal">
                       Status
                     </th>
@@ -151,12 +153,8 @@ const NaPermission = () => {
                         {naform.village.name}
                       </td>
                       <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
-                        {naform.office_status}
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
                         {naform.form_status}
                       </td>
-
                       <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
                         <button
                           className="bg-blue-500 text-white px-4 py-1 rounded-md cursor-pointer"

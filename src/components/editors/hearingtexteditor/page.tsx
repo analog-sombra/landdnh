@@ -35,9 +35,19 @@ function onError(error: Error) {
 
 interface HearingEditorProps {
   id: number;
+  isAccepted: boolean;
+  isRejected: boolean;
+  isRescheduled: boolean;
+  users: string[];
 }
 
-export const HearingEditor = ({ id }: HearingEditorProps) => {
+export const HearingEditor = ({
+  id,
+  isAccepted,
+  isRejected,
+  isRescheduled,
+  users,
+}: HearingEditorProps) => {
   const initialConfig = {
     namespace: "MyEditor",
     theme: exampleTheme,
@@ -57,8 +67,14 @@ export const HearingEditor = ({ id }: HearingEditorProps) => {
   return (
     <div className="">
       <LexicalComposer initialConfig={initialConfig}>
-        <LoadState id={id} />
-        <ToolBar id={id} />
+        <LoadState
+          id={id}
+          isAccepted={isAccepted}
+          isRejected={isRejected}
+          isRescheduled={isRescheduled}
+          users={users}
+        />
+        <ToolBar id={id} isRescheduled={isRescheduled} />
         <RichTextPlugin
           contentEditable={
             <ContentEditable
@@ -75,7 +91,6 @@ export const HearingEditor = ({ id }: HearingEditorProps) => {
     </div>
   );
 };
-
 
 const exampleTheme = {
   ltr: "ltr",

@@ -76,7 +76,6 @@ export const NotingEditor = ({ id }: NotingEditorProps) => {
   );
 };
 
-
 const exampleTheme = {
   ltr: "ltr",
   rtl: "rtl",

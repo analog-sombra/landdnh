@@ -13,29 +13,64 @@ const UserServicesPage = () => {
       sr: "II",
       code: "GP",
       service: "Gift Permission",
-      viewLink: "/dashboard/user/gift-permission",
-      applyLink: "/dashboard/user/gift-permission",
+      // viewLink: "/dashboard/user/gift-permission",
+      // applyLink: "/dashboard/user/gift-permission/add",
+      viewLink: "#",
+      applyLink: "#",
     },
     {
       sr: "III",
       code: "PP",
       service: "Partition Permission",
-      viewLink: "/dashboard/user/partition-permission",
-      applyLink: "/dashboard/user/partition-permission",
+      // viewLink: "/dashboard/user/partition-permission",
+      // applyLink: "/dashboard/user/partition-permission/add",
+      viewLink: "#",
+      applyLink: "#",
     },
     {
       sr: "IV",
       code: "SD",
       service: "Sub Division Permission",
-      viewLink: "/dashboard/user/subdivistion-permission",
-      applyLink: "/dashboard/user/subdivistion-permission",
+      // viewLink: "/dashboard/user/subdivision-permission",
+      // applyLink: "/dashboard/user/subdivision-permission/add",
+      viewLink: "#",
+      applyLink: "#",
     },
     {
       sr: "V",
       code: "SP",
       service: "Sale Permission",
-      viewLink: "/dashboard/user/sale-permission",
-      applyLink: "/dashboard/user/sale-permission",
+      // viewLink: "/dashboard/user/sale-permission",
+      // applyLink: "/dashboard/user/sale-permission/add",
+      viewLink: "#",
+      applyLink: "#",
+    },
+    {
+      sr: "VI",
+      code: "GP",
+      service: "Gift Permission",
+      // viewLink: "/dashboard/user/gift-permission",
+      // applyLink: "/dashboard/user/gift-permission/add",
+      viewLink: "#",
+      applyLink: "#",
+    },
+    {
+      sr: "VII",
+      code: "EP",
+      service: "Exchange Permission",
+      // viewLink: "/dashboard/user/exchange-permission",
+      // applyLink: "/dashboard/user/exchange-permission/add",
+      viewLink: "#",
+      applyLink: "#",
+    },
+    {
+      sr: "VIII",
+      code: "SLNA",
+      service: "Sale NA Permission",
+      // viewLink: "/dashboard/user/salena-permission",
+      // applyLink: "/dashboard/user/salena-permission/add",
+      viewLink: "#",
+      applyLink: "#",
     },
   ];
   return (
@@ -46,8 +81,12 @@ const UserServicesPage = () => {
           <table border={1} className="mx-auto w-full">
             <tbody className="w-full">
               <tr className="w-full bg-blue-500 text-white">
-                <td className="px-2 text-xs leading-6 w-[10%] text-center">Sr No</td>
-                <td className="px-2 text-xs leading-6 w-[10%] text-center">Code</td>
+                <td className="px-2 text-xs leading-6 w-[10%] text-center">
+                  Sr No
+                </td>
+                <td className="px-2 text-xs leading-6 w-[10%] text-center">
+                  Code
+                </td>
                 <td className="px-2 text-xs leading-6 w-[60%]">
                   Land Section Service(s)
                 </td>
