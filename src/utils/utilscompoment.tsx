@@ -35,7 +35,7 @@ export const queryStatus = (status: string) => {
     case "SUBMITREPORT":
       return (
         <p className="text-xs px-4 py-1 bg-pink-500/10 border border-pink-500 rounded-md text-pink-500">
-          Submit Report
+          Report Received
         </p>
       );
     case "SUBMITREPORTEDITOR":

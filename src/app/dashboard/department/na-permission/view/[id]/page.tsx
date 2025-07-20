@@ -892,7 +892,7 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
     queryKey: [
       "getQueryByType",
       props.id,
-      ["QUERY", "CORESPONDENCE", "REPORT", "SUBMITREPORT"],
+      ["QUERY", "CORESPONDENCE", "REPORT", "SUBMITREPORT", "JIMNI"],
     ],
     queryFn: async () => {
       const response = await ApiCall({
@@ -900,7 +900,13 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
           "query GetQueryByType($id: Int!, $querytype: [QueryType!]!) {getQueryByType(id: $id, querytype: $querytype) {id,query,upload_url_1,type,request_type,createdAt,from_user {id, firstName,lastName,role},to_user {id, firstName,lastName,role},}}",
         variables: {
           id: props.id,
-          querytype: ["QUERY", "CORESPONDENCE", "REPORT", "SUBMITREPORT"],
+          querytype: [
+            "QUERY",
+            "CORESPONDENCE",
+            "REPORT",
+            "SUBMITREPORT",
+            "JIMNI",
+          ],
         },
       });
 
