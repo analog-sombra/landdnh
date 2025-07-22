@@ -29,7 +29,7 @@ interface QueryTypeResponseData {
   };
 }
 const LoadState = ({ id }: LoadStateProps) => {
-  const pretext = "";
+  const pretext = '{"root":{"children":[{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"code","version":1}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}';
   const notingdata = useQuery({
     queryKey: ["getQueryByType", id, ["SANAD"]],
     queryFn: async () => {
