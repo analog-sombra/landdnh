@@ -74,6 +74,18 @@ export const queryStatus = (status: string) => {
           Sanad
         </p>
       );
+    case "INTIMATION_DRAFT":
+      return (
+        <p className="text-xs px-4 py-1 bg-gray-300/10 border border-gray-300 rounded-md text-gray-700">
+          Intimation Draft
+        </p>
+      );
+    case "HEARING_NOTICE":
+      return (
+        <p className="text-xs px-4 py-1 bg-yellow-300/10 border border-yellow-300 rounded-md text-yellow-700">
+          Hearing Notice
+        </p>
+      );
     default:
       return (
         <p className="text-xs px-4 py-1 bg-rose-500/10 border border-rose-500 rounded-md text-rose-500">

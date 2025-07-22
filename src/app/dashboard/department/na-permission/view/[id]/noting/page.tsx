@@ -19,6 +19,9 @@ import { NotingEditor } from "@/components/editors/notingtexteditor/page";
 import { ViewEditor } from "@/components/editors/vieweditro/page";
 import { toast } from "react-toastify";
 import { queryStatus } from "@/utils/utilscompoment";
+import { HearingNoticeEditor } from "@/components/editors/hearingnoticeeditor/page";
+import { SanadGenerateEditor } from "@/components/editors/sanadgenerateeditor/page";
+import { IntimationOrderEditor } from "@/components/editors/intimationordereditor/page";
 
 interface NaFormResponse {
   id: number;
@@ -93,6 +96,9 @@ interface QueryTypeResponseData {
 
 const Meeting = () => {
   const [isNoting, setIsNoting] = useState<boolean>(false);
+  const [isSanad, setIsSanad] = useState<boolean>(false);
+  const [isHearing, setIsHearing] = useState<boolean>(false);
+  const [isIntimation, setIsIntimation] = useState<boolean>(false);
   const userid = getCookie("id");
 
   const router = useRouter();
@@ -101,6 +107,10 @@ const Meeting = () => {
   const idString = Array.isArray(id) ? id[0] : id;
   const formid: number = parseInt(decryptURLData(idString, router));
   const onChange = (key: string) => {
+    setIsNoting(false);
+    setIsHearing(false);
+    setIsSanad(false);
+    setIsIntimation(false);
     console.log(key);
   };
 
@@ -703,48 +713,93 @@ const Meeting = () => {
           <div className="flex items-center mb-2 gap-2">
             <div className="grow"></div>
             <button
-              onClick={() => setIsNoting(!isNoting)}
+              onClick={() => {
+                setIsNoting(!isNoting);
+                setIsHearing(false);
+                setIsSanad(false);
+                setIsIntimation(false);
+              }}
               className="bg-blue-500 text-white px-4 py-1 rounded-md text-sm"
             >
               {isNoting ? "Hide Noting" : "Add Noting"}
             </button>
-            {/* {formdata.data &&
-              userdata.data &&
-              userdata.data.role == "LDCMAMLATDAR" &&
-              (formdata.data.dept_status == "REPORT_VERIFIED" ||
-                formdata.data.dept_status == "NOTING_DRAFT") && (
-                <Popover
-                  content={
-                    <>
-                      <p>
-                        Are you sure you want to mark this noting as drafted?
-                      </p>
-                      <div className="flex items-center gap-2 mt-2">
-                        <div className="grow"></div>
-                        <button
-                          onClick={() => {
-                            updatenadata.mutate();
-                          }}
-                          className="bg-blue-500 text-white px-4 py-1 rounded-md text-sm"
-                        >
-                          Noting Drafted
-                        </button>
-                      </div>
-                    </>
-                  }
-                  title="Title"
-                  trigger="click"
-                >
-                  <button
-                    onClick={() => {}}
-                    className="bg-blue-500 text-white px-4 py-1 rounded-md text-sm"
-                  >
-                    Noting Drafted
-                  </button>
-                </Popover>
-              )} */}
           </div>
           <NotingPage id={formdata.data!.id} />
+        </>
+      ) : (
+        <></>
+      ),
+    },
+    {
+      key: "7",
+      label: "Hearing Notice",
+      children: formdata.data ? (
+        <>
+          <div className="flex items-center mb-2 gap-2">
+            <div className="grow"></div>
+            <button
+              onClick={() => {
+                setIsHearing(!isHearing);
+                setIsNoting(false);
+                setIsSanad(false);
+                setIsIntimation(false);
+              }}
+              className="bg-blue-500 text-white px-4 py-1 rounded-md text-sm"
+            >
+              {isHearing ? "Hide Hearing" : "Add Hearing"}
+            </button>
+          </div>
+          <HearingNoticePage id={formdata.data!.id} />
+        </>
+      ) : (
+        <></>
+      ),
+    },
+    {
+      key: "8",
+      label: "Sanad",
+      children: formdata.data ? (
+        <>
+          <div className="flex items-center mb-2 gap-2">
+            <div className="grow"></div>
+            <button
+              onClick={() => {
+                setIsSanad(!isSanad);
+                setIsNoting(false);
+                setIsHearing(false);
+                setIsIntimation(false);
+              }}
+              className="bg-blue-500 text-white px-4 py-1 rounded-md text-sm"
+            >
+              {isSanad ? "Hide Sanad" : "Add Sanad"}
+            </button>
+          </div>
+          <SanadPage id={formdata.data!.id} />
+        </>
+      ) : (
+        <></>
+      ),
+    },
+    {
+      key: "9",
+      label: "Intimation Order",
+      children: formdata.data ? (
+        <>
+          <div className="flex items-center mb-2 gap-2">
+            <div className="grow"></div>
+            <button
+              onClick={() => {
+                setIsIntimation(!isIntimation);
+                setIsNoting(false);
+                setIsHearing(false);
+                setIsSanad(false);
+              }}
+              className="bg-blue-500 text-white px-4 py-1 rounded-md text-sm"
+            >
+              {isIntimation ? "Hide Intimation" : "Add Intimation"}
+            </button>
+          </div>
+          <IntimationOrderPage id={formdata.data!.id} />
         </>
       ) : (
         <></>
@@ -771,7 +826,9 @@ const Meeting = () => {
       <div className="p-2 grid grid-cols-12 gap-1 min-h-screen">
         <div
           className={`shadow rounded p-2  bg-[#f4f8fb] ${
-            isNoting ? "col-span-6" : "col-span-12"
+            isNoting || isHearing || isSanad || isIntimation
+              ? "col-span-6"
+              : "col-span-12"
           }  flex flex-col`}
         >
           <div className="flex-1 flex flex-col ">
@@ -785,6 +842,36 @@ const Meeting = () => {
             }`}
           >
             <NotingEditor id={formdata.data!.id} />
+          </div>
+        )}
+
+        {isHearing && (
+          <div
+            className={`bg-white shadow rounded p-2 ${
+              isHearing ? "col-span-6" : ""
+            }`}
+          >
+            <HearingNoticeEditor id={formdata.data!.id} />
+          </div>
+        )}
+
+        {isSanad && (
+          <div
+            className={`bg-white shadow rounded p-2 ${
+              isSanad ? "col-span-6" : ""
+            }`}
+          >
+            <SanadGenerateEditor id={formdata.data!.id} />
+          </div>
+        )}
+
+        {isIntimation && (
+          <div
+            className={`bg-white shadow rounded p-2 ${
+              isIntimation ? "col-span-6" : ""
+            }`}
+          >
+            <IntimationOrderEditor id={formdata.data!.id} />
           </div>
         )}
       </div>
@@ -943,6 +1030,309 @@ const NotingPage = (props: NotingProviderProps) => {
             return (
               <ShowEditor
                 key={`prenote-${index}`}
+                data={field.query}
+                fromrole={field.from_user.role}
+                torole={field.to_user.role}
+                name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+                time={new Date(field.createdAt)}
+                type={field.type}
+              />
+            );
+          }
+
+          if (field.from_user.id === Number(userid)) {
+            return (
+              <UserChat
+                key={`user-${index}`}
+                name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+                fromrole={field.from_user.role}
+                torole={field.to_user.role}
+                message={field.query}
+                time={new Date(field.createdAt)}
+                url={field.upload_url_1}
+                type={field.type}
+              />
+            );
+          } else {
+            return (
+              <DeptChat
+                key={`dept-${index}`}
+                name={`${field.to_user.firstName} ${field.to_user.lastName}`}
+                fromrole={field.from_user.role}
+                torole={field.to_user.role}
+                message={field.query}
+                time={new Date(field.createdAt)}
+                url={field.upload_url_1}
+                type={field.type}
+              />
+            );
+          }
+        });
+      })()}
+    </>
+  );
+};
+
+interface HearingNoticeProps {
+  id: number;
+}
+
+const HearingNoticePage = (props: HearingNoticeProps) => {
+  const userid = getCookie("id");
+
+  const notingdata = useQuery({
+    queryKey: ["getQueryByType", Number(props.id), ["HEARING_NOTICE"]],
+    queryFn: async () => {
+      const response = await ApiCall({
+        query:
+          "query GetQueryByType($id: Int!, $querytype: [QueryType!]!) {getQueryByType(id: $id, querytype: $querytype) {id,query,upload_url_1,type,request_type,createdAt,from_user {id, firstName,lastName,role},to_user {id, firstName,lastName,role},}}",
+        variables: {
+          id: props.id,
+          querytype: ["HEARING_NOTICE"],
+        },
+      });
+
+      if (!response.status) {
+        throw new Error(response.message);
+      }
+
+      if (!(response.data as Record<string, unknown>)["getQueryByType"]) {
+        throw new Error("Value not found in response");
+      }
+      return (response.data as Record<string, unknown>)[
+        "getQueryByType"
+      ] as QueryTypeResponseData[];
+    },
+  });
+
+  return (
+    <>
+      {notingdata.data?.length === 0 && (
+        <div>
+          <Alert message="No Notings found." type="error" showIcon />
+        </div>
+      )}
+
+      {(() => {
+        if (!notingdata.data) return null;
+
+        // Find latest PRENOTE entry
+        const latestPrenote = [...notingdata.data]
+          .filter((item) => item.type === "HEARING_NOTICE")
+          .sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          )[0];
+
+        return notingdata.data.map((field, index) => {
+          // Show only the latest HEARING_NOTICE
+          if (field.type === "HEARING_NOTICE") {
+            if (field !== latestPrenote) return null; // skip other HEARING_NOTICES
+            return (
+              <ShowEditor
+                key={`hearing_notice-${index}`}
+                data={field.query}
+                fromrole={field.from_user.role}
+                torole={field.to_user.role}
+                name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+                time={new Date(field.createdAt)}
+                type={field.type}
+              />
+            );
+          }
+
+          if (field.from_user.id === Number(userid)) {
+            return (
+              <UserChat
+                key={`user-${index}`}
+                name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+                fromrole={field.from_user.role}
+                torole={field.to_user.role}
+                message={field.query}
+                time={new Date(field.createdAt)}
+                url={field.upload_url_1}
+                type={field.type}
+              />
+            );
+          } else {
+            return (
+              <DeptChat
+                key={`dept-${index}`}
+                name={`${field.to_user.firstName} ${field.to_user.lastName}`}
+                fromrole={field.from_user.role}
+                torole={field.to_user.role}
+                message={field.query}
+                time={new Date(field.createdAt)}
+                url={field.upload_url_1}
+                type={field.type}
+              />
+            );
+          }
+        });
+      })()}
+    </>
+  );
+};
+
+interface SanadPageProps {
+  id: number;
+}
+
+const SanadPage = (props: SanadPageProps) => {
+  const userid = getCookie("id");
+
+  const notingdata = useQuery({
+    queryKey: ["getQueryByType", Number(props.id), ["SANAD"]],
+    queryFn: async () => {
+      const response = await ApiCall({
+        query:
+          "query GetQueryByType($id: Int!, $querytype: [QueryType!]!) {getQueryByType(id: $id, querytype: $querytype) {id,query,upload_url_1,type,request_type,createdAt,from_user {id, firstName,lastName,role},to_user {id, firstName,lastName,role},}}",
+        variables: {
+          id: props.id,
+          querytype: ["SANAD"],
+        },
+      });
+
+      if (!response.status) {
+        throw new Error(response.message);
+      }
+
+      if (!(response.data as Record<string, unknown>)["getQueryByType"]) {
+        throw new Error("Value not found in response");
+      }
+      return (response.data as Record<string, unknown>)[
+        "getQueryByType"
+      ] as QueryTypeResponseData[];
+    },
+  });
+
+  return (
+    <>
+      {notingdata.data?.length === 0 && (
+        <div>
+          <Alert message="No Notings found." type="error" showIcon />
+        </div>
+      )}
+
+      {(() => {
+        if (!notingdata.data) return null;
+
+        // Find latest SANAD entry
+        const latestPrenote = [...notingdata.data]
+          .filter((item) => item.type === "SANAD")
+          .sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          )[0];
+
+        return notingdata.data.map((field, index) => {
+          // Show only the latest SANAD
+          if (field.type === "SANAD") {
+            if (field !== latestPrenote) return null; // skip other SANAD
+            return (
+              <ShowEditor
+                key={`sanad-${index}`}
+                data={field.query}
+                fromrole={field.from_user.role}
+                torole={field.to_user.role}
+                name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+                time={new Date(field.createdAt)}
+                type={field.type}
+              />
+            );
+          }
+
+          if (field.from_user.id === Number(userid)) {
+            return (
+              <UserChat
+                key={`user-${index}`}
+                name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+                fromrole={field.from_user.role}
+                torole={field.to_user.role}
+                message={field.query}
+                time={new Date(field.createdAt)}
+                url={field.upload_url_1}
+                type={field.type}
+              />
+            );
+          } else {
+            return (
+              <DeptChat
+                key={`dept-${index}`}
+                name={`${field.to_user.firstName} ${field.to_user.lastName}`}
+                fromrole={field.from_user.role}
+                torole={field.to_user.role}
+                message={field.query}
+                time={new Date(field.createdAt)}
+                url={field.upload_url_1}
+                type={field.type}
+              />
+            );
+          }
+        });
+      })()}
+    </>
+  );
+};
+
+interface IntimationOrderPageProps {
+  id: number;
+}
+
+const IntimationOrderPage = (props: IntimationOrderPageProps) => {
+  const userid = getCookie("id");
+
+  const notingdata = useQuery({
+    queryKey: ["getQueryByType", Number(props.id), ["INTIMATION_DRAFT"]],
+    queryFn: async () => {
+      const response = await ApiCall({
+        query:
+          "query GetQueryByType($id: Int!, $querytype: [QueryType!]!) {getQueryByType(id: $id, querytype: $querytype) {id,query,upload_url_1,type,request_type,createdAt,from_user {id, firstName,lastName,role},to_user {id, firstName,lastName,role},}}",
+        variables: {
+          id: props.id,
+          querytype: ["INTIMATION_DRAFT"],
+        },
+      });
+
+      if (!response.status) {
+        throw new Error(response.message);
+      }
+
+      if (!(response.data as Record<string, unknown>)["getQueryByType"]) {
+        throw new Error("Value not found in response");
+      }
+      return (response.data as Record<string, unknown>)[
+        "getQueryByType"
+      ] as QueryTypeResponseData[];
+    },
+  });
+
+  return (
+    <>
+      {notingdata.data?.length === 0 && (
+        <div>
+          <Alert message="No Notings found." type="error" showIcon />
+        </div>
+      )}
+
+      {(() => {
+        if (!notingdata.data) return null;
+
+        // Find latest INTIMATION_DRAFT entry
+        const latestPrenote = [...notingdata.data]
+          .filter((item) => item.type === "INTIMATION_DRAFT")
+          .sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          )[0];
+
+        return notingdata.data.map((field, index) => {
+          // Show only the latest INTIMATION_DRAFT
+          if (field.type === "INTIMATION_DRAFT") {
+            if (field !== latestPrenote) return null; // skip other INTIMATION_DRAFT
+            return (
+              <ShowEditor
+                key={`intimation-${index}`}
                 data={field.query}
                 fromrole={field.from_user.role}
                 torole={field.to_user.role}
