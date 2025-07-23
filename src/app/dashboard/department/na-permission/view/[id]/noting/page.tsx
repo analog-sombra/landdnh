@@ -22,6 +22,7 @@ import { queryStatus } from "@/utils/utilscompoment";
 import { HearingNoticeEditor } from "@/components/editors/hearingnoticeeditor/page";
 import { SanadGenerateEditor } from "@/components/editors/sanadgenerateeditor/page";
 import { IntimationOrderEditor } from "@/components/editors/intimationordereditor/page";
+import { ShowEditor, UserChat } from "@/components/chat";
 
 interface NaFormResponse {
   id: number;
@@ -825,7 +826,7 @@ const Meeting = () => {
     <>
       <div className="p-2 grid grid-cols-12 gap-1 min-h-screen">
         <div
-          className={`shadow rounded p-2  bg-[#f4f8fb] ${
+          className={`shadow rounded p-2  bg-[#fff] ${
             isNoting || isHearing || isSanad || isIntimation
               ? "col-span-6"
               : "col-span-12"
@@ -939,34 +940,46 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
       )}
 
       {chatdata.data?.map((field, index) => {
+        return (
+          <UserChat
+            key={index}
+            name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+            fromrole={field.from_user.role}
+            torole={field.to_user.role}
+            message={field.query}
+            time={new Date(field.createdAt)}
+            url={field.upload_url_1}
+            type={field.type}
+          />
+        );
         // if (field.from_user.role === "USER") {
-        if (field.type === "CORESPONDENCE") {
-          return (
-            <UserChat
-              key={index}
-              name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-              fromrole={field.from_user.role}
-              torole={field.to_user.role}
-              message={field.query}
-              time={new Date(field.createdAt)}
-              url={field.upload_url_1}
-              type={field.type}
-            />
-          );
-        } else {
-          return (
-            <DeptChat
-              key={index}
-              name={`${field.to_user.firstName} ${field.to_user.lastName}`}
-              fromrole={field.from_user.role}
-              torole={field.to_user.role}
-              message={field.query}
-              time={new Date(field.createdAt)}
-              url={field.upload_url_1}
-              type={field.type}
-            />
-          );
-        }
+        // if (field.type === "CORESPONDENCE") {
+        //   return (
+        //     <UserChat
+        //       key={index}
+        //       name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+        //       fromrole={field.from_user.role}
+        //       torole={field.to_user.role}
+        //       message={field.query}
+        //       time={new Date(field.createdAt)}
+        //       url={field.upload_url_1}
+        //       type={field.type}
+        //     />
+        //   );
+        // } else {
+        //   return (
+        //     <DeptChat
+        //       key={index}
+        //       name={`${field.to_user.firstName} ${field.to_user.lastName}`}
+        //       fromrole={field.from_user.role}
+        //       torole={field.to_user.role}
+        //       message={field.query}
+        //       time={new Date(field.createdAt)}
+        //       url={field.upload_url_1}
+        //       type={field.type}
+        //     />
+        //   );
+        // }
       })}
     </>
   );
@@ -1040,33 +1053,46 @@ const NotingPage = (props: NotingProviderProps) => {
             );
           }
 
-          if (field.from_user.id === Number(userid)) {
-            return (
-              <UserChat
-                key={`user-${index}`}
-                name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-                fromrole={field.from_user.role}
-                torole={field.to_user.role}
-                message={field.query}
-                time={new Date(field.createdAt)}
-                url={field.upload_url_1}
-                type={field.type}
-              />
-            );
-          } else {
-            return (
-              <DeptChat
-                key={`dept-${index}`}
-                name={`${field.to_user.firstName} ${field.to_user.lastName}`}
-                fromrole={field.from_user.role}
-                torole={field.to_user.role}
-                message={field.query}
-                time={new Date(field.createdAt)}
-                url={field.upload_url_1}
-                type={field.type}
-              />
-            );
-          }
+          return (
+            <UserChat
+              key={`user-${index}`}
+              name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+              fromrole={field.from_user.role}
+              torole={field.to_user.role}
+              message={field.query}
+              time={new Date(field.createdAt)}
+              url={field.upload_url_1}
+              type={field.type}
+            />
+          );
+
+          // if (field.from_user.id === Number(userid)) {
+          //   return (
+          //     <UserChat
+          //       key={`user-${index}`}
+          //       name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+          //       fromrole={field.from_user.role}
+          //       torole={field.to_user.role}
+          //       message={field.query}
+          //       time={new Date(field.createdAt)}
+          //       url={field.upload_url_1}
+          //       type={field.type}
+          //     />
+          //   );
+          // } else {
+          //   return (
+          //     <DeptChat
+          //       key={`dept-${index}`}
+          //       name={`${field.to_user.firstName} ${field.to_user.lastName}`}
+          //       fromrole={field.from_user.role}
+          //       torole={field.to_user.role}
+          //       message={field.query}
+          //       time={new Date(field.createdAt)}
+          //       url={field.upload_url_1}
+          //       type={field.type}
+          //     />
+          //   );
+          // }
         });
       })()}
     </>
@@ -1141,33 +1167,46 @@ const HearingNoticePage = (props: HearingNoticeProps) => {
             );
           }
 
-          if (field.from_user.id === Number(userid)) {
-            return (
-              <UserChat
-                key={`user-${index}`}
-                name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-                fromrole={field.from_user.role}
-                torole={field.to_user.role}
-                message={field.query}
-                time={new Date(field.createdAt)}
-                url={field.upload_url_1}
-                type={field.type}
-              />
-            );
-          } else {
-            return (
-              <DeptChat
-                key={`dept-${index}`}
-                name={`${field.to_user.firstName} ${field.to_user.lastName}`}
-                fromrole={field.from_user.role}
-                torole={field.to_user.role}
-                message={field.query}
-                time={new Date(field.createdAt)}
-                url={field.upload_url_1}
-                type={field.type}
-              />
-            );
-          }
+          return (
+            <UserChat
+              key={`user-${index}`}
+              name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+              fromrole={field.from_user.role}
+              torole={field.to_user.role}
+              message={field.query}
+              time={new Date(field.createdAt)}
+              url={field.upload_url_1}
+              type={field.type}
+            />
+          );
+
+          // if (field.from_user.id === Number(userid)) {
+          //   return (
+          //     <UserChat
+          //       key={`user-${index}`}
+          //       name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+          //       fromrole={field.from_user.role}
+          //       torole={field.to_user.role}
+          //       message={field.query}
+          //       time={new Date(field.createdAt)}
+          //       url={field.upload_url_1}
+          //       type={field.type}
+          //     />
+          //   );
+          // } else {
+          //   return (
+          //     <DeptChat
+          //       key={`dept-${index}`}
+          //       name={`${field.to_user.firstName} ${field.to_user.lastName}`}
+          //       fromrole={field.from_user.role}
+          //       torole={field.to_user.role}
+          //       message={field.query}
+          //       time={new Date(field.createdAt)}
+          //       url={field.upload_url_1}
+          //       type={field.type}
+          //     />
+          //   );
+          // }
         });
       })()}
     </>
@@ -1242,33 +1281,46 @@ const SanadPage = (props: SanadPageProps) => {
             );
           }
 
-          if (field.from_user.id === Number(userid)) {
-            return (
-              <UserChat
-                key={`user-${index}`}
-                name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-                fromrole={field.from_user.role}
-                torole={field.to_user.role}
-                message={field.query}
-                time={new Date(field.createdAt)}
-                url={field.upload_url_1}
-                type={field.type}
-              />
-            );
-          } else {
-            return (
-              <DeptChat
-                key={`dept-${index}`}
-                name={`${field.to_user.firstName} ${field.to_user.lastName}`}
-                fromrole={field.from_user.role}
-                torole={field.to_user.role}
-                message={field.query}
-                time={new Date(field.createdAt)}
-                url={field.upload_url_1}
-                type={field.type}
-              />
-            );
-          }
+          return (
+            <UserChat
+              key={`user-${index}`}
+              name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+              fromrole={field.from_user.role}
+              torole={field.to_user.role}
+              message={field.query}
+              time={new Date(field.createdAt)}
+              url={field.upload_url_1}
+              type={field.type}
+            />
+          );
+
+          // if (field.from_user.id === Number(userid)) {
+          //   return (
+          //     <UserChat
+          //       key={`user-${index}`}
+          //       name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+          //       fromrole={field.from_user.role}
+          //       torole={field.to_user.role}
+          //       message={field.query}
+          //       time={new Date(field.createdAt)}
+          //       url={field.upload_url_1}
+          //       type={field.type}
+          //     />
+          //   );
+          // } else {
+          //   return (
+          //     <DeptChat
+          //       key={`dept-${index}`}
+          //       name={`${field.to_user.firstName} ${field.to_user.lastName}`}
+          //       fromrole={field.from_user.role}
+          //       torole={field.to_user.role}
+          //       message={field.query}
+          //       time={new Date(field.createdAt)}
+          //       url={field.upload_url_1}
+          //       type={field.type}
+          //     />
+          //   );
+          // }
         });
       })()}
     </>
@@ -1343,33 +1395,45 @@ const IntimationOrderPage = (props: IntimationOrderPageProps) => {
             );
           }
 
-          if (field.from_user.id === Number(userid)) {
-            return (
-              <UserChat
-                key={`user-${index}`}
-                name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-                fromrole={field.from_user.role}
-                torole={field.to_user.role}
-                message={field.query}
-                time={new Date(field.createdAt)}
-                url={field.upload_url_1}
-                type={field.type}
-              />
-            );
-          } else {
-            return (
-              <DeptChat
-                key={`dept-${index}`}
-                name={`${field.to_user.firstName} ${field.to_user.lastName}`}
-                fromrole={field.from_user.role}
-                torole={field.to_user.role}
-                message={field.query}
-                time={new Date(field.createdAt)}
-                url={field.upload_url_1}
-                type={field.type}
-              />
-            );
-          }
+          return (
+            <UserChat
+              key={`user-${index}`}
+              name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+              fromrole={field.from_user.role}
+              torole={field.to_user.role}
+              message={field.query}
+              time={new Date(field.createdAt)}
+              url={field.upload_url_1}
+              type={field.type}
+            />
+          );
+          // if (field.from_user.id === Number(userid)) {
+          //   return (
+          //     <UserChat
+          //       key={`user-${index}`}
+          //       name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+          //       fromrole={field.from_user.role}
+          //       torole={field.to_user.role}
+          //       message={field.query}
+          //       time={new Date(field.createdAt)}
+          //       url={field.upload_url_1}
+          //       type={field.type}
+          //     />
+          //   );
+          // } else {
+          //   return (
+          //     <DeptChat
+          //       key={`dept-${index}`}
+          //       name={`${field.to_user.firstName} ${field.to_user.lastName}`}
+          //       fromrole={field.from_user.role}
+          //       torole={field.to_user.role}
+          //       message={field.query}
+          //       time={new Date(field.createdAt)}
+          //       url={field.upload_url_1}
+          //       type={field.type}
+          //     />
+          //   );
+          // }
         });
       })()}
     </>
@@ -1455,11 +1519,11 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
       )}
 
       {paymenthistorydata.data?.map((field, index) => (
-        <div key={index} className="bg-white px-4 py-2 rounded shadow-md mt-3">
-          <p className="text-sm text-gray-700 font-semibold leading-2 border-b border-gray-200 pb-1">
+        <div key={index} className="px-2 py-2">
+          <p className="text-sm text-blue-700 font-semibold leading-2">
             Purpose
           </p>
-          <p className="text-sm leading-4 mt-1">{field.purpose}</p>
+          <p className="text-sm leading-4 mt-2">{field.purpose}</p>
 
           <div className="flex items-center mt-2 gap-4">
             <p className="text-sm rounded px-4 text-center border border-gray-500 bg-gray-500/10 text-gray-500">
@@ -1481,6 +1545,7 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
               </p>
             )}
           </div>
+          <div className="h-[1px] w-full bg-gray-200 mt-2"></div>
         </div>
       ))}
     </>
@@ -1533,39 +1598,6 @@ const ReportPage = (props: ReportProviderProps) => {
               field.to_user.id == Number(userid) ||
               field.from_user.id == Number(userid)
             ) {
-              // if (field.from_user.id == Number(userid)) {
-              if (field.type == "SUBMITREPORT") {
-                return (
-                  <UserChat
-                    key={index}
-                    name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-                    fromrole={field.from_user.role}
-                    torole={field.to_user.role}
-                    message={field.query}
-                    time={new Date(field.createdAt)}
-                    url={field.upload_url_1}
-                    type={field.type}
-                  />
-                );
-              } else {
-                return (
-                  <DeptChat
-                    key={index}
-                    name={`${field.to_user.firstName} ${field.to_user.lastName}`}
-                    fromrole={field.from_user.role}
-                    torole={field.to_user.role}
-                    message={field.query}
-                    time={new Date(field.createdAt)}
-                    url={field.upload_url_1}
-                    type={field.type}
-                  />
-                );
-              }
-            }
-          })
-        : reportdata.data?.map((field, index) => {
-            // if (field.from_user.id == Number(userid)) {
-            if (field.type == "SUBMITREPORT") {
               return (
                 <UserChat
                   key={index}
@@ -1578,147 +1610,79 @@ const ReportPage = (props: ReportProviderProps) => {
                   type={field.type}
                 />
               );
-            } else {
-              return (
-                <DeptChat
-                  key={index}
-                  name={`${field.to_user.firstName} ${field.to_user.lastName}`}
-                  fromrole={field.from_user.role}
-                  torole={field.to_user.role}
-                  message={field.query}
-                  time={new Date(field.createdAt)}
-                  url={field.upload_url_1}
-                  type={field.type}
-                />
-              );
+              // if (field.from_user.id == Number(userid)) {
+              // if (field.type == "SUBMITREPORT") {
+              //   return (
+              //     <UserChat
+              //       key={index}
+              //       name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+              //       fromrole={field.from_user.role}
+              //       torole={field.to_user.role}
+              //       message={field.query}
+              //       time={new Date(field.createdAt)}
+              //       url={field.upload_url_1}
+              //       type={field.type}
+              //     />
+              //   );
+              // } else {
+              //   return (
+              //     <DeptChat
+              //       key={index}
+              //       name={`${field.to_user.firstName} ${field.to_user.lastName}`}
+              //       fromrole={field.from_user.role}
+              //       torole={field.to_user.role}
+              //       message={field.query}
+              //       time={new Date(field.createdAt)}
+              //       url={field.upload_url_1}
+              //       type={field.type}
+              //     />
+              //   );
+              // }
             }
+          })
+        : reportdata.data?.map((field, index) => {
+            return (
+              <UserChat
+                key={index}
+                name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+                fromrole={field.from_user.role}
+                torole={field.to_user.role}
+                message={field.query}
+                time={new Date(field.createdAt)}
+                url={field.upload_url_1}
+                type={field.type}
+              />
+            );
+            // if (field.from_user.id == Number(userid)) {
+
+            // if (field.type == "SUBMITREPORT") {
+            //   return (
+            //     <UserChat
+            //       key={index}
+            //       name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+            //       fromrole={field.from_user.role}
+            //       torole={field.to_user.role}
+            //       message={field.query}
+            //       time={new Date(field.createdAt)}
+            //       url={field.upload_url_1}
+            //       type={field.type}
+            //     />
+            //   );
+            // } else {
+            //   return (
+            //     <DeptChat
+            //       key={index}
+            //       name={`${field.to_user.firstName} ${field.to_user.lastName}`}
+            //       fromrole={field.from_user.role}
+            //       torole={field.to_user.role}
+            //       message={field.query}
+            //       time={new Date(field.createdAt)}
+            //       url={field.upload_url_1}
+            //       type={field.type}
+            //     />
+            //   );
+            // }
           })}
     </>
-  );
-};
-
-interface DeptChatProps {
-  name: string;
-  fromrole: string;
-  torole: string;
-  message: string;
-  time: Date;
-  url?: string | null;
-  type: string;
-}
-
-const DeptChat = (props: DeptChatProps) => {
-  return (
-    <div className="bg-white px-4 py-2 rounded shadow-md mt-3 w-5/6">
-      <div className="flex items-center border-b border-gray-200 pb-1">
-        <div className="shrink-0 h-8 w-8 rounded-full bg-rose-500 grid place-items-center text-xs text-white font-semibold">
-          {props.name.charAt(0).toUpperCase()}
-        </div>
-        <div className="px-2">
-          <p className="text-sm text-gray-700 font-semibold leading-2">
-            {roleToString(props.fromrole)} to {roleToString(props.torole)}
-          </p>
-          <p className="text-xs leading-4 mt-1 text-gray-600">
-            {formatDateTime(props.time)}
-          </p>
-        </div>
-        <div className="grow"></div>
-        {queryStatus(props.type)}
-      </div>
-      {/* <p className="text-sm leading-4 mt-2">{props.message}</p> */}
-      <ViewEditor data={props.message} />
-
-      {props.url && (
-        <div className="flex">
-          <div className="grow"></div>
-          <button
-            // target="_blank"
-            // href={props.url}
-            onClick={() => window.open(props.url ?? "", "_blank")}
-            className="w-20 py-1 text-center text-sm text-nowrap block text-white bg-blue-500 px-2 rounded mt-2"
-          >
-            View File
-          </button>
-        </div>
-      )}
-    </div>
-  );
-};
-
-interface UserChatProps {
-  name: string;
-  fromrole: string;
-  torole: string;
-  message: string;
-  time: Date;
-  url?: string | null;
-  type: string;
-}
-
-const UserChat = (props: UserChatProps) => {
-  return (
-    <div className="bg-white px-4 py-2 rounded shadow-md mt-3 w-5/6 ml-auto">
-      <div className="flex items-center border-b border-gray-200 pb-1">
-        <div className="shrink-0 h-8 w-8 rounded-full bg-rose-500 grid place-items-center text-xs text-white font-semibold">
-          {props.name.charAt(0).toUpperCase()}
-        </div>
-        <div className="px-2">
-          <p className="text-sm text-gray-700 font-semibold leading-2">
-            {roleToString(props.fromrole)} to {roleToString(props.torole)}
-          </p>
-          <p className="text-xs leading-4 mt-1 text-gray-600">
-            {formatDateTime(props.time)}
-          </p>
-        </div>
-        <div className="grow"></div>
-        {queryStatus(props.type)}
-      </div>
-      {/* <p className="text-sm leading-4 mt-2">{props.message}</p> */}
-      <ViewEditor data={props.message} />
-
-      {props.url && (
-        <div className="flex">
-          <div className="grow"></div>
-          <button
-            onClick={() => window.open(props.url ?? "", "_blank")}
-            className="w-20 py-1 text-center text-sm text-nowrap block text-white bg-blue-500 px-2 rounded mt-2"
-          >
-            View File
-          </button>
-        </div>
-      )}
-    </div>
-  );
-};
-
-interface ShowEditorProps {
-  name: string;
-  fromrole: string;
-  torole: string;
-  data: string;
-  time: Date;
-  type: string;
-}
-
-const ShowEditor = (props: ShowEditorProps) => {
-  return (
-    <div className="bg-white px-4 py-2 rounded shadow-md mt-3">
-      <div className="flex items-center border-b border-gray-200 pb-1">
-        <div className="shrink-0 h-8 w-8 rounded-full bg-rose-500 grid place-items-center text-xs text-white font-semibold">
-          {props.name.charAt(0).toUpperCase()}
-        </div>
-        <div className="px-2">
-          <p className="text-sm text-gray-700 font-semibold leading-2">
-            {roleToString(props.fromrole)} to {roleToString(props.torole)}
-          </p>
-          <p className="text-xs leading-4 mt-1 text-gray-600">
-            {formatDateTime(props.time)}
-          </p>
-        </div>
-        <div className="grow"></div>
-        {queryStatus(props.type)}
-      </div>
-      <ViewEditor data={props.data} />
-    </div>
   );
 };

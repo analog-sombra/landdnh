@@ -1,4 +1,5 @@
 "use client";
+import { UserChat } from "@/components/chat";
 import { ViewEditor } from "@/components/editors/vieweditro/page";
 import { TaxtAreaInput } from "@/components/form/inputfields/textareainput";
 import { TextInput } from "@/components/form/inputfields/textinput";
@@ -521,7 +522,6 @@ const ViewPermission = () => {
             paddingRight: "10px",
             paddingTop: "10px",
             paddingBottom: "0px",
-            backgroundColor: "#f4f8fb",
           },
         }}
       >
@@ -733,33 +733,45 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
             val.request_type == "APPLTODEPT" || val.request_type == "DEPTTOAPPL"
         )
         .map((field, index) => {
-          if (field.from_user.role === "USER") {
-            return (
-              <UserChat
-                key={index}
-                name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-                fromrole={field.from_user.role}
-                torole={field.to_user.role}
-                message={field.query}
-                time={new Date(field.createdAt)}
-                url={field.upload_url_1}
-                type={field.type}
-              />
-            );
-          } else {
-            return (
-              <DeptChat
-                key={index}
-                name={`${field.to_user.firstName} ${field.to_user.lastName}`}
-                fromrole={field.from_user.role}
-                torole={field.to_user.role}
-                message={field.query}
-                time={new Date(field.createdAt)}
-                url={field.upload_url_1}
-                type={field.type}
-              />
-            );
-          }
+          return (
+            <UserChat
+              key={index}
+              name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+              fromrole={field.from_user.role}
+              torole={field.to_user.role}
+              message={field.query}
+              time={new Date(field.createdAt)}
+              url={field.upload_url_1}
+              type={field.type}
+            />
+          );
+          // if (field.from_user.role === "USER") {
+          //   return (
+          //     <UserChat
+          //       key={index}
+          //       name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+          //       fromrole={field.from_user.role}
+          //       torole={field.to_user.role}
+          //       message={field.query}
+          //       time={new Date(field.createdAt)}
+          //       url={field.upload_url_1}
+          //       type={field.type}
+          //     />
+          //   );
+          // } else {
+          //   return (
+          //     <DeptChat
+          //       key={index}
+          //       name={`${field.to_user.firstName} ${field.to_user.lastName}`}
+          //       fromrole={field.from_user.role}
+          //       torole={field.to_user.role}
+          //       message={field.query}
+          //       time={new Date(field.createdAt)}
+          //       url={field.upload_url_1}
+          //       type={field.type}
+          //     />
+          //   );
+          // }
         })}
 
       <Drawer
@@ -837,130 +849,6 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
         </form>
       </Drawer>
     </>
-  );
-};
-interface DeptChatProps {
-  name: string;
-  fromrole: string;
-  torole: string;
-  message: string;
-  time: Date;
-  url?: string | null;
-  type: string;
-}
-
-const DeptChat = (props: DeptChatProps) => {
-  return (
-    <div className="bg-white px-4 py-2 rounded shadow-md mt-3 w-5/6">
-      <div className="flex items-center border-b border-gray-200 pb-1">
-        <div className="shrink-0 h-8 w-8 rounded-full bg-rose-500 grid place-items-center text-xs text-white font-semibold">
-          {props.name.charAt(0).toUpperCase()}
-        </div>
-        <div className="px-2">
-          <p className="text-sm text-gray-700 font-semibold leading-2">
-            {roleToString(props.fromrole)} to {roleToString(props.torole)}
-          </p>
-          <p className="text-xs leading-4 mt-1 text-gray-600">
-            {formatDateTime(props.time)}
-          </p>
-        </div>
-        <div className="grow"></div>
-        {queryStatus(props.type)}
-      </div>
-      {/* <p className="text-sm leading-4 mt-2">{props.message}</p> */}
-      <ViewEditor data={props.message} />
-
-      {props.url && (
-        <div className="flex">
-          <div className="grow"></div>
-          <button
-            // target="_blank"
-            // href={props.url}
-            onClick={() => window.open(props.url ?? "", "_blank")}
-            className="w-20 py-1 text-center text-sm text-nowrap block text-white bg-blue-500 px-2 rounded mt-2"
-          >
-            View File
-          </button>
-        </div>
-      )}
-    </div>
-  );
-};
-
-interface UserChatProps {
-  name: string;
-  fromrole: string;
-  torole: string;
-  message: string;
-  time: Date;
-  url?: string | null;
-  type: string;
-}
-
-const UserChat = (props: UserChatProps) => {
-  return (
-    <div className="bg-white px-4 py-2 rounded shadow-md mt-3 w-5/6 ml-auto">
-      <div className="flex items-center border-b border-gray-200 pb-1">
-        <div className="shrink-0 h-8 w-8 rounded-full bg-rose-500 grid place-items-center text-xs text-white font-semibold">
-          {props.name.charAt(0).toUpperCase()}
-        </div>
-        <div className="px-2">
-          <p className="text-sm text-gray-700 font-semibold leading-2">
-            {roleToString(props.fromrole)} to {roleToString(props.torole)}
-          </p>
-          <p className="text-xs leading-4 mt-1 text-gray-600">
-            {formatDateTime(props.time)}
-          </p>
-        </div>
-        <div className="grow"></div>
-        {queryStatus(props.type)}
-      </div>
-      <ViewEditor data={props.message} />
-      {/* <p className="text-sm leading-4 mt-2">{props.message}</p> */}
-      {props.url && (
-        <div className="flex">
-          <div className="grow"></div>
-          <button
-            onClick={() => window.open(props.url ?? "", "_blank")}
-            className="w-20 py-1 text-center text-sm text-nowrap block text-white bg-blue-500 px-2 rounded mt-2"
-          >
-            View File
-          </button>
-        </div>
-      )}
-    </div>
-  );
-};
-
-interface ShowEditorProps {
-  name: string;
-  fromrole: string;
-  torole: string;
-  data: string;
-  time: Date;
-  type: string;
-}
-
-const ShowEditor = (props: ShowEditorProps) => {
-  return (
-    <div className="bg-white px-4 py-2 rounded shadow-md mt-3">
-      <div className="flex items-center border-b border-gray-200 pb-1">
-        <div className="shrink-0 h-8 w-8 rounded-full bg-rose-500 grid place-items-center text-xs text-white font-semibold">
-          {props.name.charAt(0).toUpperCase()}
-        </div>
-        <div className="px-2">
-          <p className="text-sm text-gray-700 font-semibold leading-2">
-            {roleToString(props.fromrole)} to {roleToString(props.torole)}
-          </p>
-          <p className="text-xs leading-4 mt-1 text-gray-600">
-            {formatDateTime(props.time)}
-          </p>
-        </div>
-        <div className="grow"></div>
-        {queryStatus(props.type)}
-      </div>
-      <ViewEditor data={props.data} />
-    </div>
   );
 };
 
@@ -1179,8 +1067,8 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
       )}
 
       {paymenthistorydata.data?.map((field, index) => (
-        <div key={index} className="bg-white px-4 py-2 rounded shadow-md mt-3">
-          <div className="border-b border-gray-200 flex items-center gap-2 pb-1">
+        <div key={index} className="px-2 py-2">
+          <div className="flex items-center gap-2">
             <p className="text-sm text-gray-700 font-semibold leading-2">
               Purpose
             </p>
@@ -1222,43 +1110,8 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
               </p>
             )}
           </div>
+          <div className="h-[1px] w-full bg-gray-200 mt-2"></div>
         </div>
-        // <div
-        //   key={index}
-        //   className="bg-gradient-to-l from-blue-400 to-blue-500 shadow rounded-lg p-2 mt-3"
-        // >
-        //   <div className="flex items-center gap-2 border-b border-gray-300 pb-1">
-        //     <p className="text-sm text-white">Purpose</p>
-        //     <div className="grow"></div>
-        //     {!field.is_paid && (
-        //       <button
-        //         className="py-1 rounded-md  px-4 text-xs text-white cursor-pointer"
-        //         onClick={() => {
-        //           props.setFeesBox(true);
-        //           setFeesId(field.id);
-        //           setValue("order_id", "");
-        //           setValue("transaction_id", "");
-        //           setValue("track_id", "");
-        //         }}
-        //       >
-        //         Pay fees
-        //       </button>
-        //     )}
-        //   </div>
-
-        //   <p className="text-xs text-white">{field.purpose}</p>
-        //   <div className="flex items-center mt-2">
-        //     <p className="text-white text-sm border border-white rounded-l-md flex-1 text-center">
-        //       Amount: ₹{field.amount}
-        //     </p>
-        //     <p className="text-white text-sm border border-white flex-1 text-center">
-        //       {field.payment_type}
-        //     </p>
-        //     <p className="text-white text-sm border border-white rounded-r-md flex-1 text-center">
-        //       {field.is_paid ? "Paid" : "Unpaid"}
-        //     </p>
-        //   </div>
-        // </div>
       ))}
 
       <Drawer

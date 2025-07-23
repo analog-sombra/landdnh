@@ -18,6 +18,7 @@ import { IcBaselineArrowBack } from "@/components/icons";
 import { NotingEditor } from "@/components/editors/notingtexteditor/page";
 import { ViewEditor } from "@/components/editors/vieweditro/page";
 import { toast } from "react-toastify";
+import { ShowEditor, UserChat } from "@/components/chat";
 
 interface NaFormResponse {
   id: number;
@@ -847,145 +848,45 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
       )}
 
       {chatdata.data?.map((field, index) => {
-        if (field.from_user.role === "USER") {
-          return (
-            <UserChat
-              key={index}
-              name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-              fromrole={field.from_user.role}
-              torole={field.to_user.role}
-              message={field.query}
-              time={new Date(field.createdAt)}
-              url={field.upload_url_1}
-            />
-          );
-        } else {
-          return (
-            <DeptChat
-              key={index}
-              name={`${field.to_user.firstName} ${field.to_user.lastName}`}
-              fromrole={field.from_user.role}
-              torole={field.to_user.role}
-              message={field.query}
-              time={new Date(field.createdAt)}
-              url={field.upload_url_1}
-            />
-          );
-        }
+        return (
+          <UserChat
+            key={index}
+            name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+            fromrole={field.from_user.role}
+            torole={field.to_user.role}
+            message={field.query}
+            time={new Date(field.createdAt)}
+            url={field.upload_url_1}
+            type={field.type}
+          />
+        );
+        // if (field.from_user.role === "USER") {
+        //   return (
+        //     <UserChat
+        //       key={index}
+        //       name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+        //       fromrole={field.from_user.role}
+        //       torole={field.to_user.role}
+        //       message={field.query}
+        //       time={new Date(field.createdAt)}
+        //       url={field.upload_url_1}
+        //     />
+        //   );
+        // } else {
+        //   return (
+        //     <DeptChat
+        //       key={index}
+        //       name={`${field.to_user.firstName} ${field.to_user.lastName}`}
+        //       fromrole={field.from_user.role}
+        //       torole={field.to_user.role}
+        //       message={field.query}
+        //       time={new Date(field.createdAt)}
+        //       url={field.upload_url_1}
+        //     />
+        //   );
+        // }
       })}
     </>
-  );
-};
-
-interface DeptChatProps {
-  name: string;
-  fromrole: string;
-  torole: string;
-  message: string;
-  time: Date;
-  url?: string | null;
-}
-
-const DeptChat = (props: DeptChatProps) => {
-  return (
-    <div className="mt-4">
-      <div className="flex items-center gap-1 max-w-5/6">
-        <div className="shrink-0 h-6 w-6 rounded-full bg-rose-500 grid place-items-center text-xs text-white font-semibold">
-          {props.name.charAt(0).toUpperCase()}
-        </div>
-        <div className="px-2 py-1 bg-gray-100 rounded-md pb-2 my-1">
-          <p className="text-xs text-gray-500 border-b">
-            {/* {props.name} ({props.role}) */}
-            {roleToString(props.fromrole)} to {roleToString(props.torole)}
-          </p>
-          {/* <p className="text-sm leading-4 mt-1">{props.message}</p> */}
-          <ViewEditor data={props.message} />
-
-          {props.url && (
-            <Link
-              target="_blank"
-              href={props.url}
-              className="text-left text-sm text-nowrap inline-block text-white"
-            >
-              View File
-            </Link>
-          )}
-        </div>
-      </div>
-      <p className="text-xs text-left pl-9 text-gray-500 leading-2 max-w-5/6">
-        {formatDateTime(props.time)}
-      </p>
-    </div>
-  );
-};
-
-interface UserChatProps {
-  name: string;
-  fromrole: string;
-  torole: string;
-  message: string;
-  time: Date;
-  url?: string | null;
-}
-
-const UserChat = (props: UserChatProps) => {
-  return (
-    <div className="mt-4 flex items-end flex-col">
-      <div className="flex items-center gap-1 max-w-5/6">
-        <div className="px-2 py-1 bg-blue-500 rounded-md pb-2 my-1">
-          <p className="text-xs text-white border-b">
-            {roleToString(props.fromrole)} to {roleToString(props.torole)}
-          </p>
-          {/* <p className="text-sm leading-4 mt-1 text-white">{props.message}</p> */}
-          <ViewEditor data={props.message} />
-          {props.url && (
-            <Link
-              target="_blank"
-              href={props.url}
-              className="text-left text-sm text-nowrap inline-block text-white border border-white px-2 rounded mt-2"
-            >
-              <p className="text-white inline-block">View File</p>
-            </Link>
-          )}
-        </div>
-        <div className="shrink-0 h-6 w-6 rounded-full bg-rose-500 grid place-items-center text-xs text-white font-semibold">
-          {props.name.charAt(0).toUpperCase()}
-        </div>
-      </div>
-      <p className="text-xs text-left text-gray-500 leading-2 max-w-5/6 pr-9">
-        {formatDateTime(props.time)}
-      </p>
-    </div>
-  );
-};
-
-interface ShowEditorProps {
-  name: string;
-  fromrole: string;
-  torole: string;
-  data: string;
-  time: Date;
-}
-
-const ShowEditor = (props: ShowEditorProps) => {
-  return (
-    <div className="mt-4">
-      <div className="flex items-center gap-1 max-w-5/6">
-        <div className="shrink-0 h-6 w-6 rounded-full bg-rose-500 grid place-items-center text-xs text-white font-semibold">
-          {props.name.charAt(0).toUpperCase()}
-        </div>
-        <div className="px-2 py-1 bg-gray-100 rounded-md pb-2 my-1">
-          <p className="text-xs text-gray-500 border-b">
-            {/* {props.name} ({props.role}) */}
-            {roleToString(props.fromrole)} to {roleToString(props.torole)}
-          </p>
-          <ViewEditor data={props.data} />
-        </div>
-      </div>
-      <p className="text-xs text-left pl-9 text-gray-500 leading-2 max-w-5/6">
-        {formatDateTime(props.time)}
-      </p>
-    </div>
   );
 };
 
@@ -1052,35 +953,49 @@ const NotingPage = (props: NotingProviderProps) => {
                 torole={field.to_user.role}
                 name={`${field.from_user.firstName} ${field.from_user.lastName}`}
                 time={new Date(field.createdAt)}
+                type={field.type}
               />
             );
           }
 
-          if (field.from_user.id === Number(userid)) {
-            return (
-              <UserChat
-                key={`user-${index}`}
-                name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-                fromrole={field.from_user.role}
-                torole={field.to_user.role}
-                message={field.query}
-                time={new Date(field.createdAt)}
-                url={field.upload_url_1}
-              />
-            );
-          } else {
-            return (
-              <DeptChat
-                key={`dept-${index}`}
-                name={`${field.to_user.firstName} ${field.to_user.lastName}`}
-                fromrole={field.from_user.role}
-                torole={field.to_user.role}
-                message={field.query}
-                time={new Date(field.createdAt)}
-                url={field.upload_url_1}
-              />
-            );
-          }
+          return (
+            <UserChat
+              key={`user-${index}`}
+              name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+              fromrole={field.from_user.role}
+              torole={field.to_user.role}
+              message={field.query}
+              time={new Date(field.createdAt)}
+              url={field.upload_url_1}
+              type={field.type}
+            />
+          );
+          // if (field.from_user.id === Number(userid)) {
+          //   return (
+          //     <UserChat
+          //       key={`user-${index}`}
+          //       name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+          //       fromrole={field.from_user.role}
+          //       torole={field.to_user.role}
+          //       message={field.query}
+          //       time={new Date(field.createdAt)}
+          //       url={field.upload_url_1}
+          //       type={field.type}
+          //     />
+          //   );
+          // } else {
+          //   return (
+          //     <DeptChat
+          //       key={`dept-${index}`}
+          //       name={`${field.to_user.firstName} ${field.to_user.lastName}`}
+          //       fromrole={field.from_user.role}
+          //       torole={field.to_user.role}
+          //       message={field.query}
+          //       time={new Date(field.createdAt)}
+          //       url={field.upload_url_1}
+          //     />
+          //   );
+          // }
         });
       })()}
 
@@ -1209,9 +1124,9 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
       {paymenthistorydata.data?.map((field, index) => (
         <div
           key={index}
-          className="bg-gradient-to-l from-blue-400 to-blue-500 shadow rounded-lg p-2 mt-3"
+          className="p-2"
         >
-          <p className="text-sm border-b border-white text-white">Purpose</p>
+          <p className="text-sm text-white">Purpose</p>
           <p className="text-xs text-white">{field.purpose}</p>
           <div className="flex items-center mt-2">
             <p className="text-white text-sm border border-white rounded-l-md flex-1 text-center">
@@ -1277,35 +1192,6 @@ const ReportPage = (props: ReportProviderProps) => {
               field.to_user.id == Number(userid) ||
               field.from_user.id == Number(userid)
             ) {
-              if (field.from_user.id == Number(userid)) {
-                return (
-                  <UserChat
-                    key={index}
-                    name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-                    fromrole={field.from_user.role}
-                    torole={field.to_user.role}
-                    message={field.query}
-                    time={new Date(field.createdAt)}
-                    url={field.upload_url_1}
-                  />
-                );
-              } else {
-                return (
-                  <DeptChat
-                    key={index}
-                    name={`${field.to_user.firstName} ${field.to_user.lastName}`}
-                    fromrole={field.from_user.role}
-                    torole={field.to_user.role}
-                    message={field.query}
-                    time={new Date(field.createdAt)}
-                    url={field.upload_url_1}
-                  />
-                );
-              }
-            }
-          })
-        : reportdata.data?.map((field, index) => {
-            if (field.from_user.id == Number(userid)) {
               return (
                 <UserChat
                   key={index}
@@ -1315,21 +1201,75 @@ const ReportPage = (props: ReportProviderProps) => {
                   message={field.query}
                   time={new Date(field.createdAt)}
                   url={field.upload_url_1}
+                  type={field.type}
                 />
               );
-            } else {
-              return (
-                <DeptChat
-                  key={index}
-                  name={`${field.to_user.firstName} ${field.to_user.lastName}`}
-                  fromrole={field.from_user.role}
-                  torole={field.to_user.role}
-                  message={field.query}
-                  time={new Date(field.createdAt)}
-                  url={field.upload_url_1}
-                />
-              );
+              // if (field.from_user.id == Number(userid)) {
+              //   return (
+              //     <UserChat
+              //       key={index}
+              //       name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+              //       fromrole={field.from_user.role}
+              //       torole={field.to_user.role}
+              //       message={field.query}
+              //       time={new Date(field.createdAt)}
+              //       url={field.upload_url_1}
+              //       type={field.type}
+              //     />
+              //   );
+              // } else {
+              //   return (
+              //     <DeptChat
+              //       key={index}
+              //       name={`${field.to_user.firstName} ${field.to_user.lastName}`}
+              //       fromrole={field.from_user.role}
+              //       torole={field.to_user.role}
+              //       message={field.query}
+              //       time={new Date(field.createdAt)}
+              //       url={field.upload_url_1}
+              //     />
+              //   );
+              // }
             }
+          })
+        : reportdata.data?.map((field, index) => {
+            return (
+              <UserChat
+                key={index}
+                name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+                fromrole={field.from_user.role}
+                torole={field.to_user.role}
+                message={field.query}
+                time={new Date(field.createdAt)}
+                url={field.upload_url_1}
+                type={field.type}
+              />
+            );
+            // if (field.from_user.id == Number(userid)) {
+            //   return (
+            //     <UserChat
+            //       key={index}
+            //       name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+            //       fromrole={field.from_user.role}
+            //       torole={field.to_user.role}
+            //       message={field.query}
+            //       time={new Date(field.createdAt)}
+            //       url={field.upload_url_1}
+            //     />
+            //   );
+            // } else {
+            //   return (
+            //     <DeptChat
+            //       key={index}
+            //       name={`${field.to_user.firstName} ${field.to_user.lastName}`}
+            //       fromrole={field.from_user.role}
+            //       torole={field.to_user.role}
+            //       message={field.query}
+            //       time={new Date(field.createdAt)}
+            //       url={field.upload_url_1}
+            //     />
+            //   );
+            // }
           })}
     </>
   );
