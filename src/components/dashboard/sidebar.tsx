@@ -35,7 +35,7 @@ const Sidebar = (props: SidebarProps) => {
   }
 
   const userdata = useQuery({
-    queryKey: ["naform"],
+    queryKey: ["getUserById"],
     refetchOnWindowFocus: false,
     queryFn: async () => {
       const response = await ApiCall({
@@ -49,6 +49,7 @@ const Sidebar = (props: SidebarProps) => {
       if (!response.status) {
         throw new Error(response.message);
       }
+
       // if value is not in response.data then return the error
       if (!(response.data as Record<string, unknown>)["getUserById"]) {
         throw new Error("Value not found in response");

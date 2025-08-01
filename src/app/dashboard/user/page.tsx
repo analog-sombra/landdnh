@@ -60,6 +60,10 @@ const UserDashboardPage = () => {
   return (
     <>
       <div className="py-4">
+        <h1 className="text-2xl font-semibold px-4">Dashboard</h1>
+        <div className="px-4 mb-2 mt-1">
+          <div className="h-[1px] bg-gray-300 w-full"></div>
+        </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 items-center px-4">
           <Link href="/dashboard/user/na-permission">
             <div className="flex-1 rounded-md bg-white p-4 relative">
@@ -71,7 +75,7 @@ const UserDashboardPage = () => {
                 </Tooltip>
               </div>
               <div className="flex gap-2 items-center">
-                <MaterialSymbolsPersonRounded />
+                {/* <MaterialSymbolsPersonRounded /> */}
                 <p className="text-xl font-semibold">
                   {/* {dashboarddata.data?.user} */}
                   {naformdata.data?.total ?? 0}
@@ -93,7 +97,7 @@ const UserDashboardPage = () => {
                 </Tooltip>
               </div>
               <div className="flex gap-2 items-center">
-                <IcBaselineAttractions />
+                {/* <IcBaselineAttractions /> */}
                 <p className="text-xl font-semibold">
                   {/* {dashboarddata.data?.cows} */}0
                 </p>
@@ -113,7 +117,7 @@ const UserDashboardPage = () => {
                 </Tooltip>
               </div>
               <div className="flex gap-2 items-center">
-                <MaterialSymbolsPersonRounded />
+                {/* <MaterialSymbolsPersonRounded /> */}
                 <p className="text-xl font-semibold">
                   {/* {dashboarddata.data?.venders} */}0
                 </p>
@@ -133,7 +137,7 @@ const UserDashboardPage = () => {
                 </Tooltip>
               </div>
               <div className="flex gap-2 items-center">
-                <FluentDocumentBulletList16Regular />
+                {/* <FluentDocumentBulletList16Regular /> */}
                 <p className="text-xl font-semibold">
                   {/* {dashboarddata.data?.medical} */}0
                 </p>
@@ -153,7 +157,7 @@ const UserDashboardPage = () => {
                 </Tooltip>
               </div>
               <div className="flex gap-2 items-center">
-                <MaterialSymbolsPersonRounded />
+                {/* <MaterialSymbolsPersonRounded /> */}
                 <p className="text-xl font-semibold">
                   {/* {dashboarddata.data?.user} */}0
                 </p>
@@ -174,7 +178,7 @@ const UserDashboardPage = () => {
                 </Tooltip>
               </div>
               <div className="flex gap-2 items-center">
-                <IcBaselineAttractions />
+                {/* <IcBaselineAttractions /> */}
                 <p className="text-xl font-semibold">
                   {/* {dashboarddata.data?.cows} */}0
                 </p>
@@ -195,7 +199,7 @@ const UserDashboardPage = () => {
                 </Tooltip>
               </div>
               <div className="flex gap-2 items-center">
-                <FluentDocumentBulletList16Regular />
+                {/* <FluentDocumentBulletList16Regular /> */}
                 <p className="text-xl font-semibold">
                   {/* {dashboarddata.data?.medical} */}0
                 </p>
@@ -215,7 +219,7 @@ const UserDashboardPage = () => {
                 </Tooltip>
               </div>
               <div className="flex gap-2 items-center">
-                <MaterialSymbolsPersonRounded />
+                {/* <MaterialSymbolsPersonRounded /> */}
                 <p className="text-xl font-semibold">
                   {/* {dashboarddata.data?.venders} */}0
                 </p>
