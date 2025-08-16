@@ -1,15 +1,27 @@
 "use client";
 import { ApiCall } from "@/services/api";
-import { departmentToString, encryptURLData, roleToString } from "@/utils/methods";
+import {
+  departmentToString,
+  encryptURLData,
+  formateDate,
+  roleToString,
+} from "@/utils/methods";
 import { useQuery } from "@tanstack/react-query";
-import { Alert, Pagination, Switch } from "antd";
+import { Alert, Drawer, Pagination, Radio } from "antd";
+import { CheckboxGroupProps } from "antd/es/checkbox";
 import { getCookie } from "cookies-next/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+enum FILTERS {
+  ALL = "All",
+  MY_FILES = "My_Files",
+  ESCALATION_FILES = "Escalation_Files",
+}
+
 const NaPermission = () => {
   const router = useRouter();
-  const [allFiles, setAllfiles] = useState<boolean>(false);
+  // const [allFiles, setAllfiles] = useState<boolean>(false);
   const currentuserrole: string = getCookie("role") as string;
 
   const [pagination, setPaginatin] = useState<{
@@ -22,7 +34,15 @@ const NaPermission = () => {
     total: 0,
   });
 
-  //   const [search, setSearch] = useState<string | undefined>(undefined);
+  const [filter, setFilter] = useState<FILTERS>(FILTERS.MY_FILES);
+
+  const [isInfo, setIsInfo] = useState<boolean>(false);
+
+  const options: CheckboxGroupProps<string>["options"] = [
+    { label: "My_Files", value: FILTERS.MY_FILES },
+    { label: "All_Files", value: FILTERS.ALL },
+    { label: "Escalation_Files", value: FILTERS.ESCALATION_FILES },
+  ];
 
   interface NaResponse {
     limit: number;
@@ -35,6 +55,7 @@ const NaPermission = () => {
       office_status: string;
       dept_status: string;
       form_status: string;
+      updatedAt: string;
       dept_user: {
         role: string;
         id: number;
@@ -51,7 +72,7 @@ const NaPermission = () => {
     queryFn: async () => {
       const response = await ApiCall({
         query:
-          "query GetAllNa($take: Int!, $skip: Int!) { getAllNa(take: $take, skip: $skip) {total, skip, take, data {id, q4, status, form_status, office_status, dept_status, dept_user {role, id}, village {name}}}}",
+          "query GetAllNa($take: Int!, $skip: Int!) { getAllNa(take: $take, skip: $skip) {total, skip, take, data {id, q4, status, form_status, office_status, dept_status, updatedAt, dept_user {role, id}, village {name}}}}",
         variables: {
           take: pagination.take,
           skip: pagination.skip,
@@ -61,6 +82,7 @@ const NaPermission = () => {
       if (!response.status) {
         throw new Error(response.message);
       }
+
       // if value is not in response.data then return the error
       if (!(response.data as Record<string, unknown>)["getAllNa"]) {
         throw new Error("Value not found in response");
@@ -80,6 +102,40 @@ const NaPermission = () => {
     naformdata.refetch();
   };
 
+  if (naformdata.isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (naformdata.isError) {
+    return <div>Error: {naformdata.error.message}</div>;
+  }
+
+  const filteredData = () => {
+    if (naformdata.data == undefined) return [];
+    if (FILTERS.ALL === filter) {
+      return naformdata.data.data.filter((val) => val.form_status != "DRAFT");
+    } else if (FILTERS.MY_FILES === filter) {
+      return naformdata.data.data.filter(
+        (val) =>
+          val.form_status != "DRAFT" &&
+          (val.dept_user.id == parseInt(getCookie("id") as string) ||
+            (val.dept_status == "SEEK_REPORT" &&
+              ["TALATHI", "DNHPDA", "LAQ", "LRO"].includes(currentuserrole)))
+      );
+    } else {
+      const date = new Date();
+
+      return naformdata.data.data.filter(
+        (val) =>
+          val.form_status != "DRAFT" &&
+          val.dept_status == "SEEK_REPORT" &&
+          (date.getTime() - new Date(val.updatedAt).getTime()) /
+            (1000 * 60 * 60 * 24) >
+            15
+      );
+    }
+  };
+
   return (
     <div className="p-6">
       <div className="flex gap-2 items-center">
@@ -88,16 +144,22 @@ const NaPermission = () => {
         {["LDCMAMLATDAR", "MAMLATDAR", "DEPUTYCOLLECTOR", "COLLECTOR"].includes(
           currentuserrole
         ) && (
-          <Switch
-            onChange={() => setAllfiles(!allFiles)}
-            value={allFiles}
-            checkedChildren="All Files"
-            unCheckedChildren="My Files"
+          <Radio.Group
+            style={{ minWidth: 320 }}
+            onChange={(e) => {
+              const value = e.target.value;
+              setFilter(value as FILTERS);
+            }}
+            block
+            options={options}
+            defaultValue={filter}
+            optionType="button"
+            buttonStyle="solid"
           />
         )}
       </div>
 
-      {naformdata.data?.data.length === 0 ? (
+      {filteredData().length === 0 ? (
         <div className="mt-4">
           <Alert message="No Active Applications" type="warning" showIcon />
         </div>
@@ -129,96 +191,80 @@ const NaPermission = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {allFiles ? (
-                    <>
-                      {naformdata.data?.data
-                        .filter((val) => val.form_status != "DRAFT")
-                        .map((naform, index) => (
-                          <tr key={index} className="hover:bg-gray-50">
-                            <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
-                              {pagination.skip + index + 1}
-                            </td>
-                            <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
-                              {naform.q4}
-                            </td>
-                            <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
-                              {naform.village.name}
-                            </td>
-                            <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
-                              {naform.dept_user && naform.dept_user.role
-                                ? naform.dept_user.role
-                                : "N/A"}
-                            </td>
-                            <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
-                              {naform.dept_status}
-                            </td>
+                  <>
+                    {filteredData().map((naform, index) => (
+                      <tr key={index} className="hover:bg-gray-50">
+                        <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                          {pagination.skip + index + 1}
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                          {naform.q4}
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                          {naform.village.name}
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                          {naform.dept_user && naform.dept_user.role
+                            ? naform.dept_user.role
+                            : "N/A"}
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                          {naform.dept_status}
+                        </td>
 
-                            <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                        <td className="border border-gray-300 px-4 py-2 font-normal text-sm flex gap-2">
+                          <button
+                            className="bg-blue-500 text-white px-4 py-1 rounded-md cursor-pointer"
+                            onClick={() => {
+                              router.push(
+                                `/dashboard/department/na-permission/view/${encryptURLData(
+                                  naform.id.toString()
+                                )}`
+                              );
+                            }}
+                          >
+                            View
+                          </button>
+
+                          {filter == FILTERS.ESCALATION_FILES && (
+                            <>
                               <button
                                 className="bg-blue-500 text-white px-4 py-1 rounded-md cursor-pointer"
-                                onClick={() => {
-                                  router.push(
-                                    `/dashboard/department/na-permission/view/${encryptURLData(
-                                      naform.id.toString()
-                                    )}`
-                                  );
-                                }}
+                                onClick={() => setIsInfo(true)}
                               >
-                                View
+                                Info
                               </button>
-                            </td>
-                          </tr>
-                        ))}
-                    </>
-                  ) : (
-                    <>
-                      {naformdata.data?.data
-                        .filter(
-                          (val) =>
-                            val.form_status != "DRAFT" &&
-                            (val.dept_user.id ==
-                              parseInt(getCookie("id") as string) ||
-                              (val.dept_status == "SEEK_REPORT" &&
-                                ["TALATHI", "DNHPDA", "LAQ", "LRO"].includes(
-                                  currentuserrole
-                                )))
-                        )
-                        .map((naform, index) => (
-                          <tr key={index} className="hover:bg-gray-50">
-                            <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
-                              {pagination.skip + index + 1}
-                            </td>
-                            <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
-                              {naform.q4}
-                            </td>
-                            <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
-                              {naform.village.name}
-                            </td>
-                            <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
-                              {roleToString(naform.dept_user.role)}
-                            </td>
-                            <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
-                              {departmentToString(naform.dept_status)}
-                            </td>
+                            </>
+                          )}
 
-                            <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
-                              <button
-                                className="bg-blue-500 text-white px-4 py-1 rounded-md cursor-pointer"
-                                onClick={() => {
-                                  router.push(
-                                    `/dashboard/department/na-permission/view/${encryptURLData(
-                                      naform.id.toString()
-                                    )}`
-                                  );
-                                }}
-                              >
-                                View
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                    </>
-                  )}
+                          <Drawer
+                            placement="right"
+                            onClose={() => setIsInfo(false)}
+                            open={isInfo}
+                            closable={false}
+                            // size="large"
+                            styles={{
+                              body: {
+                                paddingLeft: "10px",
+                                paddingRight: "10px",
+                                paddingTop: "10px",
+                                paddingBottom: "0px",
+                                // backgroundColor: "#f4f8fb",
+                              },
+                            }}
+                          >
+                            <div>
+                              <InfoPage
+                                setIsInfo={setIsInfo}
+                                isInfo={isInfo}
+                                id={naform.id}
+                              />
+                            </div>
+                          </Drawer>
+                        </td>
+                      </tr>
+                    ))}
+                  </>
                 </tbody>
               </table>
             </div>
@@ -229,7 +275,7 @@ const NaPermission = () => {
                   defaultCurrent={1}
                   onChange={onChange}
                   showSizeChanger
-                  total={500}
+                  total={filteredData().length}
                 />
               </div>
               <div className="hidden lg:block">
@@ -240,9 +286,7 @@ const NaPermission = () => {
                   }
                   showQuickJumper
                   defaultCurrent={1}
-                  total={
-                    naformdata.data?.data.length ? naformdata.data?.total : 0
-                  }
+                  total={filteredData().length}
                   pageSizeOptions={[2, 5, 10, 20, 25, 50, 100]}
                   onChange={onChange}
                 />
@@ -256,3 +300,118 @@ const NaPermission = () => {
 };
 
 export default NaPermission;
+
+interface InfoProviderProps {
+  id: number;
+  setIsInfo: React.Dispatch<React.SetStateAction<boolean>>;
+  isInfo: boolean;
+}
+
+interface ReportSubmitData {
+  id: number;
+  request_type: string;
+  query_status: string;
+  createdAt: Date;
+  updatedAt: Date;
+  type: string;
+  from_user: {
+    role: string;
+  };
+  to_user: {
+    role: string;
+  };
+}
+
+const InfoPage = (props: InfoProviderProps) => {
+  const reportsubmitdata = useQuery({
+    queryKey: ["reportReceivedStatus"],
+    refetchOnWindowFocus: false,
+    queryFn: async () => {
+      const response = await ApiCall({
+        query:
+          "query ReportReceivedStatus($id: Int!) { reportReceivedStatus(id: $id) { id, request_type,query_status,createdAt,updatedAt,type,from_user {role},to_user {role}}}",
+        variables: {
+          id: props.id,
+        },
+      });
+
+      if (!response.status) {
+        throw new Error(response.message);
+      }
+
+      // if value is not in response.data then return the error
+      if (!(response.data as Record<string, unknown>)["reportReceivedStatus"]) {
+        throw new Error("Value not found in response");
+      }
+      return (response.data as Record<string, unknown>)[
+        "reportReceivedStatus"
+      ] as ReportSubmitData[];
+    },
+  });
+
+  if (reportsubmitdata.isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (reportsubmitdata.error) {
+    return <div>Error: {reportsubmitdata.error.message}</div>;
+  }
+
+  return (
+    <>
+      <div>
+        <div className="overflow-x-auto">
+          <table className="w-full mt-2 border-collapse border border-gray-200">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                  Dept.
+                </th>
+                <th className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                  Date Sent
+                </th>
+                <th className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                  Status
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {reportsubmitdata
+                .data!.filter((item) => item.type === "REPORT")
+                .map((item) => (
+                  <tr key={item.id} className="hover:bg-gray-50">
+                    <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                      {item.to_user.role}
+                    </td>
+                    <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                      {formateDate(new Date(item.createdAt.toString()))}
+                    </td>
+                    <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                      {item.query_status === "PENDING"
+                        ? "Not Received"
+                        : item.query_status === "REPLIED"
+                        ? (() => {
+                            // Find the SUBMITREPORT with matching from_user and to_user
+                            const submitReport = reportsubmitdata.data!.find(
+                              (sr) =>
+                                sr.type === "SUBMITREPORT" &&
+                                sr.from_user.role === item.to_user.role &&
+                                sr.to_user.role === item.from_user.role
+                            );
+                            return submitReport
+                              ? `${formateDate(
+                                  new Date(submitReport.createdAt.toString())
+                                )}`
+                              : "Received";
+                          })()
+                        : "Received"}
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </>
+  );
+};
