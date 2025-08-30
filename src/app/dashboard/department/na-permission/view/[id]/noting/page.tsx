@@ -18,7 +18,6 @@ import { IcBaselineArrowBack } from "@/components/icons";
 import { NotingEditor } from "@/components/editors/notingtexteditor/page";
 import { ViewEditor } from "@/components/editors/vieweditro/page";
 import { toast } from "react-toastify";
-import { queryStatus } from "@/utils/utilscompoment";
 import { HearingNoticeEditor } from "@/components/editors/hearingnoticeeditor/page";
 import { SanadGenerateEditor } from "@/components/editors/sanadgenerateeditor/page";
 import { IntimationOrderEditor } from "@/components/editors/intimationordereditor/page";
@@ -952,34 +951,7 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
             type={field.type}
           />
         );
-        // if (field.from_user.role === "USER") {
-        // if (field.type === "CORESPONDENCE") {
-        //   return (
-        //     <UserChat
-        //       key={index}
-        //       name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-        //       fromrole={field.from_user.role}
-        //       torole={field.to_user.role}
-        //       message={field.query}
-        //       time={new Date(field.createdAt)}
-        //       url={field.upload_url_1}
-        //       type={field.type}
-        //     />
-        //   );
-        // } else {
-        //   return (
-        //     <DeptChat
-        //       key={index}
-        //       name={`${field.to_user.firstName} ${field.to_user.lastName}`}
-        //       fromrole={field.from_user.role}
-        //       torole={field.to_user.role}
-        //       message={field.query}
-        //       time={new Date(field.createdAt)}
-        //       url={field.upload_url_1}
-        //       type={field.type}
-        //     />
-        //   );
-        // }
+      
       })}
     </>
   );
@@ -993,14 +965,24 @@ const NotingPage = (props: NotingProviderProps) => {
   const userid = getCookie("id");
 
   const notingdata = useQuery({
-    queryKey: ["getQueryByType", Number(props.id), ["NOTING", "PRENOTE"]],
+    queryKey: [
+      "getQueryByType",
+      Number(props.id),
+      ["REPORTMAM", "REPORTLRO", "REPORTLAQ", "REPORTDNHPDA", "REPORTFULL"],
+    ],
     queryFn: async () => {
       const response = await ApiCall({
         query:
           "query GetQueryByType($id: Int!, $querytype: [QueryType!]!) {getQueryByType(id: $id, querytype: $querytype) {id,query,upload_url_1,type,request_type,createdAt,from_user {id, firstName,lastName,role},to_user {id, firstName,lastName,role},}}",
         variables: {
           id: props.id,
-          querytype: ["NOTING", "PRENOTE"],
+          querytype: [
+            "REPORTMAM",
+            "REPORTLRO",
+            "REPORTLAQ",
+            "REPORTDNHPDA",
+            "REPORTFULL",
+          ],
         },
       });
 
@@ -1036,64 +1018,44 @@ const NotingPage = (props: NotingProviderProps) => {
               new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           )[0];
 
-        return notingdata.data.map((field, index) => {
-          // Show only the latest PRENOTE
-          if (field.type === "PRENOTE") {
-            if (field !== latestPrenote) return null; // skip other PRENOTEs
+        return notingdata.data
+          .sort((a, b) => {
+            // Define the desired order
+            const order = [
+              "REPORTMAM",
+              "REPORTDNHPDA",
+              "REPORTLRO",
+              "REPORTLAQ",
+              "REPORTFULL",
+            ];
+            const aIndex = order.indexOf(a.type);
+            const bIndex = order.indexOf(b.type);
+
+            // If both types are in the order array, sort by their index
+            if (aIndex !== -1 && bIndex !== -1) {
+              return aIndex - bIndex;
+            }
+            // If only a is in the order array, it comes first
+            if (aIndex !== -1) return -1;
+            // If only b is in the order array, it comes first
+            if (bIndex !== -1) return 1;
+            // Otherwise, keep original order
+            return 0;
+          })
+          .map((field, index) => {
             return (
-              <ShowEditor
-                key={`prenote-${index}`}
-                data={field.query}
+              <UserChatInternal
+                key={`user-${index}`}
+                name={`${field.from_user.firstName} ${field.from_user.lastName}`}
                 fromrole={field.from_user.role}
                 torole={field.to_user.role}
-                name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+                message={field.query}
                 time={new Date(field.createdAt)}
+                url={field.upload_url_1}
                 type={field.type}
               />
             );
-          }
-
-          return (
-            <UserChat
-              key={`user-${index}`}
-              name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-              fromrole={field.from_user.role}
-              torole={field.to_user.role}
-              message={field.query}
-              time={new Date(field.createdAt)}
-              url={field.upload_url_1}
-              type={field.type}
-            />
-          );
-
-          // if (field.from_user.id === Number(userid)) {
-          //   return (
-          //     <UserChat
-          //       key={`user-${index}`}
-          //       name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-          //       fromrole={field.from_user.role}
-          //       torole={field.to_user.role}
-          //       message={field.query}
-          //       time={new Date(field.createdAt)}
-          //       url={field.upload_url_1}
-          //       type={field.type}
-          //     />
-          //   );
-          // } else {
-          //   return (
-          //     <DeptChat
-          //       key={`dept-${index}`}
-          //       name={`${field.to_user.firstName} ${field.to_user.lastName}`}
-          //       fromrole={field.from_user.role}
-          //       torole={field.to_user.role}
-          //       message={field.query}
-          //       time={new Date(field.createdAt)}
-          //       url={field.upload_url_1}
-          //       type={field.type}
-          //     />
-          //   );
-          // }
-        });
+          });
       })()}
     </>
   );
@@ -1179,34 +1141,6 @@ const HearingNoticePage = (props: HearingNoticeProps) => {
               type={field.type}
             />
           );
-
-          // if (field.from_user.id === Number(userid)) {
-          //   return (
-          //     <UserChat
-          //       key={`user-${index}`}
-          //       name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-          //       fromrole={field.from_user.role}
-          //       torole={field.to_user.role}
-          //       message={field.query}
-          //       time={new Date(field.createdAt)}
-          //       url={field.upload_url_1}
-          //       type={field.type}
-          //     />
-          //   );
-          // } else {
-          //   return (
-          //     <DeptChat
-          //       key={`dept-${index}`}
-          //       name={`${field.to_user.firstName} ${field.to_user.lastName}`}
-          //       fromrole={field.from_user.role}
-          //       torole={field.to_user.role}
-          //       message={field.query}
-          //       time={new Date(field.createdAt)}
-          //       url={field.upload_url_1}
-          //       type={field.type}
-          //     />
-          //   );
-          // }
         });
       })()}
     </>
@@ -1293,34 +1227,6 @@ const SanadPage = (props: SanadPageProps) => {
               type={field.type}
             />
           );
-
-          // if (field.from_user.id === Number(userid)) {
-          //   return (
-          //     <UserChat
-          //       key={`user-${index}`}
-          //       name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-          //       fromrole={field.from_user.role}
-          //       torole={field.to_user.role}
-          //       message={field.query}
-          //       time={new Date(field.createdAt)}
-          //       url={field.upload_url_1}
-          //       type={field.type}
-          //     />
-          //   );
-          // } else {
-          //   return (
-          //     <DeptChat
-          //       key={`dept-${index}`}
-          //       name={`${field.to_user.firstName} ${field.to_user.lastName}`}
-          //       fromrole={field.from_user.role}
-          //       torole={field.to_user.role}
-          //       message={field.query}
-          //       time={new Date(field.createdAt)}
-          //       url={field.upload_url_1}
-          //       type={field.type}
-          //     />
-          //   );
-          // }
         });
       })()}
     </>
@@ -1684,5 +1590,24 @@ const ReportPage = (props: ReportProviderProps) => {
             // }
           })}
     </>
+  );
+};
+
+interface UserChatProps {
+  name: string;
+  fromrole: string;
+  torole: string;
+  message: string;
+  time: Date;
+  url?: string | null;
+  type: string;
+}
+
+const UserChatInternal = (props: UserChatProps) => {
+  return (
+    <div className="py-2 px-2">
+      <ViewEditor data={props.message} />
+      <div className="h-[1px] w-full bg-gray-200 mt-2"></div>
+    </div>
   );
 };

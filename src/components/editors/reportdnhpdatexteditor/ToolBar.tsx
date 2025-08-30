@@ -331,14 +331,14 @@ const ToolBar = ({ id }: ToolBarProps) => {
         variables: {
           createNaQueryInput: {
             createdById: parseInt(userid.toString()),
-            from_userId: 5,
+            // from_userId: parseInt(userid.toString()),
+            from_userId: 17,
             to_userId: 5,
             query: data.query,
-            type: "REPORTFULL",
+            type: "REPORTDNHPDA",
             na_formId: id,
             query_status: "PENDING",
             request_type: "DEPTTODEPT",
-            noting_draft: true,
           },
         },
       });

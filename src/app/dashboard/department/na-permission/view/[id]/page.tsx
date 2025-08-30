@@ -48,9 +48,9 @@ import { ViewEditor } from "@/components/editors/vieweditro/page";
 import { CheckBoxInput } from "@/components/form/inputfields/checkboxinput";
 import dayjs from "dayjs";
 import { CheckboxGroupProps } from "antd/es/checkbox";
-import { queryStatus } from "@/utils/utilscompoment";
 import { ToWords } from "to-words";
-import { ShowEditor, UserChat } from "@/components/chat";
+import { queryStatus } from "@/utils/utilscompoment";
+import { UserChat } from "@/components/chat";
 
 interface NaFormResponse {
   id: number;
@@ -785,7 +785,7 @@ const ViewPermission = () => {
         onClose={() => setReportBox(false)}
         open={reportBox}
         closable={false}
-        size="large"
+        width={1000}
         styles={{
           body: {
             paddingLeft: "10px",
@@ -816,6 +816,16 @@ const ViewPermission = () => {
               role={userdata.data?.role ?? ""}
             />
           </>
+        ) : formdata.data &&
+          userdata.data &&
+          formdata.data.dept_status === "SEEK_REPORT" &&
+          ["DNHPDA", "LAQ", "LRO"].includes(userdata.data.role) ? (
+          <SeekReportDepartmentProvider
+            setReportBox={setReportBox}
+            id={formdata.data!.id}
+            role={userdata.data?.role ?? ""}
+            status={formdata.data!.dept_status}
+          />
         ) : (
           <ReportProvider
             setReportBox={setReportBox}
@@ -1239,8 +1249,6 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
   );
 };
 
-
-
 interface NotingProviderProps {
   setNotingBox: React.Dispatch<React.SetStateAction<boolean>>;
   id: number;
@@ -1272,14 +1280,24 @@ const NotingPage = (props: NotingProviderProps) => {
   const router = useRouter();
 
   const notingdata = useQuery({
-    queryKey: ["getQueryByType", props.id, ["NOTING", "PRENOTE"]],
+    queryKey: [
+      "getQueryByType",
+      props.id,
+      ["REPORTMAM", "REPORTLRO", "REPORTLAQ", "REPORTDNHPDA", "REPORTFULL"],
+    ],
     queryFn: async () => {
       const response = await ApiCall({
         query:
           "query GetQueryByType($id: Int!, $querytype: [QueryType!]!) {getQueryByType(id: $id, querytype: $querytype) {id,query,upload_url_1,type,request_type,createdAt,from_user {id, firstName,lastName,role},to_user {id, firstName,lastName,role},}}",
         variables: {
           id: props.id,
-          querytype: ["NOTING", "PRENOTE"],
+          querytype: [
+            "REPORTMAM",
+            "REPORTLRO",
+            "REPORTLAQ",
+            "REPORTDNHPDA",
+            "REPORTFULL",
+          ],
         },
       });
 
@@ -1464,63 +1482,60 @@ const NotingPage = (props: NotingProviderProps) => {
               new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           )[0];
 
-        return notingdata.data.map((field, index) => {
-          // Show only the latest PRENOTE
-          if (field.type === "PRENOTE") {
-            if (field !== latestPrenote) return null; // skip other PRENOTEs
+        return notingdata.data
+          .sort((a, b) => {
+            // Define the desired order
+            const order = [
+              "REPORTMAM",
+              "REPORTDNHPDA",
+              "REPORTLRO",
+              "REPORTLAQ",
+              "REPORTFULL",
+            ];
+            const aIndex = order.indexOf(a.type);
+            const bIndex = order.indexOf(b.type);
+
+            // If both types are in the order array, sort by their index
+            if (aIndex !== -1 && bIndex !== -1) {
+              return aIndex - bIndex;
+            }
+            // If only a is in the order array, it comes first
+            if (aIndex !== -1) return -1;
+            // If only b is in the order array, it comes first
+            if (bIndex !== -1) return 1;
+            // Otherwise, keep original order
+            return 0;
+          })
+          .map((field, index) => {
+            // Show only the latest PRENOTE
+            // if (field.type === "PRENOTE") {
+            //   if (field !== latestPrenote) return null; // skip other PRENOTEs
+            //   return (
+            //     <ShowEditor
+            //       key={`prenote-${index}`}
+            //       data={field.query}
+            //       fromrole={field.from_user.role}
+            //       torole={field.to_user.role}
+            //       name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+            //       time={new Date(field.createdAt)}
+            //       type={field.type}
+            //     />
+            //   );
+            // }
+
             return (
-              <ShowEditor
-                key={`prenote-${index}`}
-                data={field.query}
+              <UserChatInternal
+                key={`user-${index}`}
+                name={`${field.from_user.firstName} ${field.from_user.lastName}`}
                 fromrole={field.from_user.role}
                 torole={field.to_user.role}
-                name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+                message={field.query}
                 time={new Date(field.createdAt)}
+                url={field.upload_url_1}
                 type={field.type}
               />
             );
-          }
-
-          return (
-            <UserChat
-              key={`user-${index}`}
-              name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-              fromrole={field.from_user.role}
-              torole={field.to_user.role}
-              message={field.query}
-              time={new Date(field.createdAt)}
-              url={field.upload_url_1}
-              type={field.type}
-            />
-          );
-          // if (field.from_user.id === Number(userid)) {
-          //   return (
-          //     <UserChat
-          //       key={`user-${index}`}
-          //       name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-          //       fromrole={field.from_user.role}
-          //       torole={field.to_user.role}
-          //       message={field.query}
-          //       time={new Date(field.createdAt)}
-          //       url={field.upload_url_1}
-          //       type={field.type}
-          //     />
-          //   );
-          // } else {
-          //   return (
-          //     <DeptChat
-          //       key={`dept-${index}`}
-          //       name={`${field.to_user.firstName} ${field.to_user.lastName}`}
-          //       fromrole={field.from_user.role}
-          //       torole={field.to_user.role}
-          //       message={field.query}
-          //       time={new Date(field.createdAt)}
-          //       url={field.upload_url_1}
-          //       type={field.type}
-          //     />
-          //   );
-          // }
-        });
+          });
       })()}
 
       <Drawer
@@ -2910,6 +2925,413 @@ const ReportPage = (props: ReportProviderProps) => {
   );
 };
 
+interface SeekReportDepartmentProviderProps {
+  setReportBox: React.Dispatch<React.SetStateAction<boolean>>;
+  role: string;
+  id: number;
+  status: string;
+}
+
+const SeekReportDepartmentProvider = (
+  props: SeekReportDepartmentProviderProps
+) => {
+  const methods = useForm<QueryForm>({
+    resolver: valibotResolver(QuerySchema),
+  });
+
+  return (
+    <>
+      <FormProvider {...methods}>
+        <SeekReportDepartmentPage
+          setReportBox={props.setReportBox}
+          id={props.id}
+          role={props.role}
+          status={props.status}
+        />
+      </FormProvider>
+    </>
+  );
+};
+
+const SeekReportDepartmentPage = (props: SeekReportDepartmentProviderProps) => {
+  const [submitBox, setSubmitBox] = useState<boolean>(false);
+  const [id, setId] = useState<number>(0);
+  const userid = getCookie("id");
+  const currentuserrole: string = getCookie("role") as string;
+  const [queryData, setQueryData] = useState<string>("");
+
+  const reportdata = useQuery({
+    queryKey: [
+      "getQueryByType",
+      props.id,
+      [
+        "REPORT",
+        "SUBMITREPORT",
+        currentuserrole == "LAQ"
+          ? "REPORTLAQ"
+          : currentuserrole == "LRO"
+          ? "REPORTLRO"
+          : currentuserrole == "DNHPDA"
+          ? "REPORTDNHPDA"
+          : "",
+      ],
+    ],
+    queryFn: async () => {
+      const response = await ApiCall({
+        query:
+          "query GetQueryByType($id: Int!, $querytype: [QueryType!]!) {getQueryByType(id: $id, querytype: $querytype) {id,query,upload_url_1,type,request_type,query_status,createdAt,from_user {id, firstName,lastName,role},to_user {id, firstName,lastName,role},}}",
+        variables: {
+          id: props.id,
+          querytype: [
+            "REPORT",
+            "SUBMITREPORT",
+            currentuserrole == "LAQ"
+              ? "REPORTLAQ"
+              : currentuserrole == "LRO"
+              ? "REPORTLRO"
+              : currentuserrole == "DNHPDA"
+              ? "REPORTDNHPDA"
+              : "",
+          ],
+        },
+      });
+
+      if (!response.status) {
+        throw new Error(response.message);
+      }
+
+      if (!(response.data as Record<string, unknown>)["getQueryByType"]) {
+        throw new Error("Value not found in response");
+      }
+      return (response.data as Record<string, unknown>)[
+        "getQueryByType"
+      ] as QueryTypeResponseData[];
+    },
+  });
+
+  const {
+    handleSubmit,
+    formState: { isSubmitting },
+    setValue,
+    getValues,
+  } = useFormContext<QueryForm>();
+
+  const uploadRef = useRef<HTMLInputElement>(null);
+  const [upload, setUpload] = useState<File | null>(null);
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  const submitseekreport = useMutation({
+    mutationKey: ["submitSeekReport"],
+    mutationFn: async () => {
+      if (!userid) {
+        toast.error("User ID not found");
+        return;
+      }
+
+      const response = await ApiCall({
+        query:
+          "mutation SubmitSeekReport($naid: Int!,$userid: Int!) {submitSeekReport(naid: $naid, userid: $userid) {id}}",
+        variables: {
+          naid: props.id,
+          userid: parseInt(userid.toString()),
+        },
+      });
+
+      if (!response.status) {
+        throw new Error(response.message);
+      }
+
+      if (!(response.data as Record<string, unknown>)["submitSeekReport"]) {
+        throw new Error("Value not found in response");
+      }
+      return (response.data as Record<string, unknown>)[
+        "submitSeekReport"
+      ] as QueryResponseData;
+    },
+    onSuccess: () => {
+      toast.success("Report request created successfully");
+      reportdata.refetch();
+      props.setReportBox(false);
+      queryClient.invalidateQueries({
+        queryKey: ["getnaform", props.id],
+      });
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const submitreport = useMutation({
+    mutationKey: ["submitNaQuery"],
+    mutationFn: async (data: QueryForm) => {
+      if (!userid) {
+        toast.error("User ID not found");
+        return;
+      }
+
+      if (id === 0) {
+        toast.error("ID not set for report submission");
+        return;
+      }
+
+      const response = await ApiCall({
+        query:
+          "mutation SubmitNaQuery($id:Int! $createNaQueryInput: CreateNaQueryInput!) {submitNaQuery(id: $id, createNaQueryInput: $createNaQueryInput) {id}}",
+        variables: {
+          id: id,
+          createNaQueryInput: {
+            createdById: parseInt(userid.toString()),
+            from_userId: parseInt(userid.toString()),
+            to_userId: 5,
+            query: queryData,
+            type: "SUBMITREPORT",
+            na_formId: props.id,
+            query_status: "PENDING",
+            request_type: "DEPTTODEPT",
+            ...(data.upload_url_1 && {
+              upload_url_1: data.upload_url_1,
+            }),
+          },
+        },
+      });
+
+      if (!response.status) {
+        throw new Error(response.message);
+      }
+
+      if (!(response.data as Record<string, unknown>)["submitNaQuery"]) {
+        throw new Error("Value not found in response");
+      }
+      return (response.data as Record<string, unknown>)[
+        "submitNaQuery"
+      ] as QueryResponseData;
+    },
+    onSuccess: () => {
+      toast.success("Report sent successfully");
+      reportdata.refetch();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const onReportSubmit = async (data: QueryForm) => {
+    submitreport.mutate(data);
+    setSubmitBox(false);
+  };
+
+  const handleFileUpload = (ref: React.RefObject<HTMLInputElement | null>) => {
+    if (ref!.current) {
+      ref!.current.click();
+    }
+  };
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+    setFile: React.Dispatch<React.SetStateAction<File | null>>,
+    ref: React.RefObject<HTMLInputElement | null>
+  ) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setFile(file);
+      const resposne = await UploadFile(file, userid!);
+      if (!resposne.status) {
+        toast.error(resposne.message);
+        return;
+      }
+      setValue(ref.current!.name as keyof QueryForm, resposne.data as string);
+    }
+  };
+
+  return (
+    <>
+      <div className="flex items-center gap-2">
+        <p className="text-gray-700 text-lg ">Report</p>
+        <div className="grow"></div>
+
+        {["SUBMIT", "SEEK_REPORT"].includes(props.status) && (
+          <>
+            {["MAMLATDAR", "LDCMAMLATDAR"].includes(props.role) && (
+              <button
+                type="button"
+                onClick={() => {
+                  submitseekreport.mutate();
+                }}
+                className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-28 text-nowrap"
+              >
+                Seek Report
+              </button>
+            )}
+
+            {reportdata.data &&
+              reportdata.data.filter(
+                (val) =>
+                  val.to_user?.id === Number(userid) &&
+                  val.query_status === "PENDING"
+              ).length > 0 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (currentuserrole == "LRO") {
+                        router.push(
+                          `/dashboard/department/na-permission/view/${encryptURLData(
+                            props.id.toString()
+                          )}/form2`
+                        );
+                      } else if (currentuserrole == "LAQ") {
+                        router.push(
+                          `/dashboard/department/na-permission/view/${encryptURLData(
+                            props.id.toString()
+                          )}/form3`
+                        );
+                      } else {
+                        router.push(
+                          `/dashboard/department/na-permission/view/${encryptURLData(
+                            props.id.toString()
+                          )}/form4`
+                        );
+                      }
+                    }}
+                    className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-32 text-nowrap"
+                  >
+                    Submit Report
+                  </button>
+                </>
+              )}
+          </>
+        )}
+
+        <button
+          type="button"
+          onClick={() => props.setReportBox(false)}
+          className="py-1 rounded-md bg-rose-500 px-4 text-sm text-white cursor-pointer w-28 text-nowrap"
+        >
+          Close
+        </button>
+      </div>
+
+      {reportdata.data?.length === 0 && (
+        <div className="mt-2">
+          <Alert message="No Report found." type="error" showIcon />
+        </div>
+      )}
+
+      {["TALATHI", "DNHPDA", "LAQ", "LRO"].includes(currentuserrole)
+        ? reportdata.data?.map((field, index) => {
+            if (
+              field.to_user.id == Number(userid) ||
+              field.from_user.id == Number(userid)
+            ) {
+              return (
+                <UserChat
+                  key={index}
+                  name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+                  fromrole={field.from_user.role}
+                  torole={field.to_user.role}
+                  message={field.query}
+                  time={new Date(field.createdAt)}
+                  url={field.upload_url_1}
+                  type={field.type}
+                />
+              );
+            }
+          })
+        : reportdata.data?.map((field, index) => {
+            return (
+              <UserChat
+                key={index}
+                name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+                fromrole={field.from_user.role}
+                torole={field.to_user.role}
+                message={field.query}
+                time={new Date(field.createdAt)}
+                url={field.upload_url_1}
+                type={field.type}
+              />
+            );
+          })}
+
+      <Drawer
+        width={320}
+        closable={false}
+        onClose={() => setSubmitBox(false)}
+        open={submitBox}
+        styles={{
+          body: {
+            paddingLeft: "10px",
+            paddingRight: "10px",
+            paddingTop: "10px",
+            paddingBottom: "0px",
+          },
+        }}
+      >
+        <h1 className="text-lg font-semibold text-[#162f57] mb-2">Mark to</h1>
+        <form onSubmit={handleSubmit(onReportSubmit, onFormError)}>
+          <div>
+            <SimpleTextEditorInput<MarkToForm>
+              title="Query"
+              required={true}
+              name="query"
+              placeholder="Enter Details"
+              setQueryData={setQueryData}
+            />
+          </div>
+          <div className="flex items-center mt-2 p-2 rounded-lg bg-gray-100">
+            <p className="text-sm text-gray-700">Upload File</p>
+            <div className="grow"></div>
+            {upload ? (
+              <button
+                type="button"
+                onClick={() => setUpload(null)}
+                className="py-1 rounded-md bg-red-500 px-4 text-sm text-white cursor-pointer w-28"
+              >
+                Remove
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => handleFileUpload(uploadRef)}
+                className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-28 text-nowrap"
+              >
+                Upload File
+              </button>
+            )}
+
+            <input
+              type="file"
+              ref={uploadRef}
+              name="upload_url_1"
+              onChange={(e) => handleFileChange(e, setUpload, uploadRef)}
+              className="hidden"
+            />
+
+            {upload && (
+              <div className="flex gap-2 items-center">
+                <Link
+                  target="_blank"
+                  href={URL.createObjectURL(upload!)}
+                  className="bg-gray-200 text-black py-1 px-4 rounded-md text-sm h-7 grid place-items-center w-28 text-nowrap"
+                >
+                  View File
+                </Link>
+              </div>
+            )}
+          </div>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white mt-2 cursor-pointer"
+          >
+            {isSubmitting ? "Loading...." : "Submit"}
+          </button>
+        </form>
+      </Drawer>
+    </>
+  );
+};
+
 interface SubmitReportProviderProps {
   setReportBox: React.Dispatch<React.SetStateAction<boolean>>;
   role: string;
@@ -2978,14 +3400,32 @@ const SubmitReportPage = (props: SubmitReportProviderProps) => {
   // report submit check section end here
 
   const reportdata = useQuery({
-    queryKey: ["getQueryByType", props.id, ["REPORT", "SUBMITREPORT"]],
+    queryKey: [
+      "getQueryByType",
+      props.id,
+      [
+        "REPORT",
+        "SUBMITREPORT",
+        "REPORTMAM",
+        "REPORTLRO",
+        "REPORTLAQ",
+        "REPORTDNHPDA",
+      ],
+    ],
     queryFn: async () => {
       const response = await ApiCall({
         query:
           "query GetQueryByType($id: Int!, $querytype: [QueryType!]!) {getQueryByType(id: $id, querytype: $querytype) {id,query,upload_url_1,type,request_type,query_status,createdAt,from_user {id, firstName,lastName,role},to_user {id, firstName,lastName,role},}}",
         variables: {
           id: props.id,
-          querytype: ["REPORT", "SUBMITREPORT"],
+          querytype: [
+            "REPORT",
+            "SUBMITREPORT",
+            "REPORTMAM",
+            "REPORTLRO",
+            "REPORTLAQ",
+            "REPORTDNHPDA",
+          ],
         },
       });
 
@@ -3044,7 +3484,7 @@ const SubmitReportPage = (props: SubmitReportProviderProps) => {
 
   const uploadRef = useRef<HTMLInputElement>(null);
   const [upload, setUpload] = useState<File | null>(null);
-
+  const router = useRouter();
   const createquery = useMutation({
     mutationKey: ["createNaQuery"],
     mutationFn: async (data: NotingForm) => {
@@ -3183,6 +3623,19 @@ const SubmitReportPage = (props: SubmitReportProviderProps) => {
               className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-32 text-nowrap"
             >
               Report Received
+            </button>
+            <button
+              onClick={() => {
+                router.push(
+                  `/dashboard/department/na-permission/view/${encryptURLData(
+                    props.id.toString()
+                  )}/form1`
+                );
+              }}
+              type="button"
+              className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-36 text-nowrap"
+            >
+              Mamlatdar Report
             </button>
           </>
         )}
@@ -3626,47 +4079,21 @@ const AllotHearingPage = (props: AllotHearingProviderProps) => {
         </div>
       )}
 
-      {reportdata.data?.map((field, index) => {
-        return (
-          <UserChat
-            key={index}
-            name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-            fromrole={field.from_user.role}
-            torole={field.to_user.role}
-            message={field.query}
-            time={new Date(field.createdAt)}
-            url={field.upload_url_1}
-            type={field.type}
-          />
-        );
-        // if (field.from_user.id == Number(userid)) {
-        //   return (
-        //     <UserChat
-        //       key={index}
-        //       name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-        //       fromrole={field.from_user.role}
-        //       torole={field.to_user.role}
-        //       message={field.query}
-        //       time={new Date(field.createdAt)}
-        //       url={field.upload_url_1}
-        //       type={field.type}
-        //     />
-        //   );
-        // } else {
-        //   return (
-        //     <DeptChat
-        //       key={index}
-        //       name={`${field.to_user.firstName} ${field.to_user.lastName}`}
-        //       fromrole={field.from_user.role}
-        //       torole={field.to_user.role}
-        //       message={field.query}
-        //       time={new Date(field.createdAt)}
-        //       url={field.upload_url_1}
-        //       type={field.type}
-        //     />
-        //   );
-        // }
-      })}
+      {reportdata.data &&
+        [...reportdata.data].map((field, index) => {
+          return (
+            <UserChat
+              key={index}
+              name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+              fromrole={field.from_user.role}
+              torole={field.to_user.role}
+              message={field.query}
+              time={new Date(field.createdAt)}
+              url={field.upload_url_1}
+              type={field.type}
+            />
+          );
+        })}
 
       <Drawer
         width={320}
@@ -3922,5 +4349,24 @@ const HearingSchedulePage = (props: HearingScheduleProviderProps) => {
         </button>
       </form>
     </>
+  );
+};
+
+interface UserChatProps {
+  name: string;
+  fromrole: string;
+  torole: string;
+  message: string;
+  time: Date;
+  url?: string | null;
+  type: string;
+}
+
+const UserChatInternal = (props: UserChatProps) => {
+  return (
+    <div className="py-2 px-2">
+      <ViewEditor data={props.message} />
+      <div className="h-[1px] w-full bg-gray-200 mt-2"></div>
+    </div>
   );
 };

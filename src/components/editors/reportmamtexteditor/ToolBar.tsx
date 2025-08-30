@@ -331,14 +331,14 @@ const ToolBar = ({ id }: ToolBarProps) => {
         variables: {
           createNaQueryInput: {
             createdById: parseInt(userid.toString()),
+            // from_userId: parseInt(userid.toString()),
             from_userId: 5,
-            to_userId: 5,
+            to_userId: 4,
             query: data.query,
-            type: "REPORTFULL",
+            type: "REPORTMAM",
             na_formId: id,
             query_status: "PENDING",
             request_type: "DEPTTODEPT",
-            noting_draft: true,
           },
         },
       });
@@ -356,6 +356,7 @@ const ToolBar = ({ id }: ToolBarProps) => {
     },
     onSuccess: () => {
       toast.success("Noting created successfully");
+      window.location.reload();
     },
     onError: (error) => {
       toast.error(error.message);
