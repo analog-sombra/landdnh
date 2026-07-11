@@ -267,8 +267,8 @@ const ViewPermission = () => {
               onClick={() => {
                 router.push(
                   `/dashboard/department/na-permission/view/${encryptURLData(
-                    formid.toString()
-                  )}/sanad`
+                    formid.toString(),
+                  )}/sanad`,
                 );
               }}
               className="bg-[#162f57] text-white py-1 px-4 rounded-md text-sm grid place-items-center cursor-pointer"
@@ -312,6 +312,7 @@ const ViewPermission = () => {
           "DEPUTYCOLLECTOR",
           "COLLECTOR",
           "RAK",
+          "DNHPDA",
         ].includes(userdata.data!.role) ||
           formdata.data?.dept_user_id == Number(userid)) && (
           <button
@@ -361,8 +362,8 @@ const ViewPermission = () => {
               onClick={() => {
                 router.push(
                   `/dashboard/department/na-permission/view/${encryptURLData(
-                    formid.toString()
-                  )}/hearing`
+                    formid.toString(),
+                  )}/hearing`,
                 );
               }}
               className="bg-[#162f57] text-white py-1 px-4 rounded-md text-sm grid place-items-center cursor-pointer"
@@ -505,7 +506,20 @@ const ViewPermission = () => {
           </Link>
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
-          <p className="text-sm text-gray-700">Annexure 4: Other Document</p>
+          <div>
+            <p className="text-sm text-gray-700">
+              Annexure 4: Other Document
+              <span className="text-red-500">
+                (to be attached in form of pdf)
+              </span>
+            </p>
+            <p className="ml-4">1. Affidavit/Undertaking (if applicable)</p>
+            <p className="ml-4">2. Right of Way document (if applicable)</p>
+            <p className="ml-4">
+              3. Documents of adjacent NA land where access is proposed
+            </p>
+            <p className="ml-4">4. National Highway NOC, if applicable</p>
+          </div>
           <div className="grow"></div>
 
           <Link
@@ -895,6 +909,7 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
   const userid = getCookie("id");
   const router = useRouter();
   const userrole: string = getCookie("role") as string;
+  const isPdaJe = userrole === "PDA_JE" || "DNHPDA";
   const [queryBox, setQueryBox] = useState(false);
 
   const [querydata, setQueryData] = useState<string>("");
@@ -982,12 +997,17 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
           createNaQueryInput: {
             createdById: parseInt(userid.toString()),
             from_userId: parseInt(userid.toString()),
-            to_userId: parseInt(data.userid!.toString()),
+            to_userId: parseInt(
+              (isPdaJe
+                ? props.createdById.toString()
+                : data.userid!
+              ).toString(),
+            ),
             query: querydata,
-            type: data.request_type,
+            type: isPdaJe ? "QUERY" : data.request_type,
             na_formId: props.id,
             query_status: "PENDING",
-            request_type: "DEPTTODEPT",
+            request_type: isPdaJe ? "DEPTTOAPPL" : "DEPTTODEPT",
             ...(data.upload_url_1 && {
               upload_url_1: data.upload_url_1,
             }),
@@ -1032,8 +1052,8 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
 
     chatdata.refetch();
     setValue("query", "");
-    setValue("userid", "");
-    setValue("request_type", "CORESPONDENCE");
+    setValue("userid", isPdaJe ? props.createdById.toString() : "");
+    setValue("request_type", isPdaJe ? "QUERY" : "CORESPONDENCE");
   };
 
   const handleFileUpload = (ref: React.RefObject<HTMLInputElement | null>) => {
@@ -1045,7 +1065,7 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
     setFile: React.Dispatch<React.SetStateAction<File | null>>,
-    ref: React.RefObject<HTMLInputElement | null>
+    ref: React.RefObject<HTMLInputElement | null>,
   ) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -1067,10 +1087,16 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
         <div className="grow"></div>
         <button
           type="button"
-          onClick={() => setQueryBox(true)}
+          onClick={() => {
+            if (isPdaJe) {
+              setValue("userid", props.createdById.toString());
+              setValue("request_type", "QUERY");
+            }
+            setQueryBox(true);
+          }}
           className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-28 text-nowrap"
         >
-          Mark To
+          {isPdaJe ? "User Query" : "Mark To"}
         </button>
         <button
           type="button"
@@ -1146,46 +1172,50 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
       >
         <h1 className="text-lg font-semibold text-[#162f57] mb-2">Query</h1>
         <form onSubmit={handleSubmit(onSubmit, onFormError)}>
-          <div>
-            <MultiSelect<MarkToForm>
-              title="Select User"
-              required={true}
-              name="userid"
-              placeholder="Select User"
-              options={[
-                ...(userdata.data
-                  ? userdata.data
-                      .filter((val) => val.id !== Number(userid))
-                      .map((user) => ({
-                        label: `${user.firstName} ${
-                          user.lastName
-                        } [${roleToString(user.role as string)}]`,
-                        value: user.id.toString(),
-                      }))
-                  : []),
-                ...(["LDCMAMLATDAR", "MAMLATDAR"].includes(userrole)
-                  ? [
-                      {
-                        label: "User",
-                        value: props.createdById.toString(),
-                      },
-                    ]
-                  : []),
-              ]}
-            />
-          </div>
-          <div className="my-2">
-            <RabioInput<MarkToForm>
-              title="Request Type"
-              required={true}
-              name="request_type"
-              options={[
-                { label: "Correspondence", value: "CORESPONDENCE" },
-                { label: "Query", value: "QUERY" },
-              ]}
-              defaultValue={"CORESPONDENCE"}
-            />
-          </div>
+          {!isPdaJe && (
+            <>
+              <div>
+                <MultiSelect<MarkToForm>
+                  title="Select User"
+                  required={true}
+                  name="userid"
+                  placeholder="Select User"
+                  options={[
+                    ...(userdata.data
+                      ? userdata.data
+                          .filter((val) => val.id !== Number(userid))
+                          .map((user) => ({
+                            label: `${user.firstName} ${
+                              user.lastName
+                            } [${roleToString(user.role as string)}]`,
+                            value: user.id.toString(),
+                          }))
+                      : []),
+                    ...(["LDCMAMLATDAR", "MAMLATDAR"].includes(userrole)
+                      ? [
+                          {
+                            label: "User",
+                            value: props.createdById.toString(),
+                          },
+                        ]
+                      : []),
+                  ]}
+                />
+              </div>
+              <div className="my-2">
+                <RabioInput<MarkToForm>
+                  title="Request Type"
+                  required={true}
+                  name="request_type"
+                  options={[
+                    { label: "Correspondence", value: "CORESPONDENCE" },
+                    { label: "Query", value: "QUERY" },
+                  ]}
+                  defaultValue={"CORESPONDENCE"}
+                />
+              </div>
+            </>
+          )}
           <div>
             <SimpleTextEditorInput<MarkToForm>
               title="Query"
@@ -1420,7 +1450,7 @@ const NotingPage = (props: NotingProviderProps) => {
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
     setFile: React.Dispatch<React.SetStateAction<File | null>>,
-    ref: React.RefObject<HTMLInputElement | null>
+    ref: React.RefObject<HTMLInputElement | null>,
   ) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -1446,8 +1476,8 @@ const NotingPage = (props: NotingProviderProps) => {
             onClick={() => {
               router.push(
                 `/dashboard/department/na-permission/view/${encryptURLData(
-                  props.id.toString()
-                )}/noting`
+                  props.id.toString(),
+                )}/noting`,
               );
             }}
             className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-28 text-nowrap"
@@ -1479,7 +1509,7 @@ const NotingPage = (props: NotingProviderProps) => {
           .filter((item) => item.type === "PRENOTE")
           .sort(
             (a, b) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
           )[0];
 
         return notingdata.data
@@ -1654,6 +1684,10 @@ interface PaymentHistoryProviderProps {
   role: string;
 }
 
+interface NaTypeResponseData {
+  q12: string;
+}
+
 const PaymentHistoryProvider = (props: PaymentHistoryProviderProps) => {
   const methods = useForm<RequestPaymentForm>({
     resolver: valibotResolver(RequestPaymentSchema),
@@ -1677,6 +1711,30 @@ const PaymentHistoryProvider = (props: PaymentHistoryProviderProps) => {
 const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
   const userid = getCookie("id");
   const [penaltyBox, setPenaltyBox] = useState(false);
+
+  const nadata = useQuery({
+    queryKey: ["getNaType", props.id],
+    queryFn: async () => {
+      const response = await ApiCall({
+        query: "query GetNaById($id:Int!) { getNaById(id: $id) { q12 }}",
+        variables: {
+          id: props.id,
+        },
+      });
+
+      if (!response.status) {
+        throw new Error(response.message);
+      }
+
+      if (!(response.data as Record<string, unknown>)["getNaById"]) {
+        throw new Error("Value not found in response");
+      }
+
+      return (response.data as Record<string, unknown>)[
+        "getNaById"
+      ] as NaTypeResponseData;
+    },
+  });
 
   const paymenthistorydata = useQuery({
     queryKey: ["getPaymentHistory"],
@@ -1784,6 +1842,7 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
     { label: "Unauthorized", value: "unauth" },
     // { label: "Damanganga Irrigation Fees", value: "damanganga" },
     { label: "Damanganga Irrigation", value: "damanganga" },
+    { label: "Conversion Fees", value: "typewise" },
   ];
 
   const [selectedOptions, setSelectedOptions] = useState<string>("unauth");
@@ -1827,29 +1886,42 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
   const [nextId, setNextId] = useState<number>(2);
   const toWords = new ToWords();
 
+  const getTypeBasedRate = (typeValue: string | undefined) => {
+    const normalizedType = (typeValue || "").trim().toLowerCase();
+
+    if (normalizedType === "residential") return 25;
+    if (normalizedType === "commercial") return 40;
+    if (normalizedType === "industrial") return 50;
+    if (normalizedType === "residential cum commercial") return 40;
+    if (normalizedType === "public offices , utilities") return 10;
+    return 10;
+  };
+
+  const typeBasedRate = getTypeBasedRate(nadata.data?.q12);
+
   return (
     <>
-      <div className="flex items-center gap-2">
-        <p className="text-gray-700 text-lg">Payment History</p>
+      <div className="mb-3 flex flex-wrap items-center gap-3">
+        <p className="text-gray-800 text-xl font-semibold">Payment History</p>
         <div className="grow"></div>
 
         {pendingpaymentdata.data && pendingpaymentdata.data.length === 0 && (
           <button
             type="button"
             onClick={() => props.setRequestPaymentBox(true)}
-            className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-44 text-nowrap"
+            className="py-2 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-44 text-nowrap"
           >
             Add Payment Request
           </button>
         )}
 
         {["LDCMAMLATDAR", "MAMLATDAR", "RAK", "DNHPDA"].includes(
-          props.role
+          props.role,
         ) && (
           <button
             type="button"
             onClick={() => setPenaltyBox(true)}
-            className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-38 text-nowrap"
+            className="py-2 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-38 text-nowrap"
           >
             Add Penalty
           </button>
@@ -1858,7 +1930,7 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
         <button
           type="button"
           onClick={() => props.setPaymentHistoryBox(false)}
-          className="py-1 rounded-md bg-rose-500 px-4 text-sm text-white cursor-pointer w-24 text-nowrap"
+          className="py-2 rounded-md bg-rose-500 px-4 text-sm text-white cursor-pointer w-24 text-nowrap"
         >
           Close
         </button>
@@ -1871,33 +1943,33 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
       )}
 
       {paymenthistorydata.data?.map((field, index) => (
-        <div key={index} className="px-2 py-2">
-          <p className="text-sm text-gray-700 font-semibold leading-2 mb-2">
-            Purpose
-          </p>
-          <p className="text-sm leading-4 mt-1">{field.purpose}</p>
+        <div
+          key={index}
+          className="mb-3 rounded-lg border border-gray-200 bg-gray-50/40 px-3 py-3"
+        >
+          <p className="mb-2 text-base font-semibold text-gray-800">Purpose</p>
+          <p className="text-sm leading-6 text-gray-700">{field.purpose}</p>
 
-          <div className="flex items-center mt-2 gap-4">
-            <p className="text-sm rounded px-4 text-center border border-gray-500 bg-gray-500/10 text-gray-500">
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <p className="rounded border border-gray-500 bg-gray-500/10 px-3 py-1.5 text-sm text-center text-gray-600">
               Amount: ₹{field.amount}
             </p>
-            <p className="text-sm rounded px-4 text-center border border-orange-500 bg-orange-500/10 text-orange-500">
+            <p className="rounded border border-orange-500 bg-orange-500/10 px-3 py-1.5 text-sm text-center text-orange-600">
               {field.payment_type}
             </p>
 
             {field.is_paid ? (
               <>
-                <p className="text-sm rounded px-4 text-center border border-green-500 bg-green-500/10 text-green-500">
+                <p className="rounded border border-green-500 bg-green-500/10 px-3 py-1.5 text-sm text-center text-green-600">
                   Paid
                 </p>
               </>
             ) : (
-              <p className="text-sm rounded px-4 text-center border border-red-500 bg-red-500/10 text-red-500">
+              <p className="rounded border border-red-500 bg-red-500/10 px-3 py-1.5 text-sm text-center text-red-600">
                 Unpaid
               </p>
             )}
           </div>
-          <div className="h-[1px] w-full bg-gray-200 mt-2"></div>
         </div>
       ))}
 
@@ -1908,15 +1980,20 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
         open={props.requestPaymentBox}
         styles={{
           body: {
-            paddingLeft: "10px",
-            paddingRight: "10px",
-            paddingTop: "10px",
-            paddingBottom: "0px",
+            paddingLeft: "16px",
+            paddingRight: "16px",
+            paddingTop: "16px",
+            paddingBottom: "16px",
           },
         }}
       >
-        <h1 className="text-lg font-semibold text-[#162f57] mb-2">Query</h1>
-        <form onSubmit={handleSubmit(onSubmit, onFormError)}>
+        <h1 className="mb-3 text-lg font-semibold text-[#162f57]">
+          Request Payment
+        </h1>
+        <form
+          onSubmit={handleSubmit(onSubmit, onFormError)}
+          className="space-y-3"
+        >
           <div>
             <TextInput<RequestPaymentForm>
               title="Amount"
@@ -1936,7 +2013,7 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white mt-2 cursor-pointer"
+            className="mt-1 w-full rounded-md bg-blue-500 px-4 py-2 text-sm text-white cursor-pointer"
           >
             {isSubmitting ? "Loading...." : "Submit"}
           </button>
@@ -1950,10 +2027,10 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
         size="large"
         styles={{
           body: {
-            paddingLeft: "10px",
-            paddingRight: "10px",
-            paddingTop: "10px",
-            paddingBottom: "0px",
+            paddingLeft: "16px",
+            paddingRight: "16px",
+            paddingTop: "16px",
+            paddingBottom: "16px",
           },
         }}
       >
@@ -1963,24 +2040,25 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
           defaultValue={selectedOptions}
           optionType="button"
           buttonStyle="solid"
+          className="mb-4"
           onChange={(e) => handlePenaltyTypeChange(e.target.value)}
         />
 
         {selectedOptions === "unauth" && (
           <>
-            <h1 className="text-lg font-semibold text-[#162f57] mb-2">
+            <h1 className="mb-3 text-lg font-semibold text-[#162f57]">
               Unauthorized Construction Penalty
             </h1>
-            <div className="flex gap-2">
+            <div className="mb-2 flex flex-wrap gap-2">
               <div className="grow"></div>
               <button
-                className="py-1 rounded-md bg-gray-500 px-4 text-sm text-white mt-2 cursor-pointer"
+                className="rounded-md bg-gray-500 px-4 py-2 text-sm text-white mt-2 cursor-pointer"
                 onClick={() => resetPenaltyData()}
               >
                 Reset
               </button>
               <button
-                className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white mt-2 cursor-pointer"
+                className="rounded-md bg-blue-500 px-4 py-2 text-sm text-white mt-2 cursor-pointer"
                 onClick={() => {
                   setPenaltyData((prev) => [
                     ...prev,
@@ -1997,25 +2075,25 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
               </button>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full mt-2 border-collapse border border-gray-200">
+              <table className="w-full mt-2 border-collapse border border-gray-200 rounded-lg overflow-hidden">
                 <thead>
                   <tr className="hover:bg-gray-50 bg-gray-100">
-                    <th className="border border-gray-300 px-4 py-1 font-semibold text-sm">
+                    <th className="border border-gray-300 px-4 py-2 font-semibold text-sm">
                       Year
                     </th>
-                    <th className="border border-gray-300 px-4 py-1 font-semibold text-sm">
+                    <th className="border border-gray-300 px-4 py-2 font-semibold text-sm">
                       Area (Sq.Mtrs)
                     </th>
-                    <th className="border border-gray-300 px-4 py-1 font-semibold text-sm">
+                    <th className="border border-gray-300 px-4 py-2 font-semibold text-sm">
                       Penalty
                     </th>
-                    <th className="border border-gray-300 px-4 py-1 font-semibold text-sm">
+                    <th className="border border-gray-300 px-4 py-2 font-semibold text-sm">
                       Assessment
                     </th>
-                    <th className="border border-gray-300 px-4 py-1 font-semibold text-sm">
+                    <th className="border border-gray-300 px-4 py-2 font-semibold text-sm">
                       Total
                     </th>
-                    <th className="border border-gray-300 px-4 py-1 font-semibold text-sm">
+                    <th className="border border-gray-300 px-4 py-2 font-semibold text-sm">
                       Actions
                     </th>
                   </tr>
@@ -2023,7 +2101,7 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
                 <tbody>
                   {penaltyData.map((penalty, index) => (
                     <tr key={penalty.id} className="hover:bg-gray-50">
-                      <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                      <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
                         <InputNumber
                           className="w-full"
                           style={{ width: "100%" }}
@@ -2034,14 +2112,14 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
                               prev.map((p) =>
                                 p.id === penalty.id
                                   ? { ...p, year: value || 0 }
-                                  : p
-                              )
+                                  : p,
+                              ),
                             );
                           }}
                           value={penalty.year}
                         />
                       </td>
-                      <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                      <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
                         <InputNumber
                           className="w-full"
                           style={{ width: "100%" }}
@@ -2052,26 +2130,26 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
                               prev.map((p) =>
                                 p.id === penalty.id
                                   ? { ...p, area: value || 0 }
-                                  : p
-                              )
+                                  : p,
+                              ),
                             );
                           }}
                           value={penalty.area}
                         />
                       </td>
-                      <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                      <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
                         {iscal
                           ? (penalty.year * penalty.area * 0.02).toFixed(2)
                           : "-"}
                       </td>
-                      <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                      <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
                         {iscal
                           ? (penalty.year * penalty.area * 0.02 * 400).toFixed(
-                              2
+                              2,
                             )
                           : "-"}
                       </td>
-                      <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                      <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
                         {iscal
                           ? (
                               penalty.year * penalty.area * 0.02 * 400 +
@@ -2079,13 +2157,13 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
                             ).toFixed(2)
                           : "-"}
                       </td>
-                      <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                      <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
                         <button
                           className="py-1 px-2 rounded-md bg-red-500 text-white text-xs cursor-pointer"
                           onClick={() => {
                             if (penaltyData.length > 1) {
                               setPenaltyData((prev) =>
-                                prev.filter((p) => p.id !== penalty.id)
+                                prev.filter((p) => p.id !== penalty.id),
                               );
                             }
                           }}
@@ -2101,14 +2179,14 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
             </div>
 
             <button
-              className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white mt-2 cursor-pointer w-full"
+              className="mt-3 w-full rounded-md bg-blue-500 px-4 py-2 text-sm text-white cursor-pointer"
               onClick={() => {
                 const hasInvalidData = penaltyData.some(
-                  (penalty) => penalty.year <= 0 || penalty.area <= 0
+                  (penalty) => penalty.year <= 0 || penalty.area <= 0,
                 );
                 if (hasInvalidData) {
                   toast.error(
-                    "Please enter valid year and area for all penalties"
+                    "Please enter valid year and area for all penalties",
                   );
                   return;
                 }
@@ -2120,43 +2198,43 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
             {iscal && (
               <>
                 <div className="overflow-x-auto">
-                  <table className="w-full mt-2 border-collapse border border-gray-200">
+                  <table className="w-full mt-2 border-collapse border border-gray-200 rounded-lg overflow-hidden">
                     <tbody>
                       <tr className="hover:bg-gray-50">
-                        <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                        <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
                           Total Penalty
                         </td>
-                        <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                        <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
                           ₹
                           {penaltyData
                             .reduce(
                               (sum, penalty) =>
                                 sum + penalty.year * penalty.area * 0.02,
-                              0
+                              0,
                             )
                             .toFixed(2)}
                         </td>
                       </tr>
                       <tr className="hover:bg-gray-50">
-                        <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                        <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
                           Total Assessment
                         </td>
-                        <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                        <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
                           ₹
                           {penaltyData
                             .reduce(
                               (sum, penalty) =>
                                 sum + penalty.year * penalty.area * 0.02 * 400,
-                              0
+                              0,
                             )
                             .toFixed(2)}
                         </td>
                       </tr>
                       <tr className="hover:bg-gray-50">
-                        <td className="border border-gray-300 px-4 py-1 font-semibold text-sm">
+                        <td className="border border-gray-300 px-4 py-2 font-semibold text-sm">
                           Grand Total
                         </td>
-                        <td className="border border-gray-300 px-4 py-1 font-semibold text-sm">
+                        <td className="border border-gray-300 px-4 py-2 font-semibold text-sm">
                           ₹
                           {penaltyData
                             .reduce(
@@ -2164,7 +2242,7 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
                                 sum +
                                 (penalty.year * penalty.area * 0.02 * 400 +
                                   penalty.year * penalty.area * 0.02),
-                              0
+                              0,
                             )
                             .toFixed(2)}
                         </td>
@@ -2173,14 +2251,14 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
                   </table>
                 </div>
                 <button
-                  className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white mt-2 cursor-pointer w-full"
+                  className="mt-3 w-full rounded-md bg-blue-500 px-4 py-2 text-sm text-white cursor-pointer"
                   onClick={() => {
                     const totalAmount = penaltyData.reduce(
                       (sum, penalty) =>
                         sum +
                         (penalty.year * penalty.area * 0.02 * 400 +
                           penalty.year * penalty.area * 0.02),
-                      0
+                      0,
                     );
 
                     //                     (Property 1) - x sq. mtrs. for y years. Na Assessment y * x sq.mtrs. * 0.02 paise = z/-.
@@ -2201,14 +2279,14 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
                           }/- Total Rs. ${(
                             penalty.year * penalty.area * 0.02 * 400 +
                             penalty.year * penalty.area * 0.02
-                          ).toFixed(2)}`
+                          ).toFixed(2)}`,
                       )
                       .join("; ");
 
                     createPaymentRequest.mutate({
                       amount: totalAmount.toString(),
                       purpose: `Unauthorized Construction Penalty - ${penaltyDetails}. Grand Total : Rs. ${totalAmount.toFixed(
-                        2
+                        2,
                       )}/- (${capitalcase(toWords.convert(totalAmount))})`,
                     });
                     setPenaltyBox(false);
@@ -2223,19 +2301,19 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
 
         {selectedOptions === "damanganga" && (
           <>
-            <h1 className="text-lg font-semibold text-[#162f57] mb-2">
+            <h1 className="mb-3 text-lg font-semibold text-[#162f57]">
               Damanganga Irrigation Fees
             </h1>
-            <div className="flex gap-2">
+            <div className="mb-2 flex flex-wrap gap-2">
               <div className="grow"></div>
               <button
-                className="py-1 rounded-md bg-gray-500 px-4 text-sm text-white mt-2 cursor-pointer"
+                className="rounded-md bg-gray-500 px-4 py-2 text-sm text-white mt-2 cursor-pointer"
                 onClick={() => resetPenaltyData()}
               >
                 Reset
               </button>
               <button
-                className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white mt-2 cursor-pointer"
+                className="rounded-md bg-blue-500 px-4 py-2 text-sm text-white mt-2 cursor-pointer"
                 onClick={() => {
                   setPenaltyData((prev) => [
                     ...prev,
@@ -2252,19 +2330,19 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
               </button>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full mt-2 border-collapse border border-gray-200">
+              <table className="w-full mt-2 border-collapse border border-gray-200 rounded-lg overflow-hidden">
                 <thead>
                   <tr className="hover:bg-gray-50 bg-gray-100">
-                    <th className="border border-gray-300 px-4 py-1 font-semibold text-sm">
+                    <th className="border border-gray-300 px-4 py-2 font-semibold text-sm">
                       Area (Sq.Mtrs)
                     </th>
-                    <th className="border border-gray-300 px-4 py-1 font-semibold text-sm">
+                    <th className="border border-gray-300 px-4 py-2 font-semibold text-sm">
                       Rate per Sq.Mtr
                     </th>
-                    <th className="border border-gray-300 px-4 py-1 font-semibold text-sm">
+                    <th className="border border-gray-300 px-4 py-2 font-semibold text-sm">
                       Total Fees
                     </th>
-                    <th className="border border-gray-300 px-4 py-1 font-semibold text-sm">
+                    <th className="border border-gray-300 px-4 py-2 font-semibold text-sm">
                       Actions
                     </th>
                   </tr>
@@ -2272,7 +2350,7 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
                 <tbody>
                   {penaltyData.map((penalty) => (
                     <tr key={penalty.id} className="hover:bg-gray-50">
-                      <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                      <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
                         <InputNumber
                           className="w-full"
                           style={{ width: "100%" }}
@@ -2283,26 +2361,26 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
                               prev.map((p) =>
                                 p.id === penalty.id
                                   ? { ...p, area: value || 0 }
-                                  : p
-                              )
+                                  : p,
+                              ),
                             );
                           }}
                           value={penalty.area}
                         />
                       </td>
-                      <td className="border border-gray-300 px-4 py-1 font-normal text-sm text-center">
+                      <td className="border border-gray-300 px-4 py-2 font-normal text-sm text-center">
                         ₹7
                       </td>
-                      <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                      <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
                         {iscal ? `₹${(penalty.area * 7).toFixed(2)}` : "-"}
                       </td>
-                      <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                      <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
                         <button
                           className="py-1 px-2 rounded-md bg-red-500 text-white text-xs cursor-pointer"
                           onClick={() => {
                             if (penaltyData.length > 1) {
                               setPenaltyData((prev) =>
-                                prev.filter((p) => p.id !== penalty.id)
+                                prev.filter((p) => p.id !== penalty.id),
                               );
                             }
                           }}
@@ -2317,10 +2395,10 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
               </table>
             </div>
             <button
-              className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white mt-2 cursor-pointer w-full"
+              className="mt-3 w-full rounded-md bg-blue-500 px-4 py-2 text-sm text-white cursor-pointer"
               onClick={() => {
                 const hasInvalidData = penaltyData.some(
-                  (penalty) => penalty.area <= 0
+                  (penalty) => penalty.area <= 0,
                 );
                 if (hasInvalidData) {
                   toast.error("Please enter valid area for all entries");
@@ -2334,25 +2412,25 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
             {iscal && (
               <>
                 <div className="overflow-x-auto">
-                  <table className="w-full mt-2 border-collapse border border-gray-200">
+                  <table className="w-full mt-2 border-collapse border border-gray-200 rounded-lg overflow-hidden">
                     <tbody>
                       <tr className="hover:bg-gray-50">
-                        <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                        <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
                           Total Area
                         </td>
-                        <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                        <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
                           {penaltyData.reduce(
                             (sum, penalty) => sum + penalty.area,
-                            0
+                            0,
                           )}{" "}
                           Sq.Mtrs
                         </td>
                       </tr>
                       <tr className="hover:bg-gray-50">
-                        <td className="border border-gray-300 px-4 py-1 font-semibold text-sm">
+                        <td className="border border-gray-300 px-4 py-2 font-semibold text-sm">
                           Total Fees
                         </td>
-                        <td className="border border-gray-300 px-4 py-1 font-semibold text-sm">
+                        <td className="border border-gray-300 px-4 py-2 font-semibold text-sm">
                           ₹
                           {penaltyData
                             .reduce((sum, penalty) => sum + penalty.area * 7, 0)
@@ -2363,11 +2441,11 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
                   </table>
                 </div>
                 <button
-                  className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white mt-2 cursor-pointer w-full"
+                  className="mt-3 w-full rounded-md bg-blue-500 px-4 py-2 text-sm text-white cursor-pointer"
                   onClick={() => {
                     const totalAmount = penaltyData.reduce(
                       (sum, penalty) => sum + penalty.area * 7,
-                      0
+                      0,
                     );
                     const areaDetails = penaltyData
                       .map(
@@ -2378,15 +2456,231 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
                             penalty.area * 7
                           ).toFixed(2)}. Total Rs. ₹${(
                             penalty.area * 7
-                          ).toFixed(2)}/-.`
+                          ).toFixed(2)}/-.`,
                       )
                       .join("; ");
 
                     createPaymentRequest.mutate({
                       amount: totalAmount.toString(),
                       purpose: `Damanganga Irrigation Fees - ${areaDetails} Grand Total : Rs. ${totalAmount.toFixed(
-                        2
+                        2,
                       )}/- (${capitalcase(toWords.convert(totalAmount))})`,
+                    });
+                    setPenaltyBox(false);
+                  }}
+                >
+                  Request Payment
+                </button>
+              </>
+            )}
+          </>
+        )}
+
+        {selectedOptions === "typewise" && (
+          <>
+            <h1 className="mb-2 text-lg font-semibold text-[#162f57]">
+              Conversion Fees
+            </h1>
+            <p className="mb-3 rounded-md bg-blue-50 px-3 py-2 text-sm text-gray-700">
+              Type: {nadata.data?.q12 || "Others"} | Rate: ₹{typeBasedRate} per
+              Sq.Mtr | Minimum Fees: ₹1000
+            </p>
+            <div className="mb-2 flex flex-wrap gap-2">
+              <div className="grow"></div>
+              <button
+                className="rounded-md bg-gray-500 px-4 py-2 text-sm text-white mt-2 cursor-pointer"
+                onClick={() => resetPenaltyData()}
+              >
+                Reset
+              </button>
+              <button
+                className="rounded-md bg-blue-500 px-4 py-2 text-sm text-white mt-2 cursor-pointer"
+                onClick={() => {
+                  setPenaltyData((prev) => [
+                    ...prev,
+                    {
+                      id: nextId,
+                      year: 0,
+                      area: 0,
+                    },
+                  ]);
+                  setNextId(nextId + 1);
+                }}
+              >
+                Add Entry
+              </button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full mt-2 border-collapse border border-gray-200 rounded-lg overflow-hidden">
+                <thead>
+                  <tr className="hover:bg-gray-50 bg-gray-100">
+                    <th className="border border-gray-300 px-4 py-2 font-semibold text-sm">
+                      Area (Sq.Mtrs)
+                    </th>
+                    <th className="border border-gray-300 px-4 py-2 font-semibold text-sm">
+                      Rate per Sq.Mtr
+                    </th>
+                    <th className="border border-gray-300 px-4 py-2 font-semibold text-sm">
+                      Total Fees
+                    </th>
+                    <th className="border border-gray-300 px-4 py-2 font-semibold text-sm">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {penaltyData.map((penalty) => (
+                    <tr key={penalty.id} className="hover:bg-gray-50">
+                      <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                        <InputNumber
+                          className="w-full"
+                          style={{ width: "100%" }}
+                          placeholder="Enter Area"
+                          disabled={iscal}
+                          onChange={(value) => {
+                            setPenaltyData((prev) =>
+                              prev.map((p) =>
+                                p.id === penalty.id
+                                  ? { ...p, area: value || 0 }
+                                  : p,
+                              ),
+                            );
+                          }}
+                          value={penalty.area}
+                        />
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2 font-normal text-sm text-center">
+                        ₹{typeBasedRate}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                        {iscal
+                          ? `₹${(penalty.area * typeBasedRate).toFixed(2)}`
+                          : "-"}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                        <button
+                          className="py-1 px-2 rounded-md bg-red-500 text-white text-xs cursor-pointer"
+                          onClick={() => {
+                            if (penaltyData.length > 1) {
+                              setPenaltyData((prev) =>
+                                prev.filter((p) => p.id !== penalty.id),
+                              );
+                            }
+                          }}
+                          disabled={penaltyData.length <= 1}
+                        >
+                          Remove
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <button
+              className="mt-3 w-full rounded-md bg-blue-500 px-4 py-2 text-sm text-white cursor-pointer"
+              onClick={() => {
+                const hasInvalidData = penaltyData.some(
+                  (penalty) => penalty.area <= 0,
+                );
+                if (hasInvalidData) {
+                  toast.error("Please enter valid area for all entries");
+                  return;
+                }
+                setiscal(true);
+              }}
+            >
+              Calculate
+            </button>
+            {iscal && (
+              <>
+                <div className="overflow-x-auto">
+                  <table className="w-full mt-2 border-collapse border border-gray-200 rounded-lg overflow-hidden">
+                    <tbody>
+                      <tr className="hover:bg-gray-50">
+                        <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                          Total Area
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                          {penaltyData.reduce(
+                            (sum, penalty) => sum + penalty.area,
+                            0,
+                          )}{" "}
+                          Sq.Mtrs
+                        </td>
+                      </tr>
+                      <tr className="hover:bg-gray-50">
+                        <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                          Calculated Fees
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
+                          ₹
+                          {penaltyData
+                            .reduce(
+                              (sum, penalty) =>
+                                sum + penalty.area * typeBasedRate,
+                              0,
+                            )
+                            .toFixed(2)}
+                        </td>
+                      </tr>
+                      <tr className="hover:bg-gray-50">
+                        <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                          Minimum Fees
+                        </td>
+                        <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                          ₹1000.00
+                        </td>
+                      </tr>
+                      <tr className="hover:bg-gray-50">
+                        <td className="border border-gray-300 px-4 py-2 font-semibold text-sm">
+                          Payable Fees
+                        </td>
+                        <td className="border border-gray-300 px-4 py-2 font-semibold text-sm">
+                          ₹
+                          {Math.max(
+                            penaltyData.reduce(
+                              (sum, penalty) =>
+                                sum + penalty.area * typeBasedRate,
+                              0,
+                            ),
+                            1000,
+                          ).toFixed(2)}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <button
+                  className="mt-3 w-full rounded-md bg-blue-500 px-4 py-2 text-sm text-white cursor-pointer"
+                  onClick={() => {
+                    const calculatedAmount = penaltyData.reduce(
+                      (sum, penalty) => sum + penalty.area * typeBasedRate,
+                      0,
+                    );
+                    const totalAmount = Math.max(calculatedAmount, 1000);
+                    const minimumApplied = calculatedAmount < 1000;
+
+                    const areaDetails = penaltyData
+                      .map(
+                        (penalty, index) =>
+                          `(Property ${index + 1}) - ${
+                            penalty.area
+                          } sq. mtrs. * ${typeBasedRate} rupees = ₹${(
+                            penalty.area * typeBasedRate
+                          ).toFixed(2)}.`,
+                      )
+                      .join("; ");
+
+                    createPaymentRequest.mutate({
+                      amount: totalAmount.toString(),
+                      purpose: `Conversion Fees (${nadata.data?.q12 || "Others"}) - ${areaDetails} Calculated Fees : Rs. ${calculatedAmount.toFixed(
+                        2,
+                      )}/-. Minimum Fees : Rs. 1000/-. ${
+                        minimumApplied ? "Minimum fees applied. " : ""
+                      }Grand Total : Rs. ${totalAmount.toFixed(2)}/- (${capitalcase(
+                        toWords.convert(totalAmount),
+                      )})`,
                     });
                     setPenaltyBox(false);
                   }}
@@ -2581,7 +2875,7 @@ const ReportPage = (props: ReportProviderProps) => {
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
     setFile: React.Dispatch<React.SetStateAction<File | null>>,
-    ref: React.RefObject<HTMLInputElement | null>
+    ref: React.RefObject<HTMLInputElement | null>,
   ) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -2619,7 +2913,7 @@ const ReportPage = (props: ReportProviderProps) => {
               reportdata.data.filter(
                 (val) =>
                   val.to_user?.id === Number(userid) &&
-                  val.query_status === "PENDING"
+                  val.query_status === "PENDING",
               ).length > 0 && (
                 <>
                   <button
@@ -2635,8 +2929,8 @@ const ReportPage = (props: ReportProviderProps) => {
                         reportdata.data.filter(
                           (val) =>
                             val.to_user?.id === Number(userid) &&
-                            val.query_status === "PENDING"
-                        )[0].id
+                            val.query_status === "PENDING",
+                        )[0].id,
                       );
                     }}
                     className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-32 text-nowrap"
@@ -2933,7 +3227,7 @@ interface SeekReportDepartmentProviderProps {
 }
 
 const SeekReportDepartmentProvider = (
-  props: SeekReportDepartmentProviderProps
+  props: SeekReportDepartmentProviderProps,
 ) => {
   const methods = useForm<QueryForm>({
     resolver: valibotResolver(QuerySchema),
@@ -2970,10 +3264,10 @@ const SeekReportDepartmentPage = (props: SeekReportDepartmentProviderProps) => {
         currentuserrole == "LAQ"
           ? "REPORTLAQ"
           : currentuserrole == "LRO"
-          ? "REPORTLRO"
-          : currentuserrole == "DNHPDA"
-          ? "REPORTDNHPDA"
-          : "",
+            ? "REPORTLRO"
+            : currentuserrole == "DNHPDA"
+              ? "REPORTDNHPDA"
+              : "",
       ],
     ],
     queryFn: async () => {
@@ -2988,10 +3282,10 @@ const SeekReportDepartmentPage = (props: SeekReportDepartmentProviderProps) => {
             currentuserrole == "LAQ"
               ? "REPORTLAQ"
               : currentuserrole == "LRO"
-              ? "REPORTLRO"
-              : currentuserrole == "DNHPDA"
-              ? "REPORTDNHPDA"
-              : "",
+                ? "REPORTLRO"
+                : currentuserrole == "DNHPDA"
+                  ? "REPORTDNHPDA"
+                  : "",
           ],
         },
       });
@@ -3130,7 +3424,7 @@ const SeekReportDepartmentPage = (props: SeekReportDepartmentProviderProps) => {
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
     setFile: React.Dispatch<React.SetStateAction<File | null>>,
-    ref: React.RefObject<HTMLInputElement | null>
+    ref: React.RefObject<HTMLInputElement | null>,
   ) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -3168,7 +3462,7 @@ const SeekReportDepartmentPage = (props: SeekReportDepartmentProviderProps) => {
               reportdata.data.filter(
                 (val) =>
                   val.to_user?.id === Number(userid) &&
-                  val.query_status === "PENDING"
+                  val.query_status === "PENDING",
               ).length > 0 && (
                 <>
                   <button
@@ -3177,20 +3471,20 @@ const SeekReportDepartmentPage = (props: SeekReportDepartmentProviderProps) => {
                       if (currentuserrole == "LRO") {
                         router.push(
                           `/dashboard/department/na-permission/view/${encryptURLData(
-                            props.id.toString()
-                          )}/form2`
+                            props.id.toString(),
+                          )}/form2`,
                         );
                       } else if (currentuserrole == "LAQ") {
                         router.push(
                           `/dashboard/department/na-permission/view/${encryptURLData(
-                            props.id.toString()
-                          )}/form3`
+                            props.id.toString(),
+                          )}/form3`,
                         );
                       } else {
                         router.push(
                           `/dashboard/department/na-permission/view/${encryptURLData(
-                            props.id.toString()
-                          )}/form4`
+                            props.id.toString(),
+                          )}/form4`,
                         );
                       }
                     }}
@@ -3584,7 +3878,7 @@ const SubmitReportPage = (props: SubmitReportProviderProps) => {
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
     setFile: React.Dispatch<React.SetStateAction<File | null>>,
-    ref: React.RefObject<HTMLInputElement | null>
+    ref: React.RefObject<HTMLInputElement | null>,
   ) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -3628,8 +3922,8 @@ const SubmitReportPage = (props: SubmitReportProviderProps) => {
               onClick={() => {
                 router.push(
                   `/dashboard/department/na-permission/view/${encryptURLData(
-                    props.id.toString()
-                  )}/form1`
+                    props.id.toString(),
+                  )}/form1`,
                 );
               }}
               type="button"
@@ -4008,7 +4302,7 @@ const AllotHearingPage = (props: AllotHearingProviderProps) => {
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
     setFile: React.Dispatch<React.SetStateAction<File | null>>,
-    ref: React.RefObject<HTMLInputElement | null>
+    ref: React.RefObject<HTMLInputElement | null>,
   ) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -4043,7 +4337,7 @@ const AllotHearingPage = (props: AllotHearingProviderProps) => {
           reportdata.data.filter(
             (val) =>
               val.to_user?.id === Number(userid) &&
-              val.query_status === "PENDING"
+              val.query_status === "PENDING",
           ).length > 0 && (
             <>
               <button
@@ -4053,8 +4347,8 @@ const AllotHearingPage = (props: AllotHearingProviderProps) => {
                     reportdata.data.filter(
                       (val) =>
                         val.to_user?.id === Number(userid) &&
-                        val.query_status === "PENDING"
-                    )[0].id
+                        val.query_status === "PENDING",
+                    )[0].id,
                   );
                 }}
                 className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-32 text-nowrap"

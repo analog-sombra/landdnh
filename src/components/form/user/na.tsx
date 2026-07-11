@@ -115,7 +115,7 @@ const NaPage = () => {
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
     setFile: React.Dispatch<React.SetStateAction<File | null>>,
-    ref: React.RefObject<HTMLInputElement | null>
+    ref: React.RefObject<HTMLInputElement | null>,
   ) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -156,7 +156,7 @@ const NaPage = () => {
         throw new Error("Value not found in response");
       }
       return (response.data as Record<string, unknown>)["getAllVillage"] as [
-        VillageResponse
+        VillageResponse,
       ];
     },
   });
@@ -200,8 +200,8 @@ const NaPage = () => {
     onSuccess: (data) => {
       router.push(
         `/dashboard/user/na-permission/view/${encryptURLData(
-          data!.id.toString()
-        )}/preview`
+          data!.id.toString(),
+        )}/preview`,
       );
     },
 
@@ -498,9 +498,20 @@ const NaPage = () => {
               )}
             </div>
             <div className="flex p-2 px-16 items-center mt-2 gap-2 border-b border-gray-200">
-              <p className="text-sm text-gray-700">
-                Annexure 4: Other Document
-              </p>
+              <div>
+                <p className="text-sm text-gray-700">
+                  Annexure 4: Other Document
+                  <span className="text-red-500">
+                    (to be attached in form of pdf)
+                  </span>
+                </p>
+                <p className="ml-4">1. Affidavit/Undertaking (if applicable)</p>
+                <p className="ml-4">2. Right of Way document (if applicable)</p>
+                <p className="ml-4">
+                  3. Documents of adjacent NA land where access is proposed
+                </p>
+                <p className="ml-4">4. National Highway NOC, if applicable</p>
+              </div>
               <div className="grow"></div>
               {anx4 ? (
                 <button
@@ -748,7 +759,7 @@ const NaPage = () => {
                                   if (file) {
                                     const response = await UploadFile(
                                       file,
-                                      userid!
+                                      userid!,
                                     );
                                     if (!response.status) {
                                       toast.error(response.message);
@@ -756,7 +767,7 @@ const NaPage = () => {
                                     }
                                     // Get the latest values for this applicant
                                     const currentApplicant = getValues(
-                                      `applicants.${index}`
+                                      `applicants.${index}`,
                                     );
                                     applicants.update(index, {
                                       ...currentApplicant,
@@ -990,10 +1001,24 @@ const NaPage = () => {
                 (11) Type (Residential/Commercial/Industrial)
               </p>
               <div className="flex-1">
-                <TextInput<NAForm>
+                <MultiSelect<NAForm>
                   required={true}
                   name="q12"
-                  placeholder="Enter Details"
+                  placeholder="Select Type"
+                  options={[
+                    { label: "Residential", value: "Residential" },
+                    { label: "Commercial", value: "Commercial" },
+                    { label: "Industrial", value: "Industrial" },
+                    {
+                      label: "Residential cum Commercial",
+                      value: "Residential cum Commercial",
+                    },
+                    {
+                      label: "Public offices , Utilities",
+                      value: "Public offices , Utilities",
+                    },
+                    { label: "Others", value: "Others" },
+                  ]}
                 />
               </div>
             </div>

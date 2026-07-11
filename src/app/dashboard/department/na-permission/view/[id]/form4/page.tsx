@@ -283,9 +283,20 @@ const Meeting = () => {
               </Link>
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
-              <p className="text-sm text-gray-700">
-                Annexure 4: Other Document
-              </p>
+              <div>
+                <p className="text-sm text-gray-700">
+                  Annexure 4: Other Document
+                  <span className="text-red-500">
+                    (to be attached in form of pdf)
+                  </span>
+                </p>
+                <p className="ml-4">1. Affidavit/Undertaking (if applicable)</p>
+                <p className="ml-4">2. Right of Way document (if applicable)</p>
+                <p className="ml-4">
+                  3. Documents of adjacent NA land where access is proposed
+                </p>
+                <p className="ml-4">4. National Highway NOC, if applicable</p>
+              </div>
               <div className="grow"></div>
               <Link
                 target="_blank"
@@ -564,7 +575,7 @@ const Meeting = () => {
       <div className="p-2 grid grid-cols-12 gap-1 min-h-screen">
         <div
           className={`shadow rounded p-2  bg-[#fff] ${
-            isNoting ? "col-span-6" : "col-span-12"
+            isNoting ? "col-span-4" : "col-span-12"
           }  flex flex-col`}
         >
           <div className="flex-1 flex flex-col ">
@@ -574,7 +585,7 @@ const Meeting = () => {
         {isNoting && (
           <div
             className={`bg-white shadow rounded p-2 ${
-              isNoting ? "col-span-6" : ""
+              isNoting ? "col-span-8" : ""
             }`}
           >
             <ReportDNGPDAEditor id={formdata.data!.id} />

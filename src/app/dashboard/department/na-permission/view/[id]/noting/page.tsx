@@ -444,9 +444,20 @@ const Meeting = () => {
               </Link>
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
-              <p className="text-sm text-gray-700">
-                Annexure 4: Other Document
-              </p>
+              <div>
+                <p className="text-sm text-gray-700">
+                  Annexure 4: Other Document
+                  <span className="text-red-500">
+                    (to be attached in form of pdf)
+                  </span>
+                </p>
+                <p className="ml-4">1. Affidavit/Undertaking (if applicable)</p>
+                <p className="ml-4">2. Right of Way document (if applicable)</p>
+                <p className="ml-4">
+                  3. Documents of adjacent NA land where access is proposed
+                </p>
+                <p className="ml-4">4. National Highway NOC, if applicable</p>
+              </div>
               <div className="grow"></div>
               <Link
                 target="_blank"
@@ -951,7 +962,6 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
             type={field.type}
           />
         );
-      
       })}
     </>
   );
@@ -1015,7 +1025,7 @@ const NotingPage = (props: NotingProviderProps) => {
           .filter((item) => item.type === "PRENOTE")
           .sort(
             (a, b) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
           )[0];
 
         return notingdata.data
@@ -1109,7 +1119,7 @@ const HearingNoticePage = (props: HearingNoticeProps) => {
           .filter((item) => item.type === "HEARING_NOTICE")
           .sort(
             (a, b) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
           )[0];
 
         return notingdata.data.map((field, index) => {
@@ -1195,7 +1205,7 @@ const SanadPage = (props: SanadPageProps) => {
           .filter((item) => item.type === "SANAD")
           .sort(
             (a, b) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
           )[0];
 
         return notingdata.data.map((field, index) => {
@@ -1281,7 +1291,7 @@ const IntimationOrderPage = (props: IntimationOrderPageProps) => {
           .filter((item) => item.type === "INTIMATION_DRAFT")
           .sort(
             (a, b) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
           )[0];
 
         return notingdata.data.map((field, index) => {

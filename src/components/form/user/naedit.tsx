@@ -1101,10 +1101,24 @@ const NaEditPage = ({ id }: { id: number }) => {
                 (11) Type (Residential/Commercial/Industrial)
               </p>
               <div className="flex-1">
-                <TextInput<NAForm>
+                <MultiSelect<NAForm>
                   required={true}
                   name="q12"
-                  placeholder="Enter Details"
+                  placeholder="Select Type"
+                  options={[
+                    { label: "Residential", value: "Residential" },
+                    { label: "Commercial", value: "Commercial" },
+                    { label: "Industrial", value: "Industrial" },
+                    {
+                      label: "Residential cum Commercial",
+                      value: "Residential cum Commercial",
+                    },
+                    {
+                      label: "Public offices , Utilities",
+                      value: "Public offices , Utilities",
+                    },
+                    { label: "Others", value: "Others" },
+                  ]}
                 />
               </div>
             </div>

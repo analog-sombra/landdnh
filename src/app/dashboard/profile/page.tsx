@@ -5,6 +5,7 @@ import { getCookie } from "cookies-next/client";
 
 const UserProfilePage = () => {
   const userid = getCookie("id");
+  console.log("User ID from cookie:", userid);
 
   interface UserResponse {
     id: number;
@@ -37,6 +38,8 @@ const UserProfilePage = () => {
           id: parseInt(userid!.toString()),
         },
       });
+
+      console.log("API Response:", response);
 
       if (!response.status) {
         throw new Error(response.message);

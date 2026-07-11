@@ -281,7 +281,20 @@ const ViewPermission = () => {
           </Link>
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
-          <p className="text-sm text-gray-700">Annexure 4: Other Document</p>
+          <div>
+            <p className="text-sm text-gray-700">
+              Annexure 4: Other Document
+              <span className="text-red-500">
+                (to be attached in form of pdf)
+              </span>
+            </p>
+            <p className="ml-4">1. Affidavit/Undertaking (if applicable)</p>
+            <p className="ml-4">2. Right of Way document (if applicable)</p>
+            <p className="ml-4">
+              3. Documents of adjacent NA land where access is proposed
+            </p>
+            <p className="ml-4">4. National Highway NOC, if applicable</p>
+          </div>
           <div className="grow"></div>
 
           <Link
@@ -591,6 +604,39 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
   const userid = getCookie("id");
   const [queryBox, setQueryBox] = useState(false);
 
+  const toLexicalJsonString = (text: string) => {
+    const normalizedText = (text || "").trim();
+    return JSON.stringify({
+      root: {
+        children: [
+          {
+            children: [
+              {
+                detail: 0,
+                format: 0,
+                mode: "normal",
+                style: "",
+                text: normalizedText,
+                type: "text",
+                version: 1,
+              },
+            ],
+            direction: "ltr",
+            format: "",
+            indent: 0,
+            type: "paragraph",
+            version: 1,
+          },
+        ],
+        direction: "ltr",
+        format: "",
+        indent: 0,
+        type: "root",
+        version: 1,
+      },
+    });
+  };
+
   const chatdata = useQuery({
     queryKey: ["getQueryByType", props.id, ["QUERY", "UPDATES"]],
     queryFn: async () => {
@@ -631,7 +677,7 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
             createdById: parseInt(userid.toString()),
             from_userId: parseInt(userid.toString()),
             to_userId: mamlatdarid,
-            query: getValues("query"),
+            query: toLexicalJsonString(getValues("query")),
             type: "QUERY",
             na_formId: props.id,
             query_status: "PENDING",
@@ -684,7 +730,7 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>,
     setFile: React.Dispatch<React.SetStateAction<File | null>>,
-    ref: React.RefObject<HTMLInputElement | null>
+    ref: React.RefObject<HTMLInputElement | null>,
   ) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -730,7 +776,8 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
       {chatdata.data
         ?.filter(
           (val) =>
-            val.request_type == "APPLTODEPT" || val.request_type == "DEPTTOAPPL"
+            val.request_type == "APPLTODEPT" ||
+            val.request_type == "DEPTTOAPPL",
         )
         .map((field, index) => {
           return (
