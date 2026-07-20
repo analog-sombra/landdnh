@@ -5,7 +5,6 @@ import {
   FluentMdl2ViewDashboard,
   FluentPower28Filled,
   FluentSignOut24Regular,
-  FluentTaskListLtr20Regular,
   MaterialSymbolsKeyboardDoubleArrowRight,
   MaterialSymbolsPersonRounded,
 } from "../icons";
@@ -96,22 +95,11 @@ const Sidebar = (props: SidebarProps) => {
               <MenuTab
                 name="Dashboard"
                 path={path}
-                pathcheck="/dashboard/user"
+                pathcheck="/dashboard/user/na-permission"
                 click={() => props.setIsOpen(false)}
                 icon={
                   <div className="bg-[#f3f6f8] rounded-lg">
                     <FluentMdl2ViewDashboard className="text-blue-500 w-6 h-6 p-1" />
-                  </div>
-                }
-              />
-              <MenuTab
-                name="Service(s)"
-                path={path}
-                pathcheck="/dashboard/user/services"
-                click={() => props.setIsOpen(false)}
-                icon={
-                  <div className="bg-[#f3f6f8] rounded-lg">
-                    <FluentTaskListLtr20Regular className="text-blue-500 w-6 h-6 p-1" />
                   </div>
                 }
               />

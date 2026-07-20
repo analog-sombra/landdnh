@@ -651,7 +651,7 @@ const ReportPage = (props: ReportProviderProps) => {
           <Alert message="No Notings found." type="error" showIcon />
         </div>
       )}
-      {["TALATHI", "DNHPDA", "LAQ", "LRO"].includes(currentuserrole)
+      {["TALATHI", "DNHPDA", "LAQ", "LRO","PDA_JE", "PDA_JE"].includes(currentuserrole)
         ? reportdata.data?.map((field, index) => {
             if (
               field.to_user.id == Number(userid) ||

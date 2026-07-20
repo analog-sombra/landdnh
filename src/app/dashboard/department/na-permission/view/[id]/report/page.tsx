@@ -1194,7 +1194,7 @@ const ReportPage = (props: ReportProviderProps) => {
         </div>
       )}
 
-      {["TALATHI", "DNHPDA", "LAQ", "LRO"].includes(currentuserrole)
+      {["TALATHI", "DNHPDA", "LAQ", "LRO", "PDA_JE"].includes(currentuserrole)
         ? reportdata.data?.map((field, index) => {
             if (
               field.to_user.id == Number(userid) ||

@@ -612,7 +612,7 @@ const NotingPage = (props: NotingProviderProps) => {
           .filter((item) => item.type === "PRENOTE")
           .sort(
             (a, b) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
           )[0];
 
         return notingdata.data.map((field, index) => {
@@ -873,7 +873,7 @@ const ReportPage = (props: ReportProviderProps) => {
         </div>
       )}
 
-      {["TALATHI", "DNHPDA", "LAQ", "LRO"].includes(currentuserrole)
+      {["TALATHI", "DNHPDA", "LAQ", "LRO", "PDA_JE"].includes(currentuserrole)
         ? reportdata.data?.map((field, index) => {
             if (
               field.to_user.id == Number(userid) ||

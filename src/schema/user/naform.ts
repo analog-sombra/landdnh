@@ -54,7 +54,7 @@ const NASchema = object({
   anx2: pipe(string("Please enter anx2."), minLength(1, "Please enter anx2.")),
   anx3: pipe(string("Please enter anx3."), minLength(1, "Please enter anx3.")),
   anx4: pipe(string("Please enter anx4."), minLength(1, "Please enter anx4.")),
-  anx5: pipe(string("Please enter anx5."), minLength(1, "Please enter anx5.")),
+  anx5: optional(string("Please enter anx5.")),
   q4: pipe(string("Please enter q4."), minLength(1, "Please enter q4.")),
   q5: pipe(string("Please enter q5."), minLength(1, "Please enter q5.")),
   q6: pipe(string("Please enter q6."), minLength(1, "Please enter q6.")),

@@ -1,11 +1,6 @@
 "use client";
 import { ApiCall } from "@/services/api";
-import {
-  departmentToString,
-  encryptURLData,
-  formateDate,
-  roleToString,
-} from "@/utils/methods";
+import { encryptURLData, formateDate } from "@/utils/methods";
 import { useQuery } from "@tanstack/react-query";
 import { Alert, Drawer, Pagination, Radio } from "antd";
 import { CheckboxGroupProps } from "antd/es/checkbox";
@@ -62,6 +57,8 @@ const NaPermission = () => {
       };
       village: {
         name: string;
+        talati_id: number;
+        pda_id: number;
       };
     }[];
   }
@@ -72,7 +69,7 @@ const NaPermission = () => {
     queryFn: async () => {
       const response = await ApiCall({
         query:
-          "query GetAllNa($take: Int!, $skip: Int!) { getAllNa(take: $take, skip: $skip) {total, skip, take, data {id, q4, status, form_status, office_status, dept_status, updatedAt, dept_user {role, id}, village {name}}}}",
+          "query GetAllNa($take: Int!, $skip: Int!) { getAllNa(take: $take, skip: $skip) {total, skip, take, data {id, q4, status, form_status, office_status, dept_status, updatedAt, dept_user {role, id}, village {name, talati_id, pda_id}}}}",
         variables: {
           take: pagination.take,
           skip: pagination.skip,
@@ -115,12 +112,20 @@ const NaPermission = () => {
     if (FILTERS.ALL === filter) {
       return naformdata.data.data.filter((val) => val.form_status != "DRAFT");
     } else if (FILTERS.MY_FILES === filter) {
+      console.log("currentuserrole", currentuserrole);
+      console.log("id", getCookie("id"));
+      console.log("id", naformdata.data.data);
       return naformdata.data.data.filter(
         (val) =>
           val.form_status != "DRAFT" &&
           (val.dept_user.id == parseInt(getCookie("id") as string) ||
             (val.dept_status == "SEEK_REPORT" &&
-              ["TALATHI", "DNHPDA", "LAQ", "LRO"].includes(currentuserrole)))
+              ((currentuserrole == "TALATHI" &&
+                val.village.talati_id == parseInt(getCookie("id") as string)) ||
+                ((currentuserrole == "PDA_JE") &&
+                  val.village.pda_id == parseInt(getCookie("id") as string)) ||
+              
+                ["LAQ", "LRO","DNHPDA"].includes(currentuserrole)))),
       );
     } else {
       const date = new Date();
@@ -131,7 +136,7 @@ const NaPermission = () => {
           val.dept_status == "SEEK_REPORT" &&
           (date.getTime() - new Date(val.updatedAt).getTime()) /
             (1000 * 60 * 60 * 24) >
-            15
+            15,
       );
     }
   };
@@ -142,7 +147,7 @@ const NaPermission = () => {
         <h1 className="text-[#162f57] text-2xl font-semibold">NA Permission</h1>
         <div className="grow"></div>
         {["LDCMAMLATDAR", "MAMLATDAR", "DEPUTYCOLLECTOR", "COLLECTOR"].includes(
-          currentuserrole
+          currentuserrole,
         ) && (
           <Radio.Group
             style={{ minWidth: 320 }}
@@ -218,8 +223,8 @@ const NaPermission = () => {
                             onClick={() => {
                               router.push(
                                 `/dashboard/department/na-permission/view/${encryptURLData(
-                                  naform.id.toString()
-                                )}`
+                                  naform.id.toString(),
+                                )}`,
                               );
                             }}
                           >
@@ -390,21 +395,21 @@ const InfoPage = (props: InfoProviderProps) => {
                       {item.query_status === "PENDING"
                         ? "Not Received"
                         : item.query_status === "REPLIED"
-                        ? (() => {
-                            // Find the SUBMITREPORT with matching from_user and to_user
-                            const submitReport = reportsubmitdata.data!.find(
-                              (sr) =>
-                                sr.type === "SUBMITREPORT" &&
-                                sr.from_user.role === item.to_user.role &&
-                                sr.to_user.role === item.from_user.role
-                            );
-                            return submitReport
-                              ? `${formateDate(
-                                  new Date(submitReport.createdAt.toString())
-                                )}`
-                              : "Received";
-                          })()
-                        : "Received"}
+                          ? (() => {
+                              // Find the SUBMITREPORT with matching from_user and to_user
+                              const submitReport = reportsubmitdata.data!.find(
+                                (sr) =>
+                                  sr.type === "SUBMITREPORT" &&
+                                  sr.from_user.role === item.to_user.role &&
+                                  sr.to_user.role === item.from_user.role,
+                              );
+                              return submitReport
+                                ? `${formateDate(
+                                    new Date(submitReport.createdAt.toString()),
+                                  )}`
+                                : "Received";
+                            })()
+                          : "Received"}
                     </td>
                   </tr>
                 ))}

@@ -65,7 +65,7 @@ export const na_query = ["MAMLATDAR", "RAK", "LDCMAMLATDAR"];
 // export const na_seek_report_talathi = ["CIRCLEOFFICER"];
 
 export const na_seek_report = {
-  MAMLATDAR: ["TALATHI", "DNHPDA", "LRO", "LAQ"],
+  MAMLATDAR: ["TALATHI", "DNHPDA", "LRO", "LAQ","PDA_JE"],
   TALATHI: ["CIRCLEOFFICER"],
 };
 

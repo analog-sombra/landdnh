@@ -539,14 +539,16 @@ const Meeting = () => {
         <>
           <div className="flex items-center mb-2 gap-2">
             <div className="grow"></div>
-            <button
-              onClick={() => {
-                setIsNoting(!isNoting);
-              }}
-              className="bg-blue-500 text-white px-4 py-1 rounded-md text-sm"
-            >
-              {isNoting ? "Hide Report" : "Add Report"}
-            </button>
+            {userdata.data?.role !== "DNHPDA" && (
+              <button
+                onClick={() => {
+                  setIsNoting(!isNoting);
+                }}
+                className="bg-blue-500 text-white px-4 py-1 rounded-md text-sm"
+              >
+                {isNoting ? "Hide Report" : "Add Report"}
+              </button>
+            )}
           </div>
           <ReportPage id={formdata.data!.id} />
         </>
@@ -651,7 +653,7 @@ const ReportPage = (props: ReportProviderProps) => {
           <Alert message="No Notings found." type="error" showIcon />
         </div>
       )}
-      {["TALATHI", "DNHPDA", "LAQ", "LRO"].includes(currentuserrole)
+      {["TALATHI", "LAQ", "LRO", "PDA_JE"].includes(currentuserrole)
         ? reportdata.data?.map((field, index) => {
             if (
               field.to_user.id == Number(userid) ||
@@ -671,20 +673,41 @@ const ReportPage = (props: ReportProviderProps) => {
               );
             }
           })
-        : reportdata.data?.map((field, index) => {
-            return (
-              <UserChat
-                key={index}
-                name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-                fromrole={field.from_user.role}
-                torole={field.to_user.role}
-                message={field.query}
-                time={new Date(field.createdAt)}
-                url={field.upload_url_1}
-                type={field.type}
-              />
-            );
-          })}
+        : currentuserrole === "DNHPDA"
+          ? reportdata.data
+              ?.filter(
+                (field) =>
+                  field.to_user.role == "PDA_JE" ||
+                  field.from_user.role == "PDA_JE",
+              )
+              .map((field, index) => {
+                return (
+                  <UserChat
+                    key={index}
+                    name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+                    fromrole={field.from_user.role}
+                    torole={field.to_user.role}
+                    message={field.query}
+                    time={new Date(field.createdAt)}
+                    url={field.upload_url_1}
+                    type={field.type}
+                  />
+                );
+              })
+          : reportdata.data?.map((field, index) => {
+              return (
+                <UserChat
+                  key={index}
+                  name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+                  fromrole={field.from_user.role}
+                  torole={field.to_user.role}
+                  message={field.query}
+                  time={new Date(field.createdAt)}
+                  url={field.upload_url_1}
+                  type={field.type}
+                />
+              );
+            })}
     </>
   );
 };

@@ -332,7 +332,7 @@ const ToolBar = ({ id }: ToolBarProps) => {
           createNaQueryInput: {
             createdById: parseInt(userid.toString()),
             // from_userId: parseInt(userid.toString()),
-            from_userId: 17,
+            from_userId: 27,
             to_userId: 5,
             query: data.query,
             type: "REPORTDNHPDA",

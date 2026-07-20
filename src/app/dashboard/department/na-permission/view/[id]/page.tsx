@@ -85,6 +85,11 @@ interface NaFormResponse {
   village: {
     id: number;
     name: string;
+    mamlatar_id: number;
+    rak_id: number;
+    circle_officer_id: number;
+    ldc_mamlatar_id: number;
+    dy_collector_id: number;
   };
   na_applicant: {
     firstName: string;
@@ -152,7 +157,7 @@ const ViewPermission = () => {
     queryFn: async () => {
       const response = await ApiCall({
         query:
-          "query GetNaById($id:Int!) { getNaById(id: $id) { id, last_name, q1, q2, q3, q4, anx1, anx2, anx3, anx4, anx5, q4, q5, q6, q7, q8, q9, q10, q11, q12, q13, q14, q15, q16, q17, q18, createdById, dept_user_id, seek_report, dept_status, village{ id, name }, na_applicant { firstName, lastName, contact,relation, signature_url }, na_survey { area, sub_division, survey_no, village { name }}}}",
+          "query GetNaById($id:Int!) { getNaById(id: $id) { id, last_name, q1, q2, q3, q4, anx1, anx2, anx3, anx4, anx5, q4, q5, q6, q7, q8, q9, q10, q11, q12, q13, q14, q15, q16, q17, q18, createdById, dept_user_id, seek_report, dept_status, village{ id, name , mamlatar_id, rak_id, circle_officer_id, ldc_mamlatar_id, dy_collector_id }, na_applicant { firstName, lastName, contact,relation, signature_url }, na_survey { area, sub_division, survey_no, village { name }}}}",
         variables: {
           id: formid,
         },
@@ -298,6 +303,7 @@ const ViewPermission = () => {
           "COLLECTOR",
           "DNHPDA",
           "RAK",
+          "PDA_JE",
         ].includes(userdata.data!.role) && (
           <button
             onClick={() => setPaymentHistoryBox(true)}
@@ -313,6 +319,7 @@ const ViewPermission = () => {
           "COLLECTOR",
           "RAK",
           "DNHPDA",
+          "PDA_JE",
         ].includes(userdata.data!.role) ||
           formdata.data?.dept_user_id == Number(userid)) && (
           <button
@@ -346,7 +353,9 @@ const ViewPermission = () => {
           "RAK",
         ].includes(userdata.data!.role) ||
           (formdata.data?.seek_report &&
-            ["TALATHI", "DNHPDA", "LAQ", "LRO"].includes(currentuserrole)) ||
+            ["TALATHI", "DNHPDA", "LAQ", "LRO", "PDA_JE"].includes(
+              currentuserrole,
+            )) ||
           formdata.data?.dept_user_id == Number(userid)) && (
           <button
             onClick={() => setReportBox(true)}
@@ -763,11 +772,14 @@ const ViewPermission = () => {
           },
         }}
       >
-        <CorrespondenceProvider
-          setCorrespondenceBox={setCorrespondenceBox}
-          createdById={formdata.data!.createdById}
-          id={formdata.data!.id}
-        />
+        {formdata.data && (
+          <CorrespondenceProvider
+            setCorrespondenceBox={setCorrespondenceBox}
+            createdById={formdata.data!.createdById}
+            id={formdata.data!.id}
+            fromdata={formdata.data}
+          />
+        )}
       </Drawer>
 
       <Drawer
@@ -833,7 +845,7 @@ const ViewPermission = () => {
         ) : formdata.data &&
           userdata.data &&
           formdata.data.dept_status === "SEEK_REPORT" &&
-          ["DNHPDA", "LAQ", "LRO"].includes(userdata.data.role) ? (
+          ["LAQ", "LRO"].includes(userdata.data.role) ? (
           <SeekReportDepartmentProvider
             setReportBox={setReportBox}
             id={formdata.data!.id}
@@ -885,6 +897,7 @@ interface CorrespondenceProviderProps {
   setCorrespondenceBox: React.Dispatch<React.SetStateAction<boolean>>;
   createdById: number;
   id: number;
+  fromdata: NaFormResponse;
 }
 
 const CorrespondenceProvider = (props: CorrespondenceProviderProps) => {
@@ -899,6 +912,7 @@ const CorrespondenceProvider = (props: CorrespondenceProviderProps) => {
           setCorrespondenceBox={props.setCorrespondenceBox}
           createdById={props.createdById}
           id={props.id}
+          fromdata={props.fromdata}
         />
       </FormProvider>
     </>
@@ -909,7 +923,7 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
   const userid = getCookie("id");
   const router = useRouter();
   const userrole: string = getCookie("role") as string;
-  const isPdaJe = userrole === "PDA_JE" || "DNHPDA";
+  const isPdaJe = userrole == "PDA_JE" || userrole == "DNHPDA";
   const [queryBox, setQueryBox] = useState(false);
 
   const [querydata, setQueryData] = useState<string>("");
@@ -958,10 +972,10 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
         variables: {
           role: [
             "SUPTDCOLL",
-            "LDCMAMLATDAR",
-            "MAMLATDAR",
-            "RAK",
-            "DEPUTYCOLLECTOR",
+            "LDCMAMLATDAR", //
+            "MAMLATDAR", //
+            "RAK", //
+            "DEPUTYCOLLECTOR", //
             "COLLECTOR",
             "PATOCOLLECTOR",
             "RTSMAMLATDAR",
@@ -1113,19 +1127,74 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
         </div>
       )}
 
-      {chatdata.data?.map((field, index) => {
-        return (
-          <UserChat
-            key={index}
-            name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-            fromrole={field.from_user.role}
-            torole={field.to_user.role}
-            message={field.query}
-            time={new Date(field.createdAt)}
-            url={field.upload_url_1}
-            type={field.type}
-          />
-        );
+      {
+        ["TALATHI", "LAQ", "LRO", "PDA_JE"].includes(userrole)
+          ? chatdata.data?.map((field, index) => {
+              if (
+                field.to_user.id == Number(userid) ||
+                field.from_user.id == Number(userid)
+              ) {
+                return (
+                  <UserChat
+                    key={index}
+                    name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+                    fromrole={field.from_user.role}
+                    torole={field.to_user.role}
+                    message={field.query}
+                    time={new Date(field.createdAt)}
+                    url={field.upload_url_1}
+                    type={field.type}
+                  />
+                );
+              }
+            })
+          : userrole == "DNHPDA"
+            ? chatdata.data?.map((field, index) => {
+                if (
+                  field.to_user.role == "PDA_JE" ||
+                  field.from_user.role == "PDA_JE"
+                ) {
+                  return (
+                    <UserChat
+                      key={index}
+                      name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+                      fromrole={field.from_user.role}
+                      torole={field.to_user.role}
+                      message={field.query}
+                      time={new Date(field.createdAt)}
+                      url={field.upload_url_1}
+                      type={field.type}
+                    />
+                  );
+                }
+              })
+            : chatdata.data?.map((field, index) => {
+                return (
+                  <UserChat
+                    key={index}
+                    name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+                    fromrole={field.from_user.role}
+                    torole={field.to_user.role}
+                    message={field.query}
+                    time={new Date(field.createdAt)}
+                    url={field.upload_url_1}
+                    type={field.type}
+                  />
+                );
+              })
+
+        // return (
+        //   <UserChat
+        //     key={index}
+        //     name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+        //     fromrole={field.from_user.role}
+        //     torole={field.to_user.role}
+        //     message={field.query}
+        //     time={new Date(field.createdAt)}
+        //     url={field.upload_url_1}
+        //     type={field.type}
+        //   />
+        // );
         // if (field.from_user.role === "USER") {
         // if (field.type === "CORESPONDENCE") {
         //   return (
@@ -1154,7 +1223,7 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
         //     />
         //   );
         // }
-      })}
+      }
 
       <Drawer
         width={320}
@@ -1183,7 +1252,34 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
                   options={[
                     ...(userdata.data
                       ? userdata.data
-                          .filter((val) => val.id !== Number(userid))
+                          .filter((val) => {
+                            if (!val.role) return false;
+
+                            if (
+                              [
+                                "LDCMAMLATDAR",
+                                "MAMLATDAR",
+                                "DEPUTYCOLLECTOR",
+                                "RAK",
+                              ].includes(val.role)
+                            ) {
+                              return (
+                                (val.role === "MAMLATDAR" &&
+                                  val.id ===
+                                    props.fromdata.village.mamlatar_id) ||
+                                (val.role === "RAK" &&
+                                  val.id === props.fromdata.village.rak_id) ||
+                                (val.role === "LDCMAMLATDAR" &&
+                                  val.id ===
+                                    props.fromdata.village.ldc_mamlatar_id) ||
+                                (val.role === "DEPUTYCOLLECTOR" &&
+                                  val.id ===
+                                    props.fromdata.village.dy_collector_id)
+                              );
+                            } else {
+                              return val.id !== Number(userid);
+                            }
+                          })
                           .map((user) => ({
                             label: `${user.firstName} ${
                               user.lastName
@@ -1915,7 +2011,7 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
           </button>
         )}
 
-        {["LDCMAMLATDAR", "MAMLATDAR", "RAK", "DNHPDA"].includes(
+        {["LDCMAMLATDAR", "MAMLATDAR", "RAK", "DNHPDA", "PDA_JE"].includes(
           props.role,
         ) && (
           <button
@@ -2723,7 +2819,6 @@ const ReportProvider = (props: ReportProviderProps) => {
 };
 
 const ReportPage = (props: ReportProviderProps) => {
-  // const [queryBox, setQueryBox] = useState<boolean>(false);
   const [submitBox, setSubmitBox] = useState<boolean>(false);
   const [id, setId] = useState<number>(0);
   const userid = getCookie("id");
@@ -2765,6 +2860,7 @@ const ReportPage = (props: ReportProviderProps) => {
   const uploadRef = useRef<HTMLInputElement>(null);
   const [upload, setUpload] = useState<File | null>(null);
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const submitseekreport = useMutation({
     mutationKey: ["submitSeekReport"],
@@ -2909,7 +3005,7 @@ const ReportPage = (props: ReportProviderProps) => {
               </button>
             )}
 
-            {reportdata.data &&
+            {/* {reportdata.data &&
               reportdata.data.filter(
                 (val) =>
                   val.to_user?.id === Number(userid) &&
@@ -2919,26 +3015,53 @@ const ReportPage = (props: ReportProviderProps) => {
                   <button
                     type="button"
                     onClick={() => {
-                      // router.push(
-                      //   `/dashboard/department/na-permission/view/${encryptURLData(
-                      //     props.id.toString()
-                      //   )}/submitreport`
-                      // );
-                      setSubmitBox(true);
-                      setId(
-                        reportdata.data.filter(
-                          (val) =>
-                            val.to_user?.id === Number(userid) &&
-                            val.query_status === "PENDING",
-                        )[0].id,
+                      router.push(
+                        `/dashboard/department/na-permission/view/${encryptURLData(
+                          props.id.toString(),
+                        )}/form4`,
                       );
+                      // setSubmitBox(true);
+                      // setId(
+                      //   reportdata.data.filter(
+                      //     (val) =>
+                      //       val.to_user?.id === Number(userid) &&
+                      //       val.query_status === "PENDING",
+                      //   )[0].id,
+                      // );
                     }}
                     className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-32 text-nowrap"
                   >
                     Submit Report
                   </button>
                 </>
-              )}
+              )} */}
+            {
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    router.push(
+                      `/dashboard/department/na-permission/view/${encryptURLData(
+                        props.id.toString(),
+                      )}/form4`,
+                    );
+                    // setSubmitBox(true);
+                    // setId(
+                    //   reportdata.data.filter(
+                    //     (val) =>
+                    //       val.to_user?.id === Number(userid) &&
+                    //       val.query_status === "PENDING",
+                    //   )[0].id,
+                    // );
+                  }}
+                  className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-32 text-nowrap"
+                >
+                  {currentuserrole == "DNHPDA"
+                    ? "View Report"
+                    : "Submit Report"}
+                </button>
+              </>
+            }
           </>
         )}
 
@@ -2957,7 +3080,7 @@ const ReportPage = (props: ReportProviderProps) => {
         </div>
       )}
 
-      {["TALATHI", "DNHPDA", "LAQ", "LRO"].includes(currentuserrole)
+      {["TALATHI", "LAQ", "LRO", "PDA_JE"].includes(currentuserrole)
         ? reportdata.data?.map((field, index) => {
             if (
               field.to_user.id == Number(userid) ||
@@ -3005,48 +3128,69 @@ const ReportPage = (props: ReportProviderProps) => {
               // }
             }
           })
-        : reportdata.data?.map((field, index) => {
-            return (
-              <UserChat
-                key={index}
-                name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-                fromrole={field.from_user.role}
-                torole={field.to_user.role}
-                message={field.query}
-                time={new Date(field.createdAt)}
-                url={field.upload_url_1}
-                type={field.type}
-              />
-            );
-            // if (field.from_user.id == Number(userid)) {
-            // if (field.type == "SUBMITREPORT") {
-            //   return (
-            //     <UserChat
-            //       key={index}
-            //       name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-            //       fromrole={field.from_user.role}
-            //       torole={field.to_user.role}
-            //       message={field.query}
-            //       time={new Date(field.createdAt)}
-            //       url={field.upload_url_1}
-            //       type={field.type}
-            //     />
-            //   );
-            // } else {
-            //   return (
-            //     <DeptChat
-            //       key={index}
-            //       name={`${field.to_user.firstName} ${field.to_user.lastName}`}
-            //       fromrole={field.from_user.role}
-            //       torole={field.to_user.role}
-            //       message={field.query}
-            //       time={new Date(field.createdAt)}
-            //       url={field.upload_url_1}
-            //       type={field.type}
-            //     />
-            //   );
-            // }
-          })}
+        : currentuserrole == "DNHPDA"
+          ? reportdata.data
+              ?.filter(
+                (field) =>
+                  field.to_user.role == "PDA_JE" ||
+                  field.from_user.role == "PDA_JE",
+              )
+              .map((field, index) => {
+                return (
+                  <UserChat
+                    key={index}
+                    name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+                    fromrole={field.from_user.role}
+                    torole={field.to_user.role}
+                    message={field.query}
+                    time={new Date(field.createdAt)}
+                    url={field.upload_url_1}
+                    type={field.type}
+                  />
+                );
+              })
+          : reportdata.data?.map((field, index) => {
+              return (
+                <UserChat
+                  key={index}
+                  name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+                  fromrole={field.from_user.role}
+                  torole={field.to_user.role}
+                  message={field.query}
+                  time={new Date(field.createdAt)}
+                  url={field.upload_url_1}
+                  type={field.type}
+                />
+              );
+              // if (field.from_user.id == Number(userid)) {
+              // if (field.type == "SUBMITREPORT") {
+              //   return (
+              //     <UserChat
+              //       key={index}
+              //       name={`${field.from_user.firstName} ${field.from_user.lastName}`}
+              //       fromrole={field.from_user.role}
+              //       torole={field.to_user.role}
+              //       message={field.query}
+              //       time={new Date(field.createdAt)}
+              //       url={field.upload_url_1}
+              //       type={field.type}
+              //     />
+              //   );
+              // } else {
+              //   return (
+              //     <DeptChat
+              //       key={index}
+              //       name={`${field.to_user.firstName} ${field.to_user.lastName}`}
+              //       fromrole={field.from_user.role}
+              //       torole={field.to_user.role}
+              //       message={field.query}
+              //       time={new Date(field.createdAt)}
+              //       url={field.upload_url_1}
+              //       type={field.type}
+              //     />
+              //   );
+              // }
+            })}
 
       {/* <Drawer
         width={320}
@@ -3265,9 +3409,11 @@ const SeekReportDepartmentPage = (props: SeekReportDepartmentProviderProps) => {
           ? "REPORTLAQ"
           : currentuserrole == "LRO"
             ? "REPORTLRO"
-            : currentuserrole == "DNHPDA"
+            : currentuserrole == "PDA_JE"
               ? "REPORTDNHPDA"
-              : "",
+              : currentuserrole == "DNHPDA"
+                ? "REPORTDNHPDA"
+                : "",
       ],
     ],
     queryFn: async () => {
@@ -3283,9 +3429,11 @@ const SeekReportDepartmentPage = (props: SeekReportDepartmentProviderProps) => {
               ? "REPORTLAQ"
               : currentuserrole == "LRO"
                 ? "REPORTLRO"
-                : currentuserrole == "DNHPDA"
+                : currentuserrole == "PDA_JE"
                   ? "REPORTDNHPDA"
-                  : "",
+                  : currentuserrole == "DNHPDA"
+                    ? "REPORTDNHPDA"
+                    : "",
           ],
         },
       });
@@ -3512,7 +3660,7 @@ const SeekReportDepartmentPage = (props: SeekReportDepartmentProviderProps) => {
         </div>
       )}
 
-      {["TALATHI", "DNHPDA", "LAQ", "LRO"].includes(currentuserrole)
+      {["TALATHI", "DNHPDA", "LAQ", "LRO", "PDA_JE"].includes(currentuserrole)
         ? reportdata.data?.map((field, index) => {
             if (
               field.to_user.id == Number(userid) ||
