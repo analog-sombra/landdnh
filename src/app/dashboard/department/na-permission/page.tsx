@@ -59,6 +59,9 @@ const NaPermission = () => {
         name: string;
         talati_id: number;
         pda_id: number;
+        mamlatar_id: number;
+        ldc_mamlatar_id: number;
+        dy_collector_id: number;
       };
     }[];
   }
@@ -69,7 +72,7 @@ const NaPermission = () => {
     queryFn: async () => {
       const response = await ApiCall({
         query:
-          "query GetAllNa($take: Int!, $skip: Int!) { getAllNa(take: $take, skip: $skip) {total, skip, take, data {id, q4, status, form_status, office_status, dept_status, updatedAt, dept_user {role, id}, village {name, talati_id, pda_id}}}}",
+          "query GetAllNa($take: Int!, $skip: Int!) { getAllNa(take: $take, skip: $skip) {total, skip, take, data {id, q4, status, form_status, office_status, dept_status, updatedAt, dept_user {role, id}, village {name, talati_id, pda_id, mamlatar_id, ldc_mamlatar_id, dy_collector_id}}}}",
         variables: {
           take: pagination.take,
           skip: pagination.skip,
@@ -107,14 +110,32 @@ const NaPermission = () => {
     return <div>Error: {naformdata.error.message}</div>;
   }
 
-  const filteredData = () => {
+  const filteredData = (): NaResponse["data"] => {
     if (naformdata.data == undefined) return [];
     if (FILTERS.ALL === filter) {
+      if (currentuserrole == "COLLECTOR") {
+        return naformdata.data.data.filter((val) => val.form_status != "DRAFT");
+      } else if (currentuserrole == "DEPUTYCOLLECTOR") {
+        return naformdata.data.data.filter(
+          (val) =>
+            val.form_status != "DRAFT" &&
+            val.village.dy_collector_id == parseInt(getCookie("id") ?? "0"),
+        );
+      } else if (currentuserrole == "MAMLATDAR") {
+        return naformdata.data.data.filter(
+          (val) =>
+            val.form_status != "DRAFT" &&
+            val.village.mamlatar_id == parseInt(getCookie("id") ?? "0"),
+        );
+      } else if (currentuserrole == "LDCMAMLATDAR") {
+        return naformdata.data.data.filter(
+          (val) =>
+            val.form_status != "DRAFT" &&
+            val.village.ldc_mamlatar_id == parseInt(getCookie("id") ?? "0"),
+        );
+      }
       return naformdata.data.data.filter((val) => val.form_status != "DRAFT");
     } else if (FILTERS.MY_FILES === filter) {
-      console.log("currentuserrole", currentuserrole);
-      console.log("id", getCookie("id"));
-      console.log("id", naformdata.data.data);
       return naformdata.data.data.filter(
         (val) =>
           val.form_status != "DRAFT" &&
@@ -122,10 +143,9 @@ const NaPermission = () => {
             (val.dept_status == "SEEK_REPORT" &&
               ((currentuserrole == "TALATHI" &&
                 val.village.talati_id == parseInt(getCookie("id") as string)) ||
-                ((currentuserrole == "PDA_JE") &&
+                (currentuserrole == "PDA_JE" &&
                   val.village.pda_id == parseInt(getCookie("id") as string)) ||
-              
-                ["LAQ", "LRO","DNHPDA"].includes(currentuserrole)))),
+                ["LAQ", "LRO", "DNHPDA","PDA_MS"].includes(currentuserrole)))),
       );
     } else {
       const date = new Date();

@@ -304,6 +304,7 @@ const ViewPermission = () => {
           "DNHPDA",
           "RAK",
           "PDA_JE",
+          "PDA_MS",
         ].includes(userdata.data!.role) && (
           <button
             onClick={() => setPaymentHistoryBox(true)}
@@ -320,6 +321,7 @@ const ViewPermission = () => {
           "RAK",
           "DNHPDA",
           "PDA_JE",
+          "PDA_MS",
         ].includes(userdata.data!.role) ||
           formdata.data?.dept_user_id == Number(userid)) && (
           <button
@@ -353,7 +355,7 @@ const ViewPermission = () => {
           "RAK",
         ].includes(userdata.data!.role) ||
           (formdata.data?.seek_report &&
-            ["TALATHI", "DNHPDA", "LAQ", "LRO", "PDA_JE"].includes(
+            ["TALATHI", "DNHPDA", "LAQ", "LRO", "PDA_JE","PDA_MS"].includes(
               currentuserrole,
             )) ||
           formdata.data?.dept_user_id == Number(userid)) && (
@@ -923,7 +925,7 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
   const userid = getCookie("id");
   const router = useRouter();
   const userrole: string = getCookie("role") as string;
-  const isPdaJe = userrole == "PDA_JE" || userrole == "DNHPDA";
+  const isPdaJe = userrole == "PDA_JE" || userrole == "DNHPDA" || userrole == "PDA_MS";
   const [queryBox, setQueryBox] = useState(false);
 
   const [querydata, setQueryData] = useState<string>("");
@@ -1148,7 +1150,7 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
                 );
               }
             })
-          : userrole == "DNHPDA"
+          : userrole == "DNHPDA" || userrole == "PDA_MS"
             ? chatdata.data?.map((field, index) => {
                 if (
                   field.to_user.role == "PDA_JE" ||
@@ -2011,7 +2013,7 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
           </button>
         )}
 
-        {["LDCMAMLATDAR", "MAMLATDAR", "RAK", "DNHPDA", "PDA_JE"].includes(
+        {["LDCMAMLATDAR", "MAMLATDAR", "RAK", "DNHPDA", "PDA_JE", "PDA_MS"].includes(
           props.role,
         ) && (
           <button
@@ -2826,14 +2828,14 @@ const ReportPage = (props: ReportProviderProps) => {
   const [queryData, setQueryData] = useState<string>("");
 
   const reportdata = useQuery({
-    queryKey: ["getQueryByType", props.id, ["REPORT", "SUBMITREPORT"]],
+    queryKey: ["getQueryByType", props.id, ["REPORT", "SUBMITREPORT", "REPORTDNHPDA", "QUERYDNHPDA"]],
     queryFn: async () => {
       const response = await ApiCall({
         query:
           "query GetQueryByType($id: Int!, $querytype: [QueryType!]!) {getQueryByType(id: $id, querytype: $querytype) {id,query,upload_url_1,type,request_type,query_status,createdAt,from_user {id, firstName,lastName,role},to_user {id, firstName,lastName,role},}}",
         variables: {
           id: props.id,
-          querytype: ["REPORT", "SUBMITREPORT"],
+          querytype: ["REPORT", "SUBMITREPORT", "REPORTDNHPDA", "QUERYDNHPDA"],
         },
       });
 
@@ -3056,7 +3058,7 @@ const ReportPage = (props: ReportProviderProps) => {
                   }}
                   className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-32 text-nowrap"
                 >
-                  {currentuserrole == "DNHPDA"
+                  {currentuserrole == "DNHPDA" || currentuserrole == "PDA_MS"
                     ? "View Report"
                     : "Submit Report"}
                 </button>
@@ -3128,7 +3130,7 @@ const ReportPage = (props: ReportProviderProps) => {
               // }
             }
           })
-        : currentuserrole == "DNHPDA"
+        : currentuserrole == "DNHPDA" || currentuserrole == "PDA_MS"
           ? reportdata.data
               ?.filter(
                 (field) =>
@@ -3411,7 +3413,7 @@ const SeekReportDepartmentPage = (props: SeekReportDepartmentProviderProps) => {
             ? "REPORTLRO"
             : currentuserrole == "PDA_JE"
               ? "REPORTDNHPDA"
-              : currentuserrole == "DNHPDA"
+              : currentuserrole == "DNHPDA" || currentuserrole == "PDA_MS"
                 ? "REPORTDNHPDA"
                 : "",
       ],
@@ -3431,8 +3433,8 @@ const SeekReportDepartmentPage = (props: SeekReportDepartmentProviderProps) => {
                 ? "REPORTLRO"
                 : currentuserrole == "PDA_JE"
                   ? "REPORTDNHPDA"
-                  : currentuserrole == "DNHPDA"
-                    ? "REPORTDNHPDA"
+                  : currentuserrole == "DNHPDA" || currentuserrole == "PDA_MS"
+                    ? "REPORTDNHPDA" 
                     : "",
           ],
         },
@@ -3660,7 +3662,7 @@ const SeekReportDepartmentPage = (props: SeekReportDepartmentProviderProps) => {
         </div>
       )}
 
-      {["TALATHI", "DNHPDA", "LAQ", "LRO", "PDA_JE"].includes(currentuserrole)
+      {["TALATHI", "DNHPDA", "LAQ", "LRO", "PDA_JE", "PDA_MS"].includes(currentuserrole)
         ? reportdata.data?.map((field, index) => {
             if (
               field.to_user.id == Number(userid) ||
@@ -3899,6 +3901,7 @@ const SubmitReportPage = (props: SubmitReportProviderProps) => {
             "RTSMAMLATDAR",
             "SURVEYSETTLEMENT",
             "DNHPDA",
+            "PDA_MS",
             "SNSSO",
             "SURVEYOR",
           ],
@@ -4358,6 +4361,7 @@ const AllotHearingPage = (props: AllotHearingProviderProps) => {
             "RTSMAMLATDAR",
             "SURVEYSETTLEMENT",
             "DNHPDA",
+            "PDA_MS",
             "SNSSO",
             "SURVEYOR",
           ],

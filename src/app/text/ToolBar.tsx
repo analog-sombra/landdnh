@@ -119,11 +119,9 @@ const ToolBar = () => {
   }, []);
 
   const handleSave = useDebouncedCallback((content) => {
-    console.log("Saving content:", content);
     editor.update(() => {
       const state = editor.getEditorState();
       // Save the state to local storage or server
-      console.log("Editor state:", JSON.stringify(state.toJSON()));
       // localStorage.setItem("editorState", JSON.stringify(state.toJSON()));
     });
   }, 500);
