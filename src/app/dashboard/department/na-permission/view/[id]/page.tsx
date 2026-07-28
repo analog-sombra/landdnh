@@ -355,7 +355,7 @@ const ViewPermission = () => {
           "RAK",
         ].includes(userdata.data!.role) ||
           (formdata.data?.seek_report &&
-            ["TALATHI", "DNHPDA", "LAQ", "LRO", "PDA_JE","PDA_MS"].includes(
+            ["TALATHI", "DNHPDA", "LAQ", "LRO", "PDA_JE", "PDA_MS"].includes(
               currentuserrole,
             )) ||
           formdata.data?.dept_user_id == Number(userid)) && (
@@ -925,7 +925,8 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
   const userid = getCookie("id");
   const router = useRouter();
   const userrole: string = getCookie("role") as string;
-  const isPdaJe = userrole == "PDA_JE" || userrole == "DNHPDA" || userrole == "PDA_MS";
+  const isPdaJe =
+    userrole == "PDA_JE" || userrole == "DNHPDA" || userrole == "PDA_MS";
   const [queryBox, setQueryBox] = useState(false);
 
   const [querydata, setQueryData] = useState<string>("");
@@ -2013,9 +2014,14 @@ const PaymentHistoryPage = (props: PaymentHistoryProviderProps) => {
           </button>
         )}
 
-        {["LDCMAMLATDAR", "MAMLATDAR", "RAK", "DNHPDA", "PDA_JE", "PDA_MS"].includes(
-          props.role,
-        ) && (
+        {[
+          "LDCMAMLATDAR",
+          "MAMLATDAR",
+          "RAK",
+          "DNHPDA",
+          "PDA_JE",
+          "PDA_MS",
+        ].includes(props.role) && (
           <button
             type="button"
             onClick={() => setPenaltyBox(true)}
@@ -2828,7 +2834,11 @@ const ReportPage = (props: ReportProviderProps) => {
   const [queryData, setQueryData] = useState<string>("");
 
   const reportdata = useQuery({
-    queryKey: ["getQueryByType", props.id, ["REPORT", "SUBMITREPORT", "REPORTDNHPDA", "QUERYDNHPDA"]],
+    queryKey: [
+      "getQueryByType",
+      props.id,
+      ["REPORT", "SUBMITREPORT", "REPORTDNHPDA", "QUERYDNHPDA"],
+    ],
     queryFn: async () => {
       const response = await ApiCall({
         query:
@@ -2863,6 +2873,47 @@ const ReportPage = (props: ReportProviderProps) => {
   const [upload, setUpload] = useState<File | null>(null);
   const queryClient = useQueryClient();
   const router = useRouter();
+
+  const submitfinalreport = useMutation({
+    mutationKey: ["submitFinalReport"],
+    mutationFn: async () => {
+      if (!userid) {
+        toast.error("User ID not found");
+        return;
+      }
+
+      const response = await ApiCall({
+        query:
+          "mutation SubmitFinalReport($naid: Int!,$userid: Int!) {submitFinalReport(naid: $naid, userid: $userid) {id}}",
+        variables: {
+          naid: props.id,
+          userid: parseInt(userid.toString()),
+        },
+      });
+
+      if (!response.status) {
+        throw new Error(response.message);
+      }
+
+      if (!(response.data as Record<string, unknown>)["submitFinalReport"]) {
+        throw new Error("Value not found in response");
+      }
+      return (response.data as Record<string, unknown>)[
+        "submitFinalReport"
+      ] as QueryResponseData;
+    },
+    onSuccess: () => {
+      toast.success("Report request created successfully");
+      reportdata.refetch();
+      props.setReportBox(false);
+      queryClient.invalidateQueries({
+        queryKey: ["getnaform", props.id],
+      });
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
 
   const submitseekreport = useMutation({
     mutationKey: ["submitSeekReport"],
@@ -2987,6 +3038,33 @@ const ReportPage = (props: ReportProviderProps) => {
     }
   };
 
+  const tworeportsubmitdata = useQuery({
+    queryKey: ["twoReportReceived"],
+    refetchOnWindowFocus: false,
+    queryFn: async () => {
+      const response = await ApiCall({
+        query:
+          "query TwoReportReceived($id: Int!) { twoReportReceived(id: $id) { id }}",
+        variables: {
+          id: props.id,
+        },
+      });
+      console.log("twoReportReceived response:", response);
+
+      if (!response.status) {
+        throw new Error(response.message);
+      }
+
+      // if value is not in response.data then return the error
+      if (!(response.data as Record<string, unknown>)["twoReportReceived"]) {
+        throw new Error("Value not found in response");
+      }
+      return (response.data as Record<string, unknown>)[
+        "twoReportReceived"
+      ] as ReportSubmitData[];
+    },
+  });
+
   return (
     <>
       <div className="flex items-center gap-2">
@@ -2995,6 +3073,19 @@ const ReportPage = (props: ReportProviderProps) => {
 
         {["SUBMIT", "SEEK_REPORT"].includes(props.status) && (
           <>
+            {["PDA_JE"].includes(props.role) &&
+              tworeportsubmitdata.data &&
+              tworeportsubmitdata.data.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    submitfinalreport.mutate();
+                  }}
+                  className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-28 text-nowrap"
+                >
+                  Finalize Report
+                </button>
+              )}
             {["MAMLATDAR", "LDCMAMLATDAR"].includes(props.role) && (
               <button
                 type="button"
@@ -3434,7 +3525,7 @@ const SeekReportDepartmentPage = (props: SeekReportDepartmentProviderProps) => {
                 : currentuserrole == "PDA_JE"
                   ? "REPORTDNHPDA"
                   : currentuserrole == "DNHPDA" || currentuserrole == "PDA_MS"
-                    ? "REPORTDNHPDA" 
+                    ? "REPORTDNHPDA"
                     : "",
           ],
         },
@@ -3662,7 +3753,9 @@ const SeekReportDepartmentPage = (props: SeekReportDepartmentProviderProps) => {
         </div>
       )}
 
-      {["TALATHI", "DNHPDA", "LAQ", "LRO", "PDA_JE", "PDA_MS"].includes(currentuserrole)
+      {["TALATHI", "DNHPDA", "LAQ", "LRO", "PDA_JE", "PDA_MS"].includes(
+        currentuserrole,
+      )
         ? reportdata.data?.map((field, index) => {
             if (
               field.to_user.id == Number(userid) ||
@@ -3837,6 +3930,32 @@ const SubmitReportPage = (props: SubmitReportProviderProps) => {
       }
       return (response.data as Record<string, unknown>)[
         "allReportReceived"
+      ] as ReportSubmitData[];
+    },
+  });
+
+  const tworeportsubmitdata = useQuery({
+    queryKey: ["twoReportReceived"],
+    refetchOnWindowFocus: false,
+    queryFn: async () => {
+      const response = await ApiCall({
+        query:
+          "query TwoReportReceived($id: Int!) { twoReportReceived(id: $id) { id }}",
+        variables: {
+          id: props.id,
+        },
+      });
+
+      if (!response.status) {
+        throw new Error(response.message);
+      }
+
+      // if value is not in response.data then return the error
+      if (!(response.data as Record<string, unknown>)["twoReportReceived"]) {
+        throw new Error("Value not found in response");
+      }
+      return (response.data as Record<string, unknown>)[
+        "twoReportReceived"
       ] as ReportSubmitData[];
     },
   });

@@ -59,7 +59,8 @@ const LoginPage = () => {
       }
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      // toast.error(error.message);
+      toast.error("Invalid password");
     },
   });
 

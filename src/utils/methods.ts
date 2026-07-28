@@ -411,11 +411,11 @@ export const roleToString = (role: string): string => {
     case "SUPTDCOLL":
       return "Suptd. Collectorate";
     case "LDCMAMLATDAR":
-      return "LDC Mamlatar";
+      return "LDC Mamlatdar";
     case "LDCSINGLEWINDOW":
       return "LDC Single Window";
     case "MAMLATDAR":
-      return "Mamlatar";
+      return "Mamlatdar";
     case "TALATHI":
       return "Talathi";
     case "CIRCLEOFFICER":
@@ -433,15 +433,19 @@ export const roleToString = (role: string): string => {
     case "PATOCOLLECTOR":
       return "PA To Collector";
     case "RTSMAMLATDAR":
-      return "RTS Mamlatar";
+      return "RTS Mamlatdar";
     case "SURVEYSETTLEMENT":
       return "Survey Settlement";
     case "DNHPDA":
-      return "PDA DNH";
+      return "ATP PDA";
     case "SNSSO":
       return "SNSSO";
     case "SURVEYOR":
       return "Surveyor";
+    case "PDA_MS":
+      return "MS PDA";
+    case "PDA_JE":
+      return "JE PDA";
     default:
       return role;
   }
