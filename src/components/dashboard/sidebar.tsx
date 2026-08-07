@@ -90,6 +90,21 @@ const Sidebar = (props: SidebarProps) => {
             />
           </div>
           <div className="h-6"></div>
+
+          {userdata.data?.role === "ADMIN" && (
+            <MenuTab
+              name="OBPS"
+              path={path}
+              pathcheck="/dashboard/obps"
+              click={() => props.setIsOpen(false)}
+              icon={
+                <div className="bg-[#f3f6f8] rounded-lg">
+                  <FluentMdl2ViewDashboard className="text-blue-500 w-6 h-6 p-1" />
+                </div>
+              }
+            />
+          )}
+
           {userdata.data?.role === "USER" ? (
             <>
               <MenuTab

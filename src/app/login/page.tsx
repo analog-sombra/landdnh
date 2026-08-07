@@ -28,30 +28,16 @@ export default function Home() {
               <br />
               and Daman & Diu
             </p>
-            {/* <p className="text-center text-[#244F4C] text-2xl font-bold">
-              Bhumi Seva
-            </p> */}
           </div>
           <div className="p-5 bg-white w-96 rounded-r-lg grid place-items-center">
             <div>
               <p className="text-center text-2xl text-[#244F4C]">Login</p>
-              <p className="text-center">
-                Enter your username and password to login
-              </p>
+              <p className="text-center">Choose password or OTP to login</p>
               <LoginPage />
             </div>
           </div>
         </div>
       </div>
-      {/* <div className="grid place-items-center h-screen w-full bg-gray-100">
-        <div className="p-5 bg-white shadow w-96 rounded-xl">
-          <p className="text-center text-xl">Login</p>
-          <p className="text-center">
-            Enter your username and password to login
-          </p>
-          <LoginPage />
-        </div>
-      </div> */}
     </div>
   );
 }

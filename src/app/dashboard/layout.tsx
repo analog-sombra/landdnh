@@ -14,7 +14,7 @@ const Layout = ({
   return (
     <>
       <div className="min-h-screen w-full bg-[#f3f6f8] relative">
-        <Sidebar isOpen={isOpen} setIsOpen={setIsOpen}/>
+        <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
 
         <div className={`relative p-0 md:pl-60 min-h-screen w-full`}>
           <div className="pb-8">{children}</div>
@@ -28,9 +28,7 @@ const Layout = ({
               Version: 1.0.0
             </div>
             <div className="grow"></div>
-            <p className="px-2">
-              SmartTechWebworks
-            </p>
+            <p className="px-2">Designed and Developed by Smart Technologies</p>
           </div>
         </div>
         {isOpen && (

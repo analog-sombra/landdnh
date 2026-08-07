@@ -22,7 +22,6 @@ const NaPermission = () => {
     total: 0,
   });
 
-  //   const [search, setSearch] = useState<string | undefined>(undefined);
 
   interface NaResponse {
     limit: number;
@@ -92,23 +91,8 @@ const NaPermission = () => {
           }}
         >
           <MaterialSymbolsLightAdd className="text-white text-xl" />
-          Add NA Permission
+          New Permission
         </button>
-        {/* <Input
-          placeholder="search"
-          style={{ width: 200 }}
-          value={search}
-          allowClear
-          onChange={(e) => {
-            setPaginatin({
-              ...pagination,
-              skip: 0,
-              take: pagination.take,
-            });
-            setSearch(e.target.value);
-            cowdata.refetch();
-          }}
-        /> */}
       </div>
 
       {naformdata.data?.data.length === 0 ? (
@@ -162,14 +146,14 @@ const NaPermission = () => {
                             if (naform.form_status == "DRAFT") {
                               router.push(
                                 `/dashboard/user/na-permission/view/${encryptURLData(
-                                  naform.id.toString()
-                                )}/preview`
+                                  naform.id.toString(),
+                                )}/preview`,
                               );
                             } else {
                               router.push(
                                 `/dashboard/user/na-permission/view/${encryptURLData(
-                                  naform.id.toString()
-                                )}`
+                                  naform.id.toString(),
+                                )}`,
                               );
                             }
                           }}
