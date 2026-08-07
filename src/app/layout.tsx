@@ -14,8 +14,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Land Section",
-  description: "Land Section",
+  title: "Bhoomi Seva",
+  description: "Bhoomi Seva",
+  icons: {
+    icon: "/logo.png",
+  },
 };
 
 export default function RootLayout({
