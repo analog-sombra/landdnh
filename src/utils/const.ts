@@ -1,6 +1,6 @@
 // export const baseurl = "http://localhost:5566";
 // export const baseurl = "http://192.168.0.210:4422";
-export const baseurl = "http://192.168.1.18:4422";
+export const baseurl = "http://192.168.1.8:4422";
 
 export const graphqlurl = `${baseurl}/graphql`;
 export const uploadUrl = `${baseurl}/uploader/upload/`;
