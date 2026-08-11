@@ -1,5 +1,8 @@
 "use client";
 
+import { useState } from "react";
+import Link from "next/link";
+import { Alert } from "antd";
 import LoginPage from "@/components/form/login/login";
 
 const colors = {
@@ -12,6 +15,8 @@ const colors = {
 };
 
 export default function Home() {
+  const [encId, setEncId] = useState("");
+  const [showAlert, setShowAlert] = useState(false);
   return (
     <div className="min-h-screen bg-[#f8fafc]">
       {/* Accessibility Bar */}
@@ -58,14 +63,38 @@ export default function Home() {
               Apply for Non-Agricultural permission online, calculate statutory revenue fees, track real-time application processing, and issue e-Signed clearance certificates.
             </p>
 
-            {/* Quick Tracker */}
+          {/* Quick Tracker */}
+            {showAlert && (
+              <>
+              <Alert
+                message="Please enter the Application Reference Number to track your status."
+             
+                type="error"
+                closable
+                onClose={() => setShowAlert(false)}
+                
+              />
+              <div className="h-2"></div>
+              </>
+            )}
             <div className="bg-white p-4 rounded-lg border border-[#e2e8f0] flex gap-2 max-w-2xl shadow-md">
               <input
                 type="text"
+                value={encId}
+                onChange={(e) => setEncId(e.target.value)}
                 placeholder="Enter Application Ref No. (e.g. DNH/NA/2026/0124)"
                 className="flex-1 px-3.5 py-2.5 border border-[#cbd5e1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]"
               />
-              <button className="bg-[#1e3a8a] text-white px-5 py-2.5 rounded-md font-semibold cursor-pointer hover:bg-[#1e40af] text-sm">
+              <button
+                onClick={() => {
+                  if (encId.trim()) {
+                    window.open(`/report/${encId}`, "_blank");
+                  } else {
+                    setShowAlert(true);
+                  }
+                }}
+                className="bg-[#1e3a8a] text-white px-5 py-2.5 rounded-md font-semibold cursor-pointer hover:bg-[#1e40af] text-sm"
+              >
                 Track Status
               </button>
             </div>
@@ -111,27 +140,30 @@ export default function Home() {
             {
               title: "Document Checklist",
               desc: "View required documents by conversion type (Residential, Commercial, Industrial).",
+              href: "/document-checklist",
             },
             {
               title: "NA Fee Calculator",
               desc: "Estimate conversion premium, tax, and application fees based on land area.",
+              href: "/calculator",
             },
             {
               title: "Verify E-Certificate",
               desc: "Validate and download official QR-coded NA permission orders.",
+              href: "#",
             },
             {
               title: "User Manual & FAQs",
               desc: "Step-by-step guidance on application workflows and compliance timelines.",
+              href: "/faq",
             },
           ].map((service, idx) => (
-            <div
-              key={idx}
-              className="bg-white p-6 rounded-lg border border-[#e2e8f0] text-center transition-all hover:shadow-md hover:-translate-y-1 cursor-pointer"
-            >
-              <h4 className="text-[#1e3a8a] font-semibold mb-2">{service.title}</h4>
-              <p className="text-[#64748b] text-sm">{service.desc}</p>
-            </div>
+            <Link href={service.href} key={idx}>
+              <div className="bg-white p-6 rounded-lg border border-[#e2e8f0] text-center transition-all hover:shadow-md hover:-translate-y-1 cursor-pointer h-full">
+                <h4 className="text-[#1e3a8a] font-semibold mb-2">{service.title}</h4>
+                <p className="text-[#64748b] text-sm">{service.desc}</p>
+              </div>
+            </Link>
           ))}
         </div>
       </section>
