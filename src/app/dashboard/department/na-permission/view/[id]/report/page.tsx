@@ -622,7 +622,7 @@ const Meeting = () => {
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
               <p className="flex-1 text-sm text-gray-500">
-                (10) Area of the site out of (6) above to be used for.
+                (10) Area of the site out of (8) above to be used for.
               </p>
               <div className="flex-1">{formdata.data!.q11}</div>
             </div>

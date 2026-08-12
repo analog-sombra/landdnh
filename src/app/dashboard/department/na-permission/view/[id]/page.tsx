@@ -118,6 +118,11 @@ interface UserResponseData {
 interface QueryResponseData {
   id: number;
 }
+
+interface UpdateNaResponseData {
+  id: number;
+}
+
 interface ReportSubmitData {
   id: number;
 }
@@ -175,6 +180,73 @@ const ViewPermission = () => {
       ] as NaFormResponse;
     },
   });
+
+  const updateOfficeStatus = useMutation({
+    mutationKey: ["updateNaOfficeStatus", formid],
+    mutationFn: async (data: {
+      office_status: "SUPERINTENDENT_COLLECTORATE" | "MAMLATDAR";
+      dept_user_id: number;
+    }) => {
+      if (!userid) {
+        throw new Error("User ID not found");
+      }
+
+      const response = await ApiCall({
+        query:
+          "mutation UpdateNa($updateNaInput: UpdateNaInput!) { updateNa(updateNaInput: $updateNaInput) { id } }",
+        variables: {
+          updateNaInput: {
+            id: formid,
+            office_status: data.office_status,
+            dept_user_id: data.dept_user_id,
+            updatedById: parseInt(userid.toString()),
+          },
+        },
+      });
+
+      if (!response.status) {
+        throw new Error(response.message);
+      }
+
+      if (!(response.data as Record<string, unknown>)["updateNa"]) {
+        throw new Error("Value not found in response");
+      }
+
+      return (response.data as Record<string, unknown>)[
+        "updateNa"
+      ] as UpdateNaResponseData;
+    },
+    onSuccess: () => {
+      toast.success("Updated successfully");
+      formdata.refetch();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const handleMarkToSuptdCollectorate = () => {
+    updateOfficeStatus.mutate({
+      office_status: "SUPERINTENDENT_COLLECTORATE",
+      dept_user_id: 6,
+    });
+    router.back();
+  };
+
+  const handleMarkToMamlatdar = () => {
+    const mamlatdarId = formdata.data?.village?.mamlatar_id;
+
+    if (!mamlatdarId) {
+      toast.error("Mamlatdar not found for selected village");
+      return;
+    }
+
+    updateOfficeStatus.mutate({
+      office_status: "MAMLATDAR",
+      dept_user_id: mamlatdarId,
+    });
+    router.back();
+  };
 
   const [correspondenceBox, setCorrespondenceBox] = useState(false);
   const [notingBox, setNotingBox] = useState(false);
@@ -313,24 +385,25 @@ const ViewPermission = () => {
             Payment
           </button>
         )}
-        {([
-          "LDCMAMLATDAR",
-          "MAMLATDAR",
-          "DEPUTYCOLLECTOR",
-          "COLLECTOR",
-          "RAK",
-          "DNHPDA",
-          "PDA_JE",
-          "PDA_MS",
-        ].includes(userdata.data!.role) ||
-          formdata.data?.dept_user_id == Number(userid)) && (
-          <button
-            onClick={() => setCorrespondenceBox(true)}
-            className="bg-[#162f57] text-white py-1 px-4 rounded-md text-sm grid place-items-center cursor-pointer"
-          >
-            Correspondence
-          </button>
-        )}
+        {!["LDCSINGLEWINDOW", "SUPTDCOLL"].includes(userdata.data!.role) &&
+          ([
+            "LDCMAMLATDAR",
+            "MAMLATDAR",
+            "DEPUTYCOLLECTOR",
+            "COLLECTOR",
+            "RAK",
+            "DNHPDA",
+            "PDA_JE",
+            "PDA_MS",
+          ].includes(userdata.data!.role) ||
+            formdata.data?.dept_user_id == Number(userid)) && (
+            <button
+              onClick={() => setCorrespondenceBox(true)}
+              className="bg-[#162f57] text-white py-1 px-4 rounded-md text-sm grid place-items-center cursor-pointer"
+            >
+              Correspondence
+            </button>
+          )}
 
         {[
           "LDCMAMLATDAR",
@@ -347,23 +420,43 @@ const ViewPermission = () => {
           </button>
         )}
 
-        {([
-          "LDCMAMLATDAR",
-          "MAMLATDAR",
-          "DEPUTYCOLLECTOR",
-          "COLLECTOR",
-          "RAK",
-        ].includes(userdata.data!.role) ||
-          (formdata.data?.seek_report &&
-            ["TALATHI", "DNHPDA", "LAQ", "LRO", "PDA_JE", "PDA_MS"].includes(
-              currentuserrole,
-            )) ||
-          formdata.data?.dept_user_id == Number(userid)) && (
+        {!["LDCSINGLEWINDOW", "SUPTDCOLL"].includes(userdata.data!.role) &&
+          ([
+            "LDCMAMLATDAR",
+            "MAMLATDAR",
+            "DEPUTYCOLLECTOR",
+            "COLLECTOR",
+            "RAK",
+          ].includes(userdata.data!.role) ||
+            (formdata.data?.seek_report &&
+              ["TALATHI", "DNHPDA", "LAQ", "LRO", "PDA_JE", "PDA_MS"].includes(
+                currentuserrole,
+              )) ||
+            formdata.data?.dept_user_id == Number(userid)) && (
+            <button
+              onClick={() => setReportBox(true)}
+              className="bg-[#162f57] text-white py-1 px-4 rounded-md text-sm grid place-items-center cursor-pointer"
+            >
+              Report
+            </button>
+          )}
+
+        {["LDCSINGLEWINDOW"].includes(userdata.data!.role) && (
           <button
-            onClick={() => setReportBox(true)}
+            onClick={handleMarkToSuptdCollectorate}
+            disabled={updateOfficeStatus.isPending}
             className="bg-[#162f57] text-white py-1 px-4 rounded-md text-sm grid place-items-center cursor-pointer"
           >
-            Report
+            Mark to Suptd. Collectorate
+          </button>
+        )}
+        {["SUPTDCOLL"].includes(userdata.data!.role) && (
+          <button
+            onClick={handleMarkToMamlatdar}
+            disabled={updateOfficeStatus.isPending}
+            className="bg-[#162f57] text-white py-1 px-4 rounded-md text-sm grid place-items-center cursor-pointer"
+          >
+            Mark to Mamlatdar
           </button>
         )}
 
@@ -702,7 +795,7 @@ const ViewPermission = () => {
         </div>
         <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
           <p className="flex-1 text-sm text-gray-500">
-            (10) Area of the site out of (6) above to be used for.
+            (10) Area of the site out of (8) above to be used for.
           </p>
           <div className="flex-1">{formdata.data!.q11}</div>
         </div>
@@ -1096,6 +1189,8 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
       setValue(ref.current!.name as keyof QueryForm, resposne.data as string);
     }
   };
+  const currentuserrole: string = getCookie("role") as string;
+
 
   return (
     <>
@@ -1256,7 +1351,11 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
                     ...(userdata.data
                       ? userdata.data
                           .filter((val) => {
+
                             if (!val.role) return false;
+                            if(val.role == "SUPTDCOLL") return false;
+                            if(currentuserrole == val.role) return false;
+
 
                             if (
                               [
@@ -2903,7 +3002,7 @@ const ReportPage = (props: ReportProviderProps) => {
       ] as QueryResponseData;
     },
     onSuccess: () => {
-      toast.success("Report request created successfully");
+      toast.success("Report Submitted successfully");
       reportdata.refetch();
       props.setReportBox(false);
       queryClient.invalidateQueries({
@@ -2944,7 +3043,7 @@ const ReportPage = (props: ReportProviderProps) => {
       ] as QueryResponseData;
     },
     onSuccess: () => {
-      toast.success("Report request created successfully");
+      toast.success("Report Submitted successfully");
       reportdata.refetch();
       props.setReportBox(false);
       queryClient.invalidateQueries({
@@ -3083,7 +3182,7 @@ const ReportPage = (props: ReportProviderProps) => {
                   }}
                   className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-28 text-nowrap"
                 >
-                  Finalize Report
+                  Share Report to Mamlatdar
                 </button>
               )}
             {["MAMLATDAR", "LDCMAMLATDAR"].includes(props.role) && (
@@ -3128,7 +3227,7 @@ const ReportPage = (props: ReportProviderProps) => {
                   </button>
                 </>
               )} */}
-            {
+            {props.status != "SUBMIT" &&
               <>
                 <button
                   type="button"
@@ -3151,7 +3250,7 @@ const ReportPage = (props: ReportProviderProps) => {
                 >
                   {currentuserrole == "DNHPDA" || currentuserrole == "PDA_MS"
                     ? "View Report"
-                    : "Submit Report"}
+                    : "Create Report"}
                 </button>
               </>
             }
@@ -3585,7 +3684,7 @@ const SeekReportDepartmentPage = (props: SeekReportDepartmentProviderProps) => {
       ] as QueryResponseData;
     },
     onSuccess: () => {
-      toast.success("Report request created successfully");
+      toast.success("Report Submitted successfully");
       reportdata.refetch();
       props.setReportBox(false);
       queryClient.invalidateQueries({
@@ -4171,13 +4270,13 @@ const SubmitReportPage = (props: SubmitReportProviderProps) => {
 
         {["MAMLATDAR", "LDCMAMLATDAR", "RAK"].includes(props.role) && (
           <>
-            <button
+            {/* <button
               type="button"
               onClick={() => setQueryBox(true)}
               className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-20 text-nowrap"
             >
               Seek
-            </button>
+            </button> */}
 
             <button
               onClick={() => {
@@ -4199,7 +4298,7 @@ const SubmitReportPage = (props: SubmitReportProviderProps) => {
               type="button"
               className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-36 text-nowrap"
             >
-              Mamlatdar Report
+              Create Report
             </button>
           </>
         )}

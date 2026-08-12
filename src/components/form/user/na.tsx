@@ -552,50 +552,6 @@ const NaPage = () => {
                 </div>
               )}
             </div>
-            <div className="flex p-2 px-16 items-center mt-2 gap-2 border-b border-gray-200">
-              <p className="text-sm text-gray-700">
-                Annexure 5: Other Document
-              </p>
-              <div className="grow"></div>
-              {anx5 ? (
-                <button
-                  type="button"
-                  onClick={() => setAnx5(null)}
-                  className="py-1 rounded-md bg-red-500 px-4 text-sm text-white cursor-pointer w-28 flex-shrink-0"
-                >
-                  Remove
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => handleFileUpload(anx5Ref)}
-                  className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-28 flex-shrink-0"
-                >
-                  Upload File
-                </button>
-              )}
-
-              <input
-                type="file"
-                ref={anx5Ref}
-                name="anx5"
-                onChange={(e) => handleFileChange(e, setAnx5, anx5Ref)}
-                className="hidden"
-              />
-
-              {anx5 && (
-                <div className="flex gap-2 items-center">
-                  {/* <p className="text-sm text-gray-700">{anx5.name}</p> */}
-                  <Link
-                    target="_blank"
-                    href={URL.createObjectURL(anx5!)}
-                    className="bg-gray-200 text-black py-1 px-4 rounded-md text-sm h-7 grid place-items-center w-28 flex-shrink-0"
-                  >
-                    View File
-                  </Link>
-                </div>
-              )}
-            </div>
             <div className="bg-gray-100 px-4 py-1 my-2 mx-4 text-sm">
               Also furnish the following information
             </div>
@@ -618,7 +574,7 @@ const NaPage = () => {
               </p>
               <div className="flex-1">
                 <TextInput<NAForm>
-                  required={true}
+                  required={false}
                   name="last_name"
                   placeholder="Enter Details"
                 />
@@ -649,6 +605,60 @@ const NaPage = () => {
                   maxlength={10}
                   placeholder="Enter Details"
                 />
+              </div>
+            </div>
+
+            <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
+              <p className="flex-1 text-sm text-gray-500">
+                (4A). Signature of the Applicant.
+              </p>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  {anx5 ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAnx5(null);
+                        setValue("anx5", "");
+                      }}
+                      className="py-1 rounded-md bg-red-500 px-4 text-sm text-white cursor-pointer"
+                    >
+                      Remove Signature
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => handleFileUpload(anx5Ref)}
+                      className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer"
+                    >
+                      Upload Signature
+                    </button>
+                  )}
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    ref={anx5Ref}
+                    name="anx5"
+                    onChange={(e) => handleFileChange(e, setAnx5, anx5Ref)}
+                    className="hidden"
+                  />
+
+                  {anx5 && (
+                    <Link
+                      target="_blank"
+                      href={URL.createObjectURL(anx5)}
+                      className="bg-gray-200 text-black py-1 px-4 rounded-md text-sm h-7 grid place-items-center"
+                    >
+                      View Signature
+                    </Link>
+                  )}
+                </div>
+                {errors.anx5 && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.anx5.message}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -691,7 +701,7 @@ const NaPage = () => {
                             Relation
                           </th>
                           <th className="border border-gray-300 px-4 py-2 font-normal text-sm w-52">
-                            Signature
+                            Signature *
                           </th>
                           <th className="border border-gray-300 px-4 py-2 font-normal text-sm">
                             Actions
@@ -881,7 +891,7 @@ const NaPage = () => {
               <p className="flex-1 text-sm text-gray-500">(9) Old Survey No</p>
               <div className="flex-1">
                 <TextInput<NAForm>
-                  required={true}
+                  required={false}
                   name="q10"
                   placeholder="Enter Details"
                 />
@@ -986,7 +996,7 @@ const NaPage = () => {
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
               <p className="flex-1 text-sm text-gray-500">
-                (10) Area of the site out of (6) above to be used for.
+                (10) Area of the site out of (8) above to be used for.
               </p>
               <div className="flex-1">
                 <TextInput<NAForm>

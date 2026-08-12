@@ -40,7 +40,7 @@ import { $generateHtmlFromNodes } from "@lexical/html";
 import TablePlugin from "./TablePlugin";
 import { useDebouncedCallback } from "use-debounce";
 import { toast } from "react-toastify";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getCookie } from "cookies-next/client";
 import { ApiCall } from "@/services/api";
 
@@ -102,6 +102,7 @@ const ToolBar = ({ id }: ToolBarProps) => {
 
   const [editor] = useLexicalComposerContext();
   const queryClient = useQueryClient();
+  const [existingQueryId, setExistingQueryId] = useState<number | null>(null);
 
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
@@ -114,6 +115,37 @@ const ToolBar = ({ id }: ToolBarProps) => {
   const [heading, setHeading] = useState("h1");
   const [fontSize, setFontSizeState] = useState<number>(14);
   const [fontFamily, setFontFamily] = useState<string>("");
+
+  // Fetch existing REPORTDNHPDA query for this form
+  const existingQueryData = useQuery({
+    queryKey: ["getQueryByType", Number(id), "REPORTDNHPDA"],
+    queryFn: async () => {
+      const response = await ApiCall({
+        query:
+          "query GetQueryByType($id: Int!, $querytype: [QueryType!]!) {getQueryByType(id: $id, querytype: $querytype) {id}}",
+        variables: {
+          id: Number(id),
+          querytype: ["REPORTDNHPDA"],
+        },
+      });
+
+      if (!response.status) {
+        throw new Error(response.message);
+      }
+
+      const queries = (response.data as Record<string, unknown>)[
+        "getQueryByType"
+      ] as Array<{ id: number }>;
+      console.log("Fetched existing queries:", queries);
+      if (queries && queries.length > 0) {
+        setExistingQueryId(queries[0].id);
+      } else {
+        setExistingQueryId(null);
+      }
+
+      return queries;
+    },
+  });
 
   const $updateToolbar = useCallback(() => {
     const selection = $getSelection();
@@ -325,37 +357,62 @@ const ToolBar = ({ id }: ToolBarProps) => {
         return;
       }
 
-      const response = await ApiCall({
-        query:
-          "mutation CreateNaQuery($createNaQueryInput: CreateNaQueryInput!) {createNaQuery(createNaQueryInput: $createNaQueryInput) {id}}",
-        variables: {
-          createNaQueryInput: {
-            createdById: parseInt(userid.toString()),
-            // from_userId: parseInt(userid.toString()),
-            from_userId: 27,
-            to_userId: 5,
-            query: data.query,
-            type: "REPORTDNHPDA",
-            na_formId: id,
-            query_status: "PENDING",
-            request_type: "DEPTTODEPT",
+      // If existing query exists, update it; otherwise create new one
+      if (existingQueryId) {
+        console.log("Updating existing query with ID:", existingQueryId);
+        const response = await ApiCall({
+          query:
+            "mutation UpdateNaQuery($updateNaQueryInput: UpdateNaQueryInput!) {updateNaQuery(updateNaQueryInput: $updateNaQueryInput) {id}}",
+          variables: {
+            updateNaQueryInput: {
+              id: existingQueryId,
+              query: data.query,
+            },
           },
-        },
-      });
+        });
 
-      if (!response.status) {
-        throw new Error(response.message);
-      }
+        if (!response.status) {
+          throw new Error(response.message);
+        }
 
-      if (!(response.data as Record<string, unknown>)["createNaQuery"]) {
-        throw new Error("Value not found in response");
+        if (!(response.data as Record<string, unknown>)["updateNaQuery"]) {
+          throw new Error("Value not found in response");
+        }
+        return (response.data as Record<string, unknown>)[
+          "updateNaQuery"
+        ] as QueryResponseData;
+      } else {
+        const response = await ApiCall({
+          query:
+            "mutation CreateNaQuery($createNaQueryInput: CreateNaQueryInput!) {createNaQuery(createNaQueryInput: $createNaQueryInput) {id}}",
+          variables: {
+            createNaQueryInput: {
+              createdById: parseInt(userid.toString()),
+              from_userId: 27,
+              to_userId: 5,
+              query: data.query,
+              type: "REPORTDNHPDA",
+              na_formId: id,
+              query_status: "PENDING",
+              request_type: "DEPTTODEPT",
+            },
+          },
+        });
+
+        if (!response.status) {
+          throw new Error(response.message);
+        }
+
+        if (!(response.data as Record<string, unknown>)["createNaQuery"]) {
+          throw new Error("Value not found in response");
+        }
+        return (response.data as Record<string, unknown>)[
+          "createNaQuery"
+        ] as QueryResponseData;
       }
-      return (response.data as Record<string, unknown>)[
-        "createNaQuery"
-      ] as QueryResponseData;
     },
     onSuccess: () => {
-      toast.success("Noting created successfully");
+      toast.success(existingQueryId ? "Noting updated successfully" : "Noting created successfully");
     },
     onError: (error) => {
       toast.error(error.message);

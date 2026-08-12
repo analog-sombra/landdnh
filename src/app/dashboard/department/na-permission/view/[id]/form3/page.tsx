@@ -1,5 +1,5 @@
 "use client";
-import { Collapse, Popover, Tabs } from "antd";
+import { Collapse, Popover, Splitter, Tabs } from "antd";
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
@@ -99,7 +99,7 @@ const Meeting = () => {
   const idString = Array.isArray(id) ? id[0] : id;
   const formid: number = parseInt(decryptURLData(idString, router));
   const onChange = (key: string) => {
-    setIsNoting(false);
+    // setIsNoting(false);
   };
 
   const formdata = useQuery({
@@ -471,7 +471,7 @@ const Meeting = () => {
             </div>
             <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
               <p className="flex-1 text-sm text-gray-500">
-                (10) Area of the site out of (6) above to be used for.
+                (10) Area of the site out of (8) above to be used for.
               </p>
               <div className="flex-1">{formdata.data!.q11}</div>
             </div>
@@ -572,7 +572,7 @@ const Meeting = () => {
 
   return (
     <>
-      <div className="p-2 grid grid-cols-12 gap-1 min-h-screen">
+      {/* <div className="p-2 grid grid-cols-12 gap-1 min-h-screen">
         <div
           className={`shadow rounded p-2  bg-[#fff] ${
             isNoting ? "col-span-6" : "col-span-12"
@@ -591,8 +591,34 @@ const Meeting = () => {
             <ReportLAQEditor id={formdata.data!.id} />
           </div>
         )}
-      </div>
-
+      </div> */}
+      <Splitter
+        className="min-h-screen"
+        style={{ height: 200, boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)" }}
+      >
+        <Splitter.Panel defaultSize="40%" min="20%" max="70%">
+          <div
+            className={`shadow rounded p-2  bg-[#fff] ${
+              isNoting ? "col-span-6" : "col-span-12"
+            }  flex flex-col`}
+          >
+            <div className="flex-1 flex flex-col ">
+              <Tabs defaultActiveKey="1" items={items} onChange={onChange} />
+            </div>
+          </div>
+        </Splitter.Panel>
+        <Splitter.Panel>
+          {isNoting && (
+            <div
+              className={`bg-white shadow rounded p-2 ${
+                isNoting ? "col-span-6" : ""
+              }`}
+            >
+              <ReportLAQEditor id={formdata.data!.id} />
+            </div>
+          )}
+        </Splitter.Panel>
+      </Splitter>
       <div className="fixed top-2 left-2 z-50">
         <button
           className="bg-blue-500 text-white px-2 py-2 rounded-full hover:bg-blue-600 transition-colors text-xs"

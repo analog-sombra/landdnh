@@ -145,7 +145,7 @@ const NaPermission = () => {
                 val.village.talati_id == parseInt(getCookie("id") as string)) ||
                 (currentuserrole == "PDA_JE" &&
                   val.village.pda_id == parseInt(getCookie("id") as string)) ||
-                ["LAQ", "LRO", "DNHPDA","PDA_MS"].includes(currentuserrole)))),
+                ["LAQ", "LRO", "DNHPDA", "PDA_MS"].includes(currentuserrole)))),
       );
     } else {
       const date = new Date();
@@ -230,7 +230,9 @@ const NaPermission = () => {
                         </td>
                         <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
                           {naform.dept_user && naform.dept_user.role
-                            ? naform.dept_user.role
+                            ? naform.dept_user.role == "PDA_JE"
+                              ? "DNH PDA"
+                              : naform.dept_user.role
                             : "N/A"}
                         </td>
                         <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
