@@ -858,7 +858,14 @@ const ReportPage = (props: ReportProviderProps) => {
     queryKey: [
       "getQueryByType",
       props.id,
-      ["REPORT", "SUBMITREPORT", "REPORTDNHPDA", "QUERYDNHPDA"],
+      [
+        "REPORT",
+        "SUBMITREPORT",
+        "REPORTDNHPDA",
+        "QUERYDNHPDA",
+        "COMPLETEPDA",
+        "REPORTFULL",
+      ],
     ],
     queryFn: async () => {
       const response = await ApiCall({
@@ -866,7 +873,14 @@ const ReportPage = (props: ReportProviderProps) => {
           "query GetQueryByType($id: Int!, $querytype: [QueryType!]!) {getQueryByType(id: $id, querytype: $querytype) {id,query,upload_url_1,type,request_type,createdAt,from_user {id, firstName,lastName,role},to_user {id, firstName,lastName,role},}}",
         variables: {
           id: props.id,
-          querytype: ["REPORT", "SUBMITREPORT", "REPORTDNHPDA", "QUERYDNHPDA"],
+          querytype: [
+            "REPORT",
+            "SUBMITREPORT",
+            "REPORTDNHPDA",
+            "QUERYDNHPDA",
+           
+            "REPORTFULL",
+          ],
         },
       });
 

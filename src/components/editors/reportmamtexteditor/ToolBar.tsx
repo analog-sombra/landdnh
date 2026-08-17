@@ -8,6 +8,7 @@ import {
   FluentTextAlignLeft24Regular,
   FluentTextAlignRight24Regular,
   FluentTextClearFormatting32Light,
+  FluentDocumentPrint20Regular,
 } from "@/components/icons";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import jsPDF from "jspdf";
@@ -43,6 +44,62 @@ import { toast } from "react-toastify";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getCookie } from "cookies-next/client";
 import { ApiCall } from "@/services/api";
+
+interface NaFormResponse {
+  id: number;
+  last_name: string;
+  q1: boolean;
+  q2: string;
+  q3: string;
+  anx1: string;
+  anx2: string;
+  anx3: string;
+  anx4: string;
+  anx5: string;
+  q4: string;
+  q5: string;
+  q6: string;
+  q7: string;
+  q8: string;
+  q9: string;
+  q10: string;
+  q11: string;
+  q12: string;
+  q13: string;
+  q14: string;
+  q15: string;
+  q16: string;
+  q17: string;
+  q18: string;
+  createdById: number;
+  seek_report: boolean;
+  dept_user_id: number;
+  dept_status: string;
+  village: {
+    id: number;
+    name: string;
+    mamlatar_id: number;
+    rak_id: number;
+    circle_officer_id: number;
+    ldc_mamlatar_id: number;
+    dy_collector_id: number;
+  };
+  na_applicant: {
+    firstName: string;
+    lastName: string;
+    contact: string;
+    relation: string;
+    signature_url: string;
+  }[];
+  na_survey: {
+    area: string;
+    sub_division: string;
+    survey_no: string;
+    village: {
+      name: string;
+    };
+  }[];
+}
 
 const headingOptions = [
   { label: "H1", value: "h1" },
@@ -145,6 +202,30 @@ const ToolBar = ({ id }: ToolBarProps) => {
       return queries;
     },
   });
+
+  const formdata = useQuery({
+      queryKey: ["getnaform", id],
+      queryFn: async () => {
+        const response = await ApiCall({
+          query:
+            "query GetNaById($id:Int!) { getNaById(id: $id) { id, last_name, q1, q2, q3, q4, anx1, anx2, anx3, anx4, anx5, q4, q5, q6, q7, q8, q9, q10, q11, q12, q13, q14, q15, q16, q17, q18, createdById, dept_user_id, seek_report, dept_status, village{ id, name , mamlatar_id, rak_id, circle_officer_id, ldc_mamlatar_id, dy_collector_id }, na_applicant { firstName, lastName, contact,relation, signature_url }, na_survey { area, sub_division, survey_no, village { name }}}}",
+          variables: {
+            id: id,
+          },
+        });
+  
+        if (!response.status) {
+          throw new Error(response.message);
+        }
+  
+        if (!(response.data as Record<string, unknown>)["getNaById"]) {
+          throw new Error("Value not found in response");
+        }
+        return (response.data as Record<string, unknown>)[
+          "getNaById"
+        ] as NaFormResponse;
+      },
+    });
 
   const $updateToolbar = useCallback(() => {
     const selection = $getSelection();
@@ -317,6 +398,39 @@ const ToolBar = ({ id }: ToolBarProps) => {
     });
   }
 
+  function printDocument() {
+    editor.read(() => {
+      const htmlString = $generateHtmlFromNodes(editor, null);
+      const printWindow = window.open("", "_blank");
+      if (printWindow) {
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>Print Document</title>
+              <style>
+                body {
+                  font-family: Arial, sans-serif;
+                  padding: 20px;
+                  color: #000;
+                }
+                * {
+                  margin: 0;
+                  padding: 0;
+                }
+              </style>
+            </head>
+            <body>
+              ${htmlString}
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+        printWindow.print();
+      }
+    });
+  }
+
   const saveToDatabase = () => {
     editor.update(() => {
       const editorState = editor.getEditorState();
@@ -386,8 +500,8 @@ const ToolBar = ({ id }: ToolBarProps) => {
           variables: {
             createNaQueryInput: {
               createdById: parseInt(userid.toString()),
-              from_userId: 5,
-              to_userId: 4,
+              from_userId: parseInt(userid.toString()),
+              to_userId: parseInt(formdata.data?.village?.circle_officer_id.toString() || "0"),
               query: data.query,
               type: "REPORTMAM",
               na_formId: id,
@@ -580,11 +694,14 @@ const ToolBar = ({ id }: ToolBarProps) => {
           )}
         />
         <div className="flex items-center gap-1 px-2 py-2 border border-gray-200 rounded-md">
-          <button className="px-2 cursor-pointer" onClick={downloadAsPDF}>
-            <FluentArrowCircleDown32Regular />
+          <button className="flex items-center gap-1 px-2 cursor-pointer hover:bg-gray-100 rounded transition" onClick={downloadAsPDF}>
+            <FluentArrowCircleDown32Regular /> Download PDF
           </button>
-          <button className="px-2 cursor-pointer" onClick={saveToDatabase}>
-            <FluentSave32Regular />
+          <button className="flex items-center gap-1 px-2 cursor-pointer hover:bg-gray-100 rounded transition" onClick={saveToDatabase}>
+            <FluentSave32Regular /> Save
+          </button>
+          <button className="flex items-center gap-1 px-2 cursor-pointer hover:bg-gray-100 rounded transition" onClick={printDocument}>
+            <FluentDocumentPrint20Regular /> Print
           </button>
           <TablePlugin />
         </div>

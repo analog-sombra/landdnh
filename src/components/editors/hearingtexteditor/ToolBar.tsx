@@ -8,6 +8,7 @@ import {
   FluentTextAlignLeft24Regular,
   FluentTextAlignRight24Regular,
   FluentTextClearFormatting32Light,
+  FluentDocumentPrint20Regular,
 } from "@/components/icons";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import jsPDF from "jspdf";
@@ -288,6 +289,39 @@ const ToolBar = ({ id, isRescheduled }: ToolBarProps) => {
     });
   }
 
+  function printDocument() {
+    editor.read(() => {
+      const htmlString = $generateHtmlFromNodes(editor, null);
+      const printWindow = window.open("", "_blank");
+      if (printWindow) {
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>Print Document</title>
+              <style>
+                body {
+                  font-family: Arial, sans-serif;
+                  padding: 20px;
+                  color: #000;
+                }
+                * {
+                  margin: 0;
+                  padding: 0;
+                }
+              </style>
+            </head>
+            <body>
+              ${htmlString}
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+        printWindow.print();
+      }
+    });
+  }
+
   const saveToDatabase = () => {
     editor.update(() => {
       const editorState = editor.getEditorState();
@@ -528,11 +562,14 @@ const ToolBar = ({ id, isRescheduled }: ToolBarProps) => {
           )}
         />
         <div className="flex items-center gap-1 px-2 py-2 border border-gray-200 rounded-md">
-          <button className="px-2 cursor-pointer" onClick={downloadAsPDF}>
-            <FluentArrowCircleDown32Regular />
+          <button className="flex items-center gap-1 px-2 cursor-pointer hover:bg-gray-100 rounded transition" onClick={downloadAsPDF}>
+            <FluentArrowCircleDown32Regular /> Download PDF
           </button>
-          <button className="px-2 cursor-pointer" onClick={saveToDatabase}>
-            <FluentSave32Regular />
+          <button className="flex items-center gap-1 px-2 cursor-pointer hover:bg-gray-100 rounded transition" onClick={saveToDatabase}>
+            <FluentSave32Regular /> Save
+          </button>
+          <button className="flex items-center gap-1 px-2 cursor-pointer hover:bg-gray-100 rounded transition" onClick={printDocument}>
+            <FluentDocumentPrint20Regular /> Print
           </button>
           <TablePlugin />
         </div>

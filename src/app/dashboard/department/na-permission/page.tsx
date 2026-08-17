@@ -58,6 +58,7 @@ const NaPermission = () => {
       village: {
         name: string;
         talati_id: number;
+        circle_officer_id: number;
         pda_id: number;
         mamlatar_id: number;
         ldc_mamlatar_id: number;
@@ -72,7 +73,7 @@ const NaPermission = () => {
     queryFn: async () => {
       const response = await ApiCall({
         query:
-          "query GetAllNa($take: Int!, $skip: Int!) { getAllNa(take: $take, skip: $skip) {total, skip, take, data {id, q4, status, form_status, office_status, dept_status, updatedAt, dept_user {role, id}, village {name, talati_id, pda_id, mamlatar_id, ldc_mamlatar_id, dy_collector_id}}}}",
+          "query GetAllNa($take: Int!, $skip: Int!) { getAllNa(take: $take, skip: $skip) {total, skip, take, data {id, q4, status, form_status, office_status, dept_status, updatedAt, dept_user {role, id}, village {name, talati_id, pda_id, mamlatar_id, ldc_mamlatar_id, dy_collector_id, circle_officer_id}}}}",
         variables: {
           take: pagination.take,
           skip: pagination.skip,
@@ -143,6 +144,9 @@ const NaPermission = () => {
             (val.dept_status == "SEEK_REPORT" &&
               ((currentuserrole == "TALATHI" &&
                 val.village.talati_id == parseInt(getCookie("id") as string)) ||
+                (currentuserrole == "CIRCLEOFFICER" &&
+                  val.village.circle_officer_id ==
+                    parseInt(getCookie("id") as string)) ||
                 (currentuserrole == "PDA_JE" &&
                   val.village.pda_id == parseInt(getCookie("id") as string)) ||
                 ["LAQ", "LRO", "DNHPDA", "PDA_MS"].includes(currentuserrole)))),

@@ -1,5 +1,5 @@
 "use client";
-import { Collapse, Popover, Tabs } from "antd";
+import { Collapse, Popover, Splitter, Tabs } from "antd";
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
@@ -107,11 +107,11 @@ const Meeting = () => {
   const idString = Array.isArray(id) ? id[0] : id;
   const formid: number = parseInt(decryptURLData(idString, router));
   const onChange = (key: string) => {
-    setIsNoting(false);
-    setIsHearing(false);
-    setIsSanad(false);
-    setIsIntimation(false);
-    console.log(key);
+    // setIsNoting(false);
+    // setIsHearing(false);
+    // setIsSanad(false);
+    // setIsIntimation(false);
+    // console.log(key);
   };
 
   const formdata = useQuery({
@@ -834,58 +834,66 @@ const Meeting = () => {
 
   return (
     <>
-      <div className="p-2 grid grid-cols-12 gap-1 min-h-screen">
-        <div
-          className={`shadow rounded p-2  bg-[#fff] ${
-            isNoting || isHearing || isSanad || isIntimation
-              ? "col-span-6"
-              : "col-span-12"
-          }  flex flex-col`}
-        >
-          <div className="flex-1 flex flex-col ">
-            <Tabs defaultActiveKey="1" items={items} onChange={onChange} />
-          </div>
-        </div>
-        {isNoting && (
+      {/* <div className="p-2 grid grid-cols-12 gap-1 min-h-screen"> */}
+      <Splitter
+        className="min-h-screen"
+        style={{ height: 200, boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)" }}
+      >
+        <Splitter.Panel defaultSize="40%" min="20%" max="70%">
           <div
-            className={`bg-white shadow rounded p-2 ${
-              isNoting ? "col-span-6" : ""
-            }`}
+            className={`shadow rounded p-2  bg-[#fff] ${
+              isNoting || isHearing || isSanad || isIntimation
+                ? "col-span-6"
+                : "col-span-12"
+            }  flex flex-col`}
           >
-            <NotingEditor id={formdata.data!.id} />
+            <div className="flex-1 flex flex-col ">
+              <Tabs defaultActiveKey="1" items={items} onChange={onChange} />
+            </div>
           </div>
-        )}
+        </Splitter.Panel>
+        <Splitter.Panel>
+          {isNoting && (
+            <div
+              className={`bg-white shadow rounded p-2 ${
+                isNoting ? "col-span-6" : ""
+              }`}
+            >
+              <NotingEditor id={formdata.data!.id} />
+            </div>
+          )}
 
-        {isHearing && (
-          <div
-            className={`bg-white shadow rounded p-2 ${
-              isHearing ? "col-span-6" : ""
-            }`}
-          >
-            <HearingNoticeEditor id={formdata.data!.id} />
-          </div>
-        )}
+          {isHearing && (
+            <div
+              className={`bg-white shadow rounded p-2 ${
+                isHearing ? "col-span-6" : ""
+              }`}
+            >
+              <HearingNoticeEditor id={formdata.data!.id} />
+            </div>
+          )}
 
-        {isSanad && (
-          <div
-            className={`bg-white shadow rounded p-2 ${
-              isSanad ? "col-span-6" : ""
-            }`}
-          >
-            <SanadGenerateEditor id={formdata.data!.id} />
-          </div>
-        )}
+          {isSanad && (
+            <div
+              className={`bg-white shadow rounded p-2 ${
+                isSanad ? "col-span-6" : ""
+              }`}
+            >
+              <SanadGenerateEditor id={formdata.data!.id} />
+            </div>
+          )}
 
-        {isIntimation && (
-          <div
-            className={`bg-white shadow rounded p-2 ${
-              isIntimation ? "col-span-6" : ""
-            }`}
-          >
-            <IntimationOrderEditor id={formdata.data!.id} />
-          </div>
-        )}
-      </div>
+          {isIntimation && (
+            <div
+              className={`bg-white shadow rounded p-2 ${
+                isIntimation ? "col-span-6" : ""
+              }`}
+            >
+              <IntimationOrderEditor id={formdata.data!.id} />
+            </div>
+          )}
+        </Splitter.Panel>
+      </Splitter>
 
       <div className="fixed top-2 left-2 z-50">
         <button

@@ -1,7 +1,5 @@
 "use client";
-import { ApiCall } from "@/services/api";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 
 interface LoadStateProps {

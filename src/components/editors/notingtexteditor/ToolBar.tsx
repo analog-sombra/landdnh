@@ -8,6 +8,7 @@ import {
   FluentTextAlignLeft24Regular,
   FluentTextAlignRight24Regular,
   FluentTextClearFormatting32Light,
+  FluentDocumentPrint20Regular,
 } from "@/components/icons";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import jsPDF from "jspdf";
@@ -150,7 +151,7 @@ const ToolBar = ({ id }: ToolBarProps) => {
               handleSave(JSON.stringify(editorState));
             });
           }
-        }
+        },
       ),
       editor.registerCommand(
         SELECTION_CHANGE_COMMAND,
@@ -158,7 +159,7 @@ const ToolBar = ({ id }: ToolBarProps) => {
           $updateToolbar();
           return false;
         },
-        COMMAND_PRIORITY_LOW
+        COMMAND_PRIORITY_LOW,
       ),
       editor.registerCommand(
         CAN_UNDO_COMMAND,
@@ -166,7 +167,7 @@ const ToolBar = ({ id }: ToolBarProps) => {
           setCanUndo(payload);
           return false;
         },
-        COMMAND_PRIORITY_LOW
+        COMMAND_PRIORITY_LOW,
       ),
       editor.registerCommand(
         CAN_REDO_COMMAND,
@@ -174,8 +175,8 @@ const ToolBar = ({ id }: ToolBarProps) => {
           setCanRedo(payload);
           return false;
         },
-        COMMAND_PRIORITY_LOW
-      )
+        COMMAND_PRIORITY_LOW,
+      ),
     );
   }, [editor, $updateToolbar]);
 
@@ -184,7 +185,7 @@ const ToolBar = ({ id }: ToolBarProps) => {
       const selection = $getSelection();
       if ($isRangeSelection(selection)) {
         $setBlocksType(selection, () =>
-          $createHeadingNode(level as HeadingTagType)
+          $createHeadingNode(level as HeadingTagType),
         );
       }
     });
@@ -272,7 +273,7 @@ const ToolBar = ({ id }: ToolBarProps) => {
             0,
             position ? 0 : position,
             imgWidth,
-            imgHeight
+            imgHeight,
           );
           position += pageHeight;
           if (position < imgHeight) {
@@ -283,6 +284,39 @@ const ToolBar = ({ id }: ToolBarProps) => {
 
       pdf.save("document.pdf");
       document.body.removeChild(container);
+    });
+  }
+
+  function printDocument() {
+    editor.read(() => {
+      const htmlString = $generateHtmlFromNodes(editor, null);
+      const printWindow = window.open("", "_blank");
+      if (printWindow) {
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>Print Document</title>
+              <style>
+                body {
+                  font-family: Arial, sans-serif;
+                  padding: 20px;
+                  color: #000;
+                }
+                * {
+                  margin: 0;
+                  padding: 0;
+                }
+              </style>
+            </head>
+            <body>
+              ${htmlString}
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+        printWindow.print();
+      }
     });
   }
 
@@ -304,7 +338,7 @@ const ToolBar = ({ id }: ToolBarProps) => {
               queryKey: ["getQueryByType", Number(id)],
             });
           },
-        }
+        },
       );
     });
   };
@@ -524,11 +558,23 @@ const ToolBar = ({ id }: ToolBarProps) => {
           )}
         />
         <div className="flex items-center gap-1 px-2 py-2 border border-gray-200 rounded-md">
-          <button className="px-2 cursor-pointer" onClick={downloadAsPDF}>
-            <FluentArrowCircleDown32Regular />
+          <button
+            className="flex items-center gap-1 px-2 cursor-pointer hover:bg-gray-100 rounded transition"
+            onClick={downloadAsPDF}
+          >
+            <FluentArrowCircleDown32Regular /> Download PDF
           </button>
-          <button className="px-2 cursor-pointer" onClick={saveToDatabase}>
-            <FluentSave32Regular />
+          <button
+            className="flex items-center gap-1 px-2 cursor-pointer hover:bg-gray-100 rounded transition"
+            onClick={saveToDatabase}
+          >
+            <FluentSave32Regular /> Save
+          </button>
+          <button
+            className="flex items-center gap-1 px-2 cursor-pointer hover:bg-gray-100 rounded transition"
+            onClick={printDocument}
+          >
+            <FluentDocumentPrint20Regular /> Print
           </button>
           <TablePlugin />
         </div>

@@ -1,10 +1,10 @@
 "use client";
-import { Collapse, Popover, Splitter, Tabs } from "antd";
-import { useState } from "react";
+import { Collapse, Popover, Splitter, Tabs, Drawer } from "antd";
+import { useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { decryptURLData } from "@/utils/methods";
-import { ApiCall } from "@/services/api";
-import { useQuery } from "@tanstack/react-query";
+import { decryptURLData, onFormError } from "@/utils/methods";
+import { ApiCall, UploadFile } from "@/services/api";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { baseurl } from "@/utils/const";
 import { Alert } from "antd";
@@ -12,6 +12,10 @@ import { getCookie } from "cookies-next/client";
 import { IcBaselineArrowBack } from "@/components/icons";
 import { UserChat } from "@/components/chat";
 import { ReportMAMEditor } from "@/components/editors/reportmamtexteditor/page";
+import { toast } from "react-toastify";
+import { FormProvider, useForm, useFormContext } from "react-hook-form";
+import { SimpleTextEditorInput } from "@/components/form/inputfields/simpletexteditorinput";
+import { MarkToForm, QueryForm } from "@/schema/forms/query";
 
 interface NaFormResponse {
   id: number;
@@ -45,6 +49,8 @@ interface NaFormResponse {
   village: {
     id: number;
     name: string;
+    pda_id: number;
+    talati_id: number;
   };
   na_applicant: {
     firstName: string;
@@ -84,9 +90,104 @@ interface QueryTypeResponseData {
   };
 }
 
+interface QueryResponseData {
+  id: number;
+}
+
 const Meeting = () => {
   const [isNoting, setIsNoting] = useState<boolean>(false);
+  const [queryBox, setQueryBox] = useState<boolean>(false);
+  const [queryData, setQueryData] = useState<string>("");
+  const [upload, setUpload] = useState<File | null>(null);
   const userid = getCookie("id");
+  const uploadRef = useRef<HTMLInputElement>(null);
+
+  const {
+    handleSubmit,
+    formState: { isSubmitting },
+    setValue,
+  } = useFormContext<MarkToForm>();
+
+  const handleFileUpload = (ref: React.RefObject<HTMLInputElement | null>) => {
+    if (ref!.current) {
+      ref!.current.click();
+    }
+  };
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+    setFile: React.Dispatch<React.SetStateAction<File | null>>,
+    ref: React.RefObject<HTMLInputElement | null>,
+  ) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setFile(file);
+      const resposne = await UploadFile(file, userid!);
+      if (!resposne.status) {
+        toast.error(resposne.message);
+        return;
+      }
+
+      setValue(ref.current!.name as keyof QueryForm, resposne.data as string);
+    }
+  };
+
+  const createquery = useMutation({
+    mutationKey: ["createNaQuery"],
+    mutationFn: async (data: MarkToForm) => {
+      if (!userid) {
+        toast.error("User ID not found");
+        return;
+      }
+
+      const response = await ApiCall({
+        query:
+          "mutation CreateNaQuery($createNaQueryInput: CreateNaQueryInput!) {createNaQuery(createNaQueryInput: $createNaQueryInput) {id}}",
+        variables: {
+          createNaQueryInput: {
+            createdById: parseInt(userid.toString()),
+            from_userId: parseInt(userid.toString()),
+            to_userId: formdata.data!.village.talati_id,
+            query: queryData,
+            type: data.request_type,
+            na_formId: formid,
+            query_status: "PENDING",
+            request_type: "DEPTTODEPT",
+            ...(data.upload_url_1 && {
+              upload_url_1: data.upload_url_1,
+            }),
+            dept_update: true,
+          },
+        },
+      });
+
+      if (!response.status) {
+        throw new Error(response.message);
+      }
+
+      if (!(response.data as Record<string, unknown>)["createNaQuery"]) {
+        throw new Error("Value not found in response");
+      }
+      return (response.data as Record<string, unknown>)[
+        "createNaQuery"
+      ] as QueryResponseData;
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+    onSuccess: () => {
+      toast.success("Message Sent Successfully");
+      router.push("/dashboard/department/na-permission");
+    },
+  });
+
+  const onSubmit = async (data: MarkToForm) => {
+    setQueryBox(false);
+    createquery.mutate(data);
+    setValue("query", "");
+    setValue("userid", userid!.toString());
+    setValue("request_type", "QUERYMAM");
+  };
 
   const router = useRouter();
 
@@ -102,7 +203,7 @@ const Meeting = () => {
     queryFn: async () => {
       const response = await ApiCall({
         query:
-          "query GetNaById($id:Int!) { getNaById(id: $id) { id, dept_status, last_name, q1, q2, q3, q4, anx1, anx2, anx3, anx4, anx5, q4, q5, q6, q7, q8, q9, q10, q11, q12, q13, q14, q15, q16, q17, q18, createdById, createdAt, village{ id, name }, na_applicant { firstName, lastName, contact,relation, signature_url }, na_survey { area, sub_division, survey_no, village { name }}}}",
+          "query GetNaById($id:Int!) { getNaById(id: $id) { id, dept_status, last_name, q1, q2, q3, q4, anx1, anx2, anx3, anx4, anx5, q4, q5, q6, q7, q8, q9, q10, q11, q12, q13, q14, q15, q16, q17, q18, createdById, createdAt, village{ id, name, pda_id, talati_id }, na_applicant { firstName, lastName, contact,relation, signature_url }, na_survey { area, sub_division, survey_no, village { name }}}}",
         variables: {
           id: formid,
         },
@@ -144,7 +245,6 @@ const Meeting = () => {
         throw new Error(response.message);
       }
 
-      // if value is not in response.data then return the error
       if (!(response.data as Record<string, unknown>)["getUserById"]) {
         throw new Error("Value not found in response");
       }
@@ -534,6 +634,14 @@ const Meeting = () => {
         <>
           <div className="flex items-center mb-2 gap-2">
             <div className="grow"></div>
+            {["TALATHI", "CIRCLEOFFICER"].includes(userdata.data?.role!) && (
+              <button
+                onClick={() => setQueryBox(!queryBox)}
+                className="bg-blue-500 text-white px-4 py-1 rounded-md text-sm"
+              >
+                Add Query
+              </button>
+            )}
             <button
               onClick={() => {
                 setIsNoting(!isNoting);
@@ -543,6 +651,81 @@ const Meeting = () => {
               {isNoting ? "Hide Report" : "Add Report"}
             </button>
           </div>
+          <Drawer
+            width={320}
+            closable={false}
+            onClose={() => setQueryBox(false)}
+            open={queryBox}
+            styles={{
+              body: {
+                paddingLeft: "10px",
+                paddingRight: "10px",
+                paddingTop: "10px",
+                paddingBottom: "0px",
+              },
+            }}
+          >
+            <h1 className="text-lg font-semibold text-[#162f57] mb-2">Query</h1>
+            <form onSubmit={handleSubmit(onSubmit, onFormError)}>
+              <div>
+                <SimpleTextEditorInput<MarkToForm>
+                  title="Query"
+                  required={true}
+                  name="query"
+                  placeholder="Enter Details"
+                  setQueryData={setQueryData}
+                />
+              </div>
+              <div className="flex items-center mt-2 p-2 rounded-lg bg-gray-100">
+                <p className="text-sm text-gray-700">Upload File</p>
+                <div className="grow"></div>
+                {upload ? (
+                  <button
+                    type="button"
+                    onClick={() => setUpload(null)}
+                    className="py-1 rounded-md bg-red-500 px-4 text-sm text-white cursor-pointer w-28"
+                  >
+                    Remove
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => handleFileUpload(uploadRef)}
+                    className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-28 text-nowrap"
+                  >
+                    Upload File
+                  </button>
+                )}
+
+                <input
+                  type="file"
+                  ref={uploadRef}
+                  name="upload_url_1"
+                  onChange={(e) => handleFileChange(e, setUpload, uploadRef)}
+                  className="hidden"
+                />
+
+                {upload && (
+                  <div className="flex gap-2 items-center">
+                    <Link
+                      target="_blank"
+                      href={URL.createObjectURL(upload!)}
+                      className="bg-gray-200 text-black py-1 px-4 rounded-md text-sm h-7 grid place-items-center w-28 text-nowrap"
+                    >
+                      View File
+                    </Link>
+                  </div>
+                )}
+              </div>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white mt-2 cursor-pointer"
+              >
+                {isSubmitting ? "Loading...." : "Submit"}
+              </button>
+            </form>
+          </Drawer>
           <ReportPage id={formdata.data!.id} />
         </>
       ) : (
@@ -627,7 +810,22 @@ const Meeting = () => {
   );
 };
 
-export default Meeting;
+export default function Page() {
+  const methods = useForm<MarkToForm>({
+    mode: "onSubmit",
+    defaultValues: {
+      query: "",
+      userid: "",
+      request_type: "QUERYMAM",
+    },
+  });
+
+  return (
+    <FormProvider {...methods}>
+      <Meeting />
+    </FormProvider>
+  );
+}
 
 interface ReportProviderProps {
   id: number;
@@ -648,6 +846,8 @@ const ReportPage = (props: ReportProviderProps) => {
         "REPORTLRO",
         "REPORTLAQ",
         "REPORTDNHPDA",
+        "REPORTFULL",
+        "QUERYMAM",
       ],
     ],
     queryFn: async () => {
@@ -663,6 +863,9 @@ const ReportPage = (props: ReportProviderProps) => {
             "REPORTLRO",
             "REPORTLAQ",
             "REPORTDNHPDA",
+            "COMPLETEPDA",
+            "REPORTFULL",
+            "QUERYMAM",
           ],
         },
       });
@@ -680,15 +883,25 @@ const ReportPage = (props: ReportProviderProps) => {
     },
   });
 
+  console.log("reportdata", reportdata.data);
+
+  const shouldHideReportDnhpda =
+    ["MAMLATDAR", "LDCMAMLATDAR", "RAK"].includes(currentuserrole) &&
+    !reportdata.data?.some((field) => field.type === "COMPLETEPDA");
+
+  const visibleReportData = reportdata.data?.filter(
+    (field) => !(shouldHideReportDnhpda && field.type === "REPORTDNHPDA"),
+  );
+
   return (
     <>
-      {reportdata.data?.length === 0 && (
+      {visibleReportData?.length === 0 && (
         <div>
           <Alert message="No Notings found." type="error" showIcon />
         </div>
       )}
-      {["TALATHI", "DNHPDA", "LAQ", "LRO", "PDA_JE"].includes(currentuserrole)
-        ? reportdata.data?.map((field, index) => {
+      {["TALATHI", "CIRCLEOFFICER", "DNHPDA", "LAQ", "LRO", "PDA_JE"].includes(currentuserrole)
+        ? visibleReportData?.map((field, index) => {
             if (
               field.to_user.id == Number(userid) ||
               field.from_user.id == Number(userid)
@@ -707,7 +920,7 @@ const ReportPage = (props: ReportProviderProps) => {
               );
             }
           })
-        : reportdata.data?.map((field, index) => {
+        : visibleReportData?.map((field, index) => {
             return (
               <UserChat
                 key={index}

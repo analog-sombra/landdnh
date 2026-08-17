@@ -4,6 +4,7 @@ import { TaxtAreaInput } from "@/components/form/inputfields/textareainput";
 import { SimpleTextEditorInput } from "@/components/form/inputfields/simpletexteditorinput";
 import { TextInput } from "@/components/form/inputfields/textinput";
 import { RequestPaymentForm, RequestPaymentSchema } from "@/schema/forms/fees";
+import { FluentDocumentPrint20Regular } from "@/components/icons";
 import {
   MarkToForm,
   MarkToSchema,
@@ -248,6 +249,65 @@ const ViewPermission = () => {
     router.back();
   };
 
+  const handlePrint = () => {
+    const printWindow = window.open("", "_blank");
+    if (printWindow) {
+      const mainContent = document.querySelector(".print-content");
+      if (mainContent) {
+        const printableHTML = `
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>NA Permission - Print</title>
+              <style>
+                body {
+                  font-family: Arial, sans-serif;
+                  margin: 0;
+                  padding: 20px;
+                  background-color: white;
+                  color: #000;
+                }
+                * {
+                  margin: 0;
+                  padding: 0;
+                }
+                table {
+                  width: 100%;
+                  border-collapse: collapse;
+                }
+                th, td {
+                  border: 1px solid #ccc;
+                  padding: 8px;
+                  text-align: left;
+                }
+                th {
+                  background-color: #f0f0f0;
+                }
+                img {
+                  max-width: 100%;
+                  height: auto;
+                }
+                a {
+                  color: #0066cc;
+                }
+              </style>
+            </head>
+            <body>
+              ${mainContent.innerHTML}
+            </body>
+          </html>
+        `;
+        printWindow.document.write(printableHTML);
+        printWindow.document.close();
+        setTimeout(() => {
+          printWindow.print();
+        }, 250);
+      } else {
+        toast.error("Content not found for printing");
+      }
+    }
+  };
+
   const [correspondenceBox, setCorrespondenceBox] = useState(false);
   const [notingBox, setNotingBox] = useState(false);
   const [reportBox, setReportBox] = useState(false);
@@ -324,6 +384,13 @@ const ViewPermission = () => {
           View NA Permission
         </h1>
         <div className="grow"></div>
+
+        <button
+          onClick={handlePrint}
+          className="bg-[#162f57] text-white py-1 px-4 rounded-md text-sm flex items-center gap-2 cursor-pointer hover:bg-[#1a3a6b] transition"
+        >
+          <FluentDocumentPrint20Regular /> Print
+        </button>
 
         {userdata.data &&
           formdata.data &&
@@ -429,9 +496,15 @@ const ViewPermission = () => {
             "RAK",
           ].includes(userdata.data!.role) ||
             (formdata.data?.seek_report &&
-              ["TALATHI", "DNHPDA", "LAQ", "LRO", "PDA_JE", "PDA_MS"].includes(
-                currentuserrole,
-              )) ||
+              [
+                "TALATHI",
+                "CIRCLEOFFICER",
+                "DNHPDA",
+                "LAQ",
+                "LRO",
+                "PDA_JE",
+                "PDA_MS",
+              ].includes(currentuserrole)) ||
             formdata.data?.dept_user_id == Number(userid)) && (
             <button
               onClick={() => setReportBox(true)}
@@ -492,7 +565,7 @@ const ViewPermission = () => {
 
         <div className="w-2"></div>
       </div>
-      <div className="p-4 bg-white rounded-md shadow-md m-4">
+      <div className="p-4 bg-white rounded-md shadow-md m-4 print-content">
         <h1 className="mx-4 text-lg text-center font-semibold mt-4">
           F O R M - V I I
         </h1>
@@ -1191,7 +1264,6 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
   };
   const currentuserrole: string = getCookie("role") as string;
 
-
   return (
     <>
       <div className="flex items-center gap-2">
@@ -1226,7 +1298,7 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
       )}
 
       {
-        ["TALATHI", "LAQ", "LRO", "PDA_JE"].includes(userrole)
+        ["TALATHI", "CIRCLEOFFICER", "LAQ", "LRO", "PDA_JE"].includes(userrole)
           ? chatdata.data?.map((field, index) => {
               if (
                 field.to_user.id == Number(userid) ||
@@ -1351,11 +1423,9 @@ const CorrespondencePage = (props: CorrespondenceProviderProps) => {
                     ...(userdata.data
                       ? userdata.data
                           .filter((val) => {
-
                             if (!val.role) return false;
-                            if(val.role == "SUPTDCOLL") return false;
-                            if(currentuserrole == val.role) return false;
-
+                            if (val.role == "SUPTDCOLL") return false;
+                            if (currentuserrole == val.role) return false;
 
                             if (
                               [
@@ -3013,6 +3083,46 @@ const ReportPage = (props: ReportProviderProps) => {
       toast.error(error.message);
     },
   });
+  const submitfinalreportmam = useMutation({
+    mutationKey: ["submitFinalReportMam"],
+    mutationFn: async () => {
+      if (!userid) {
+        toast.error("User ID not found");
+        return;
+      }
+
+      const response = await ApiCall({
+        query:
+          "mutation SubmitFinalReportMam($naid: Int!,$userid: Int!) {submitFinalReportMam(naid: $naid, userid: $userid) {id}}",
+        variables: {
+          naid: props.id,
+          userid: parseInt(userid.toString()),
+        },
+      });
+
+      if (!response.status) {
+        throw new Error(response.message);
+      }
+
+      if (!(response.data as Record<string, unknown>)["submitFinalReportMam"]) {
+        throw new Error("Value not found in response");
+      }
+      return (response.data as Record<string, unknown>)[
+        "submitFinalReportMam"
+      ] as QueryResponseData;
+    },
+    onSuccess: () => {
+      toast.success("Report Submitted successfully");
+      reportdata.refetch();
+      props.setReportBox(false);
+      queryClient.invalidateQueries({
+        queryKey: ["getnaform", props.id],
+      });
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
 
   const submitseekreport = useMutation({
     mutationKey: ["submitSeekReport"],
@@ -3148,7 +3258,6 @@ const ReportPage = (props: ReportProviderProps) => {
           id: props.id,
         },
       });
-      console.log("twoReportReceived response:", response);
 
       if (!response.status) {
         throw new Error(response.message);
@@ -3160,6 +3269,33 @@ const ReportPage = (props: ReportProviderProps) => {
       }
       return (response.data as Record<string, unknown>)[
         "twoReportReceived"
+      ] as ReportSubmitData[];
+    },
+  });
+
+  const tworeportsubmitmamdata = useQuery({
+    queryKey: ["twoReportReceivedMam"],
+    refetchOnWindowFocus: false,
+    queryFn: async () => {
+      const response = await ApiCall({
+        query:
+          "query TwoReportReceivedMam($id: Int!) { twoReportReceivedMam(id: $id) { id }}",
+        variables: {
+          id: props.id,
+        },
+      });
+      console.log("tworeportsubmitmamdata", response);
+
+      if (!response.status) {
+        throw new Error(response.message);
+      }
+
+      // if value is not in response.data then return the error
+      if (!(response.data as Record<string, unknown>)["twoReportReceivedMam"]) {
+        throw new Error("Value not found in response");
+      }
+      return (response.data as Record<string, unknown>)[
+        "twoReportReceivedMam"
       ] as ReportSubmitData[];
     },
   });
@@ -3180,7 +3316,20 @@ const ReportPage = (props: ReportProviderProps) => {
                   onClick={() => {
                     submitfinalreport.mutate();
                   }}
-                  className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-28 text-nowrap"
+                  className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-52 text-nowrap"
+                >
+                  Share Report to Mamlatdar
+                </button>
+              )}
+            {["TALATHI"].includes(props.role) &&
+              tworeportsubmitmamdata.data &&
+              tworeportsubmitmamdata.data.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    submitfinalreportmam.mutate();
+                  }}
+                  className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-52 text-nowrap"
                 >
                   Share Report to Mamlatdar
                 </button>
@@ -3227,16 +3376,27 @@ const ReportPage = (props: ReportProviderProps) => {
                   </button>
                 </>
               )} */}
-            {props.status != "SUBMIT" &&
+            {props.status != "SUBMIT" && (
               <>
                 <button
                   type="button"
                   onClick={() => {
-                    router.push(
-                      `/dashboard/department/na-permission/view/${encryptURLData(
-                        props.id.toString(),
-                      )}/form4`,
-                    );
+                    if (
+                      currentuserrole == "TALATHI" ||
+                      currentuserrole == "CIRCLEOFFICER"
+                    ) {
+                      router.push(
+                        `/dashboard/department/na-permission/view/${encryptURLData(
+                          props.id.toString(),
+                        )}/form1`,
+                      );
+                    } else {
+                      router.push(
+                        `/dashboard/department/na-permission/view/${encryptURLData(
+                          props.id.toString(),
+                        )}/form4`,
+                      );
+                    }
                     // setSubmitBox(true);
                     // setId(
                     //   reportdata.data.filter(
@@ -3253,7 +3413,7 @@ const ReportPage = (props: ReportProviderProps) => {
                     : "Create Report"}
                 </button>
               </>
-            }
+            )}
           </>
         )}
 
@@ -3272,7 +3432,9 @@ const ReportPage = (props: ReportProviderProps) => {
         </div>
       )}
 
-      {["TALATHI", "LAQ", "LRO", "PDA_JE"].includes(currentuserrole)
+      {["TALATHI", "CIRCLEOFFICER", "LAQ", "LRO", "PDA_JE"].includes(
+        currentuserrole,
+      )
         ? reportdata.data?.map((field, index) => {
             if (
               field.to_user.id == Number(userid) ||
@@ -3852,9 +4014,15 @@ const SeekReportDepartmentPage = (props: SeekReportDepartmentProviderProps) => {
         </div>
       )}
 
-      {["TALATHI", "DNHPDA", "LAQ", "LRO", "PDA_JE", "PDA_MS"].includes(
-        currentuserrole,
-      )
+      {[
+        "TALATHI",
+        "CIRCLEOFFICER",
+        "DNHPDA",
+        "LAQ",
+        "LRO",
+        "PDA_JE",
+        "PDA_MS",
+      ].includes(currentuserrole)
         ? reportdata.data?.map((field, index) => {
             if (
               field.to_user.id == Number(userid) ||
@@ -4072,6 +4240,9 @@ const SubmitReportPage = (props: SubmitReportProviderProps) => {
         "REPORTLRO",
         "REPORTLAQ",
         "REPORTDNHPDA",
+        "REPORTFULL",
+        "COMPLETEPDA",
+        "COMPLETEMAM"
       ],
     ],
     queryFn: async () => {
@@ -4087,6 +4258,9 @@ const SubmitReportPage = (props: SubmitReportProviderProps) => {
             "REPORTLRO",
             "REPORTLAQ",
             "REPORTDNHPDA",
+            "REPORTFULL",
+            "COMPLETEPDA",
+            "COMPLETEMAM",
           ],
         },
       });
@@ -4262,6 +4436,20 @@ const SubmitReportPage = (props: SubmitReportProviderProps) => {
     }
   };
 
+  const shouldHideReportDnhpda =
+    ["MAMLATDAR", "LDCMAMLATDAR", "RAK"].includes(props.role) &&
+    reportdata.data &&
+    !reportdata.data.some((field) => field.type === "COMPLETEPDA");
+
+  const shouldHideReportMam =
+    ["MAMLATDAR", "LDCMAMLATDAR", "RAK"].includes(props.role) &&
+    reportdata.data &&
+    !reportdata.data.some((field) => field.type === "COMPLETEMAM");
+
+  const visibleReportData = reportdata.data?.filter(
+    (field) => !(shouldHideReportDnhpda && field.type === "REPORTDNHPDA") && !(shouldHideReportMam && field.type === "REPORTMAM"),
+  );
+ 
   return (
     <>
       <div className="flex items-center gap-2">
@@ -4362,13 +4550,13 @@ const SubmitReportPage = (props: SubmitReportProviderProps) => {
         </button>
       </div>
 
-      {reportdata.data?.length === 0 && (
+      {visibleReportData?.length === 0 && (
         <div className="mt-2">
           <Alert message="No Notings found." type="error" showIcon />
         </div>
       )}
 
-      {reportdata.data?.map((field, index) => {
+      {visibleReportData?.map((field, index) => {
         return (
           <UserChat
             key={index}
@@ -4381,33 +4569,6 @@ const SubmitReportPage = (props: SubmitReportProviderProps) => {
             type={field.type}
           />
         );
-        // if (field.from_user.id == Number(userid)) {
-        //   return (
-        //     <UserChat
-        //       key={index}
-        //       name={`${field.from_user.firstName} ${field.from_user.lastName}`}
-        //       fromrole={field.from_user.role}
-        //       torole={field.to_user.role}
-        //       message={field.query}
-        //       time={new Date(field.createdAt)}
-        //       url={field.upload_url_1}
-        //       type={field.type}
-        //     />
-        //   );
-        // } else {
-        //   return (
-        //     <DeptChat
-        //       key={index}
-        //       name={`${field.to_user.firstName} ${field.to_user.lastName}`}
-        //       fromrole={field.from_user.role}
-        //       torole={field.to_user.role}
-        //       message={field.query}
-        //       time={new Date(field.createdAt)}
-        //       url={field.upload_url_1}
-        //       type={field.type}
-        //     />
-        //   );
-        // }
       })}
 
       <Drawer
