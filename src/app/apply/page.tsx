@@ -224,9 +224,9 @@ const NaPage = () => {
       const password = generatePassword();
       const response = await ApiCall({
         query:
-          "mutation Register($registerInput: RegisterInput!) { register(registerInput: $registerInput) { id, firstName, lastName, contact, email, role } }",
+          "mutation RegisterUser($createAuthInput: CreateAuthInput!) { registerUser(createAuthInput: $createAuthInput) { id, role, firstName, lastName, contact, email } }",
         variables: {
-          registerInput: {
+          createAuthInput: {
             firstName: firstname,
             lastName: lastname,
             contact: contact,
