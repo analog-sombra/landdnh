@@ -297,7 +297,7 @@ const Meeting = () => {
     },
   ];
 
-  const items = [
+  let items = [
     {
       key: "1",
       label: "Case Information",
@@ -707,15 +707,15 @@ const Meeting = () => {
       label: "Report",
       children: formdata.data ? <ReportPage id={formdata.data!.id} /> : <></>,
     },
-    {
-      key: "5",
-      label: "Payment History",
-      children: formdata.data ? (
-        <PaymentHistoryPage id={formdata.data!.id} />
-      ) : (
-        <></>
-      ),
-    },
+    // {
+    //   key: "5",
+    //   label: "Payment History",
+    //   children: formdata.data ? (
+    //     <PaymentHistoryPage id={formdata.data!.id} />
+    //   ) : (
+    //     <></>
+    //   ),
+    // },
     {
       key: "6",
       label: "Noting",
@@ -741,7 +741,119 @@ const Meeting = () => {
         <></>
       ),
     },
-    {
+    // {
+    //   key: "7",
+    //   label: "Hearing Notice",
+    //   children: formdata.data ? (
+    //     <>
+    //       <div className="flex items-center mb-2 gap-2">
+    //         <div className="grow"></div>
+    //         <button
+    //           onClick={() => {
+    //             setIsHearing(!isHearing);
+    //             setIsNoting(false);
+    //             setIsSanad(false);
+    //             setIsIntimation(false);
+    //           }}
+    //           className="bg-blue-500 text-white px-4 py-1 rounded-md text-sm"
+    //         >
+    //           {isHearing ? "Hide Hearing" : "Add Hearing"}
+    //         </button>
+    //       </div>
+    //       <HearingNoticePage id={formdata.data!.id} />
+    //     </>
+    //   ) : (
+    //     <></>
+    //   ),
+    // },
+    // {
+    //   key: "8",
+    //   label: "Sanad",
+    //   children: formdata.data ? (
+    //     <>
+    //       <div className="flex items-center mb-2 gap-2">
+    //         <div className="grow"></div>
+    //         <button
+    //           onClick={() => {
+    //             setIsSanad(!isSanad);
+    //             setIsNoting(false);
+    //             setIsHearing(false);
+    //             setIsIntimation(false);
+    //           }}
+    //           className="bg-blue-500 text-white px-4 py-1 rounded-md text-sm"
+    //         >
+    //           {isSanad ? "Hide Sanad" : "Add Sanad"}
+    //         </button>
+    //       </div>
+    //       <SanadPage id={formdata.data!.id} />
+    //     </>
+    //   ) : (
+    //     <></>
+    //   ),
+    // },
+    // {
+    //   key: "9",
+    //   label: "Intimation Order",
+    //   children: formdata.data ? (
+    //     <>
+    //       <div className="flex items-center mb-2 gap-2">
+    //         <div className="grow"></div>
+    //         <button
+    //           onClick={() => {
+    //             setIsIntimation(!isIntimation);
+    //             setIsNoting(false);
+    //             setIsHearing(false);
+    //             setIsSanad(false);
+    //           }}
+    //           className="bg-blue-500 text-white px-4 py-1 rounded-md text-sm"
+    //         >
+    //           {isIntimation ? "Hide Intimation" : "Add Intimation"}
+    //         </button>
+    //       </div>
+    //       <IntimationOrderPage id={formdata.data!.id} />
+    //     </>
+    //   ) : (
+    //     <></>
+    //   ),
+    // },
+  ];
+  if (
+    [
+      "HEARING",
+      "INTIMATION_DRAFT",
+      "PAY_FEES",
+      "FEES_PAID",
+      "APPLY_SANAD",
+      "ORDER_GENERATE",
+      "ORDER_DOWNLOAD",
+    ].includes(formdata.data?.dept_status || "")
+  ) {
+    items.push({
+      key: "5",
+      label: "Payment History",
+      children: formdata.data ? (
+        <PaymentHistoryPage id={formdata.data!.id} />
+      ) : (
+        <></>
+      ),
+    });
+  }
+  // proposal draft
+  // proposal approve
+  if (
+    [
+      "ALLOT_HEARING",
+      "HEARING_SCHEDULED",
+      "HEARING",
+      "INTIMATION_DRAFT",
+      "PAY_FEES",
+      "FEES_PAID",
+      "APPLY_SANAD",
+      "ORDER_GENERATE",
+      "ORDER_DOWNLOAD",
+    ].includes(formdata.data?.dept_status || "")
+  ) {
+    items.push({
       key: "7",
       label: "Hearing Notice",
       children: formdata.data ? (
@@ -765,33 +877,20 @@ const Meeting = () => {
       ) : (
         <></>
       ),
-    },
-    {
-      key: "8",
-      label: "Sanad",
-      children: formdata.data ? (
-        <>
-          <div className="flex items-center mb-2 gap-2">
-            <div className="grow"></div>
-            <button
-              onClick={() => {
-                setIsSanad(!isSanad);
-                setIsNoting(false);
-                setIsHearing(false);
-                setIsIntimation(false);
-              }}
-              className="bg-blue-500 text-white px-4 py-1 rounded-md text-sm"
-            >
-              {isSanad ? "Hide Sanad" : "Add Sanad"}
-            </button>
-          </div>
-          <SanadPage id={formdata.data!.id} />
-        </>
-      ) : (
-        <></>
-      ),
-    },
-    {
+    });
+  }
+
+  if (
+    [
+      "INTIMATION_DRAFT",
+      "PAY_FEES",
+      "FEES_PAID",
+      "APPLY_SANAD",
+      "ORDER_GENERATE",
+      "ORDER_DOWNLOAD",
+    ].includes(formdata.data?.dept_status || "")
+  ) {
+    items.push({
       key: "9",
       label: "Intimation Order",
       children: formdata.data ? (
@@ -815,8 +914,39 @@ const Meeting = () => {
       ) : (
         <></>
       ),
-    },
-  ];
+    });
+  }
+  if (
+    ["APPLY_SANAD", "ORDER_GENERATE", "ORDER_DOWNLOAD"].includes(
+      formdata.data?.dept_status || "",
+    )
+  ) {
+    items.push({
+      key: "8",
+      label: "Sanad",
+      children: formdata.data ? (
+        <>
+          <div className="flex items-center mb-2 gap-2">
+            <div className="grow"></div>
+            <button
+              onClick={() => {
+                setIsSanad(!isSanad);
+                setIsNoting(false);
+                setIsHearing(false);
+                setIsIntimation(false);
+              }}
+              className="bg-blue-500 text-white px-4 py-1 rounded-md text-sm"
+            >
+              {isSanad ? "Hide Sanad" : "Add Sanad"}
+            </button>
+          </div>
+          <SanadPage id={formdata.data!.id} />
+        </>
+      ) : (
+        <></>
+      ),
+    });
+  }
 
   if (formdata.isLoading) {
     return (
