@@ -85,7 +85,6 @@ const NaPage = () => {
   const firstname: string = params.get("firstname") ?? "";
   const lastname: string = params.get("lastname") ?? "";
   const village: string = params.get("village") ?? "";
-  const email: string = params.get("email") ?? "";
   const area: string = params.get("area") ?? "";
   const survey: string = params.get("survey") ?? "";
   const [userid, setUserid] = useState<string>("0");
@@ -110,11 +109,6 @@ const NaPage = () => {
       main: village,
       title: "Village is required",
       message: "Please provide a village in the URL query parameter.",
-    },
-    {
-      main: email,
-      title: "Email is required",
-      message: "Please provide an email in the URL query parameter.",
     },
   ];
 
@@ -230,7 +224,6 @@ const NaPage = () => {
             firstName: firstname,
             lastName: lastname,
             contact: contact,
-            email: email,
             password: password,
             role: "USER",
           },
