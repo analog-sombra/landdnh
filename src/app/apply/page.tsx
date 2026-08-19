@@ -13,7 +13,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { ApiCall, UploadFile } from "@/services/api";
 import { NAForm, NASchema } from "@/schema/user/naform";
 import { toast } from "react-toastify";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { Checkbox } from "antd";
 import { TextInput } from "@/components/form/inputfields/textinput";
@@ -33,14 +33,25 @@ interface UserResponse {
   role: string;
 }
 
-export const NaProvider = () => {
+const NaProvider = () => {
   const methods = useForm<NAForm>({
     resolver: valibotResolver(NASchema),
   });
 
   return (
     <FormProvider {...methods}>
-      <NaPage />
+      <Suspense
+        fallback={
+          <div className="flex justify-center items-center h-96">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-gray-900 mb-4"></div>
+              <p className="text-gray-500">Loading...</p>
+            </div>
+          </div>
+        }
+      >
+        <NaPage />
+      </Suspense>
     </FormProvider>
   );
 };
@@ -412,7 +423,6 @@ const NaPage = () => {
       </div>
     );
   }
-
 
   if (userdata.data && userdata.data.role !== "USER") {
     return (
