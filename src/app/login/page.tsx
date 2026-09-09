@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Alert } from "antd";
 import LoginPage from "@/components/form/login/login";
+import { encryptURLData } from "@/utils/methods";
 
 const colors = {
   primary: "#1e3a8a",
@@ -36,14 +37,14 @@ export default function Home() {
       {/* Header */}
       <header className="bg-white px-[5%] py-4 border-b-4 border-[#1e3a8a] shadow-sm flex justify-between items-center">
         <div className="flex items-center gap-4">
-          <img
-            src="/logo.png"
-            alt="Emblem"
-            className="w-15 h-15 rounded"
-          />
+          <img src="/logo.png" alt="Emblem" className="w-15 h-15 rounded" />
           <div>
-            <h1 className="text-xl text-[#1e3a8a] font-bold">BHOOMISEVA Portal</h1>
-            <p className="text-xs text-[#64748b]">Land Use Conversion | Revenue Department, DNH & DD</p>
+            <h1 className="text-xl text-[#1e3a8a] font-bold">
+              BHOOMISEVA Portal
+            </h1>
+            <p className="text-xs text-[#64748b]">
+              Land Use Conversion | Revenue Department, DNH & DD
+            </p>
           </div>
         </div>
         <div className="text-sm text-[#64748b]">
@@ -60,21 +61,21 @@ export default function Home() {
               Digital Land Use Conversion Portal
             </h2>
             <p className="text-[#334155] text-lg mb-6">
-              Apply for Non-Agricultural permission online, calculate statutory revenue fees, track real-time application processing, and issue e-Signed clearance certificates.
+              Apply for Non-Agricultural permission online, calculate statutory
+              revenue fees, track real-time application processing, and issue
+              e-Signed clearance certificates.
             </p>
 
-          {/* Quick Tracker */}
+            {/* Quick Tracker */}
             {showAlert && (
               <>
-              <Alert
-                message="Please enter the Application Reference Number to track your status."
-             
-                type="error"
-                closable
-                onClose={() => setShowAlert(false)}
-                
-              />
-              <div className="h-2"></div>
+                <Alert
+                  message="Please enter the Application Reference Number to track your status."
+                  type="error"
+                  closable
+                  onClose={() => setShowAlert(false)}
+                />
+                <div className="h-2"></div>
               </>
             )}
             <div className="bg-white p-4 rounded-lg border border-[#e2e8f0] flex gap-2 max-w-2xl shadow-md">
@@ -88,7 +89,7 @@ export default function Home() {
               <button
                 onClick={() => {
                   if (encId.trim()) {
-                    window.open(`/report/${encId}`, "_blank");
+                    window.open(`/report/${encryptURLData(encId)}`, "_blank");
                   } else {
                     setShowAlert(true);
                   }
@@ -160,7 +161,9 @@ export default function Home() {
           ].map((service, idx) => (
             <Link href={service.href} key={idx}>
               <div className="bg-white p-6 rounded-lg border border-[#e2e8f0] text-center transition-all hover:shadow-md hover:-translate-y-1 cursor-pointer h-full">
-                <h4 className="text-[#1e3a8a] font-semibold mb-2">{service.title}</h4>
+                <h4 className="text-[#1e3a8a] font-semibold mb-2">
+                  {service.title}
+                </h4>
                 <p className="text-[#64748b] text-sm">{service.desc}</p>
               </div>
             </Link>

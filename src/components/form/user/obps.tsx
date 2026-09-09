@@ -15,6 +15,7 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { getCookie } from "cookies-next/client";
 import { Checkbox } from "antd";
+import { customAlphabet } from "nanoid";
 
 interface VillageResponse {
   id: number;
@@ -128,17 +129,23 @@ const ObpsPage = () => {
 
   type ObpsResponse = {
     id: string;
+    uid: string;
   };
 
   const obpsform = useMutation({
     mutationKey: ["createObps"],
     mutationFn: async (data: ObpsForm) => {
+      const nanoid = customAlphabet("1234567890", 5);
+
+      const year = new Date().getFullYear();
+      const uid = `DNH/NA/${year}/${nanoid()}`;
       const response = await ApiCall({
         query:
-          "mutation CreateObps($createObpsInput: CreateObpsInput!) {createObps(createObpsInput: $createObpsInput) { id }}",
+          "mutation CreateObps($createObpsInput: CreateObpsInput!) {createObps(createObpsInput: $createObpsInput) { id, uid }}",
         variables: {
           createObpsInput: {
             ...data,
+            uid: uid,
             createdById: Number(userid),
           },
         },
@@ -158,7 +165,7 @@ const ObpsPage = () => {
 
     onSuccess: (data) => {
       toast.success("OBPS Form Created Successfully");
-      router.push(`/report/${encryptURLData(data!.id.toString())}`);
+      router.push(`/report/${encryptURLData(data!.uid.toString())}`);
     },
 
     onError: (error: Error) => {

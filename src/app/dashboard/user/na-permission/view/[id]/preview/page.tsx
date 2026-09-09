@@ -507,8 +507,7 @@ const ViewPermission = () => {
           type="reset"
           onClick={(e) => {
             e.preventDefault();
-            router.back();
-            // router.push(`/dashboard/user/na-permission/edit/${encryptURLData(formid.toString())}`);
+            router.push(`/dashboard/user/na-permission/view/${encryptURLData(formid.toString())}/edit`);
           }}
           className="py-1 rounded-md bg-rose-500 px-4 text-sm text-white mt-2 cursor-pointer"
         >

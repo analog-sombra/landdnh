@@ -5,10 +5,14 @@ import { Button, Input, Card, Space, Tag, message } from "antd";
 import { useState } from "react";
 import Link from "next/link";
 
+const isSafeGeneratedUrl = (value: string) => /^\/[A-Za-z0-9/_-]*$/.test(value);
+
 export default function TestPage() {
   const [obpsId, setObpsId] = useState("");
   const [encryptedId, setEncryptedId] = useState("");
   const [generatedUrl, setGeneratedUrl] = useState("");
+
+  const safeGeneratedUrl = isSafeGeneratedUrl(generatedUrl) ? generatedUrl : "";
 
   const handleGenerate = () => {
     if (!obpsId.trim()) {

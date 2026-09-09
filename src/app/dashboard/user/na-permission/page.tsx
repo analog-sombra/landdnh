@@ -2,11 +2,12 @@
 import { MaterialSymbolsLightAdd } from "@/components/icons";
 import { ApiCall } from "@/services/api";
 import { encryptURLData } from "@/utils/methods";
-import { useQuery } from "@tanstack/react-query";
-import { Alert, Pagination } from "antd";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { Alert, Pagination, Modal } from "antd";
 import { getCookie } from "cookies-next/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "react-toastify";
 
 const NaPermission = () => {
   const userid = getCookie("id");
@@ -21,6 +22,9 @@ const NaPermission = () => {
     skip: 0,
     total: 0,
   });
+
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteData, setDeleteData] = useState<{ id: number; name: string } | null>(null);
 
 
   interface NaResponse {
@@ -77,6 +81,54 @@ const NaPermission = () => {
       take: pagesize,
     });
     naformdata.refetch();
+  };
+
+  const deleteNa = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await ApiCall({
+        query:
+          "mutation DeleteNa($id: Int!) { deleteNa(id: $id) { id } }",
+        variables: {
+          id: id,
+        },
+      });
+
+      if (!response.status) {
+        throw new Error(response.message);
+      }
+
+      if (!(response.data as Record<string, unknown>)["deleteNa"]) {
+        throw new Error("Failed to delete NA form");
+      }
+
+      return (response.data as Record<string, unknown>)["deleteNa"];
+    },
+
+    onSuccess: () => {
+      toast.success("Draft deleted successfully");
+      naformdata.refetch();
+    },
+
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const handleDelete = (id: number, name: string) => {
+    setDeleteData({ id, name });
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (deleteData) {
+      deleteNa.mutate(deleteData.id);
+      setDeleteModalOpen(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteModalOpen(false);
+    setDeleteData(null);
   };
 
   return (
@@ -140,26 +192,37 @@ const NaPermission = () => {
                         {naform.form_status}
                       </td>
                       <td className="border border-gray-300 px-4 py-2 font-normal text-sm">
-                        <button
-                          className="bg-blue-500 text-white px-4 py-1 rounded-md cursor-pointer"
-                          onClick={() => {
-                            if (naform.form_status == "DRAFT") {
-                              router.push(
-                                `/dashboard/user/na-permission/view/${encryptURLData(
-                                  naform.id.toString(),
-                                )}/preview`,
-                              );
-                            } else {
-                              router.push(
-                                `/dashboard/user/na-permission/view/${encryptURLData(
-                                  naform.id.toString(),
-                                )}`,
-                              );
-                            }
-                          }}
-                        >
-                          View
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            className="bg-blue-500 text-white px-4 py-1 rounded-md cursor-pointer hover:bg-blue-600"
+                            onClick={() => {
+                              if (naform.form_status == "DRAFT") {
+                                router.push(
+                                  `/dashboard/user/na-permission/view/${encryptURLData(
+                                    naform.id.toString(),
+                                  )}/preview`,
+                                );
+                              } else {
+                                router.push(
+                                  `/dashboard/user/na-permission/view/${encryptURLData(
+                                    naform.id.toString(),
+                                  )}`,
+                                );
+                              }
+                            }}
+                          >
+                            View
+                          </button>
+                          {naform.form_status === "DRAFT" && (
+                            <button
+                              className="bg-red-500 text-white px-4 py-1 rounded-md cursor-pointer hover:bg-red-600"
+                              onClick={() => handleDelete(naform.id, naform.q4)}
+                              disabled={deleteNa.isPending}
+                            >
+                              {deleteNa.isPending ? "Deleting..." : "Delete"}
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -195,6 +258,22 @@ const NaPermission = () => {
           </div>
         </>
       )}
+
+      <Modal
+        title="Delete Draft"
+        open={deleteModalOpen}
+        onCancel={handleCancelDelete}
+        okText="Delete"
+        okType="danger"
+        cancelText="Cancel"
+        onOk={handleConfirmDelete}
+        confirmLoading={deleteNa.isPending}
+      >
+        <p>
+          Are you sure you want to delete the draft for "{deleteData?.name}"?
+          This action cannot be undone.
+        </p>
+      </Modal>
     </div>
   );
 };

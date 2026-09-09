@@ -29,6 +29,35 @@ interface VillageResponse {
 export const NaProvider = () => {
   const methods = useForm<NAForm>({
     resolver: valibotResolver(NASchema),
+    defaultValues: {
+      villageId: 0,
+      last_name: "",
+      q1: false,
+      q2: "",
+      q3: "",
+      anx1: "",
+      anx2: "",
+      anx3: "",
+      anx4: "",
+      anx5: "",
+      q4: "",
+      q5: "",
+      q6: "",
+      q7: "",
+      q8: "",
+      q9: "",
+      q10: "",
+      q11: "",
+      q12: "",
+      q13: "",
+      q14: "",
+      q15: "",
+      q16: "",
+      q17: "",
+      q18: "",
+      applicants: [],
+      surveys: [],
+    },
   });
 
   return (
@@ -1282,7 +1311,7 @@ const NaPage = () => {
             disabled={isSubmitting}
             className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white mt-2 cursor-pointer"
           >
-            {isSubmitting ? "Loading...." : "Submit"}
+            {isSubmitting ? "Loading...." : "Preview"}
           </button>
         </div>
       </form>

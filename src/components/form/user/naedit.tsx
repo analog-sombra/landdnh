@@ -78,6 +78,35 @@ interface NaFormResponse {
 export const NaProviderEdit = ({ id }: { id: number }) => {
   const methods = useForm<NAForm>({
     resolver: valibotResolver(NASchema),
+    defaultValues: {
+      villageId: 0,
+      last_name: "",
+      q1: false,
+      q2: "",
+      q3: "",
+      anx1: "",
+      anx2: "",
+      anx3: "",
+      anx4: "",
+      anx5: "",
+      q4: "",
+      q5: "",
+      q6: "",
+      q7: "",
+      q8: "",
+      q9: "",
+      q10: "",
+      q11: "",
+      q12: "",
+      q13: "",
+      q14: "",
+      q15: "",
+      q16: "",
+      q17: "",
+      q18: "",
+      applicants: [],
+      surveys: [],
+    },
   });
 
   const formdata = useQuery({
@@ -303,10 +332,11 @@ const NaEditPage = ({ id }: { id: number }) => {
 
       const response = await ApiCall({
         query:
-          "mutation CreateNa($createNaInput: CreateNaInput!) {createNa(createNaInput: $createNaInput) { id }}",
+          "mutation UpdateNa($updateNaInput: UpdateNaInput!) {updateNa(updateNaInput: $updateNaInput) { id }}",
         variables: {
-          createNaInput: {
+          updateNaInput: {
             ...data,
+            id: id,
             createdById: Number(userid),
           },
         },
@@ -317,11 +347,11 @@ const NaEditPage = ({ id }: { id: number }) => {
       }
 
       // if value is not in response.data then return the error
-      if (!(response.data as Record<string, unknown>)["createNa"]) {
+      if (!(response.data as Record<string, unknown>)["updateNa"]) {
         throw new Error("Value not found in response");
       }
       return (response.data as Record<string, unknown>)[
-        "createNa"
+        "updateNa"
       ] as NaResponse;
     },
 
@@ -474,11 +504,20 @@ const NaEditPage = ({ id }: { id: number }) => {
               Annexure Details
             </div>
             <div className="flex p-2 px-16 items-center mt-2 gap-2 border-b border-gray-200">
-              <p className="text-sm text-gray-700">
-                Annexure 1: A certified copy of record of rights in respect of
-                rights in respect of the land as existed at right the time of
-                application.
-              </p>
+              <div>
+                <p className="text-sm text-gray-700">
+                  Annexure 1: A certified copy of record of rights in respect of
+                  rights in respect of the land as existed at right the time of
+                  application.{" "}
+                  <span className="text-red-500">
+                    (to be attached in form of pdf)
+                  </span>
+                </p>
+                <p className="ml-4">1. 7x12 Extract</p>
+                <p className="ml-4">2. V.F No.6</p>
+                <p className="ml-4">3. V.F No.8-A</p>
+                <p className="ml-4">4. Adesh granting occupancy rights.</p>
+              </div>
               <div className="grow"></div>
               {anx1 ? (
                 <button
@@ -521,12 +560,16 @@ const NaEditPage = ({ id }: { id: number }) => {
             </div>
 
             <div className="flex p-2 px-16 items-center mt-2 gap-2 border-b border-gray-200">
-              <p className="text-sm text-gray-700">
-                Annexure 2: A sketch or layout of the site in question (in
-                triplicate) showing the location of the proposed building or
-                other works for which permission is sought and the nearest roads
-                or means or access.
-              </p>
+              <div>
+                <p className="text-sm text-gray-700">
+                  Annexure 2: A sketch or layout of the site in question (in
+                  triplicate) showing the location of the proposed building or
+                  other works for which permission is sought and the nearest
+                  roads or means or access.
+                </p>
+                <p className="ml-4">1. Certified Site Plan</p>
+                <p className="ml-4">2. NA Proposal Plan</p>
+              </div>
               <div className="grow"></div>
               {anx2 ? (
                 <button
@@ -613,7 +656,20 @@ const NaEditPage = ({ id }: { id: number }) => {
               )}
             </div>
             <div className="flex p-2 px-16 items-center mt-2 gap-2 border-b border-gray-200">
-              <p className="text-sm text-gray-700">Annexure 4: V.F. No.8-A</p>
+              <div>
+                <p className="text-sm text-gray-700">
+                  Annexure 4: Other Document
+                  <span className="text-red-500">
+                    (to be attached in form of pdf)
+                  </span>
+                </p>
+                <p className="ml-4">1. Affidavit/Undertaking (if applicable)</p>
+                <p className="ml-4">2. Right of Way document (if applicable)</p>
+                <p className="ml-4">
+                  3. Documents of adjacent NA land where access is proposed
+                </p>
+                <p className="ml-4">4. National Highway NOC, if applicable</p>
+              </div>
               <div className="grow"></div>
               {anx4 ? (
                 <button
@@ -654,48 +710,6 @@ const NaEditPage = ({ id }: { id: number }) => {
                 </div>
               )}
             </div>
-            <div className="flex p-2 px-16 items-center mt-2 gap-2 border-b border-gray-200">
-              <p className="text-sm text-gray-700">Annexure 5: 7x12 Extract.</p>
-              <div className="grow"></div>
-              {anx5 ? (
-                <button
-                  type="button"
-                  onClick={() => setAnx5(null)}
-                  className="py-1 rounded-md bg-red-500 px-4 text-sm text-white cursor-pointer w-28 flex-shrink-0"
-                >
-                  Remove
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => handleFileUpload(anx5Ref)}
-                  className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer w-28 flex-shrink-0"
-                >
-                  Upload File
-                </button>
-              )}
-
-              <input
-                type="file"
-                ref={anx5Ref}
-                name="anx5"
-                onChange={(e) => handleFileChange(e, setAnx5, anx5Ref)}
-                className="hidden"
-              />
-
-              {anx5 && (
-                <div className="flex gap-2 items-center">
-                  {/* <p className="text-sm text-gray-700">{anx5.name}</p> */}
-                  <Link
-                    target="_blank"
-                    href={URL.createObjectURL(anx5!)}
-                    className="bg-gray-200 text-black py-1 px-4 rounded-md text-sm h-7 grid place-items-center w-28 flex-shrink-0"
-                  >
-                    View File
-                  </Link>
-                </div>
-              )}
-            </div>
             <div className="bg-gray-100 px-4 py-1 my-2 mx-4 text-sm">
               Also furnish the following information
             </div>
@@ -718,7 +732,7 @@ const NaEditPage = ({ id }: { id: number }) => {
               </p>
               <div className="flex-1">
                 <TextInput<NAForm>
-                  required={true}
+                  required={false}
                   name="last_name"
                   placeholder="Enter Details"
                 />
@@ -749,6 +763,60 @@ const NaEditPage = ({ id }: { id: number }) => {
                   maxlength={10}
                   placeholder="Enter Details"
                 />
+              </div>
+            </div>
+
+            <div className="flex gap-8 border-b border-gray-200 pb-2 mb-2 px-16">
+              <p className="flex-1 text-sm text-gray-500">
+                (4A). Signature of the Applicant.
+              </p>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  {anx5 ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAnx5(null);
+                        setValue("anx5", "");
+                      }}
+                      className="py-1 rounded-md bg-red-500 px-4 text-sm text-white cursor-pointer"
+                    >
+                      Remove Signature
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => handleFileUpload(anx5Ref)}
+                      className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white cursor-pointer"
+                    >
+                      Upload Signature
+                    </button>
+                  )}
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    ref={anx5Ref}
+                    name="anx5"
+                    onChange={(e) => handleFileChange(e, setAnx5, anx5Ref)}
+                    className="hidden"
+                  />
+
+                  {anx5 && (
+                    <Link
+                      target="_blank"
+                      href={URL.createObjectURL(anx5)}
+                      className="bg-gray-200 text-black py-1 px-4 rounded-md text-sm h-7 grid place-items-center"
+                    >
+                      View Signature
+                    </Link>
+                  )}
+                </div>
+                {errors.anx5 && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.anx5.message}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -791,7 +859,7 @@ const NaEditPage = ({ id }: { id: number }) => {
                             Relation
                           </th>
                           <th className="border border-gray-300 px-4 py-2 font-normal text-sm w-52">
-                            Signature
+                            Signature *
                           </th>
                           <th className="border border-gray-300 px-4 py-2 font-normal text-sm">
                             Actions
@@ -981,7 +1049,7 @@ const NaEditPage = ({ id }: { id: number }) => {
               <p className="flex-1 text-sm text-gray-500">(9) Old Survey No</p>
               <div className="flex-1">
                 <TextInput<NAForm>
-                  required={true}
+                  required={false}
                   name="q10"
                   placeholder="Enter Details"
                 />
@@ -1372,7 +1440,7 @@ const NaEditPage = ({ id }: { id: number }) => {
             disabled={isSubmitting}
             className="py-1 rounded-md bg-blue-500 px-4 text-sm text-white mt-2 cursor-pointer"
           >
-            {isSubmitting ? "Loading...." : "Submit"}
+            {isSubmitting ? "Loading...." : "Preview"}
           </button>
         </div>
       </form>

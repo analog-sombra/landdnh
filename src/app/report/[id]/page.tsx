@@ -44,9 +44,9 @@ const ObpsReport = () => {
   const { id } = useParams<{ id: string | string[] }>();
   const idString = Array.isArray(id) ? id[0] : id;
 
-  let formid: number = 0;
+  let formid: String = "";
   try {
-    formid = parseInt(decryptURLData(idString, router));
+    formid = decryptURLData(idString, router);
   } catch (error) {
     return (
       <div className="py-4 px-4">
@@ -61,13 +61,13 @@ const ObpsReport = () => {
   }
 
   const formdata = useQuery({
-    queryKey: ["getObpsById", formid],
+    queryKey: ["getObpsByUid", formid],
     queryFn: async () => {
       const response = await ApiCall({
         query:
-          "query GetObps($id:Int!) { getObps(id: $id) { id, last_name, q4, q5, q6, q7, q8, q9, q10, q11, q12, anx1, anx2, anx3, anx4, anx5, createdById, villageId, status, village { id, name }, createdBy { firstName, lastName, role }, createdAt, updatedAt }}",
+          "query GetObpsUid($uid:String!) { getObpsUid(uid: $uid) { id, last_name, q4, q5, q6, q7, q8, q9, q10, q11, q12, anx1, anx2, anx3, anx4, anx5, createdById, villageId, status, village { id, name }, createdBy { firstName, lastName, role }, createdAt, updatedAt }}",
         variables: {
-          id: formid,
+          uid: formid,
         },
       });
 
@@ -75,11 +75,11 @@ const ObpsReport = () => {
         throw new Error(response.message);
       }
 
-      if (!(response.data as Record<string, unknown>)["getObps"]) {
+      if (!(response.data as Record<string, unknown>)["getObpsUid"]) {
         throw new Error("OBPS Record not found");
       }
       return (response.data as Record<string, unknown>)[
-        "getObps"
+        "getObpsUid"
       ] as ObpsResponse;
     },
   });
