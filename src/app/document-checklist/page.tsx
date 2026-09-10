@@ -515,7 +515,7 @@ export default function DocumentChecklistPage() {
           />
           <div>
             <h1 className="text-xl text-[#1e3a8a] font-bold">
-              BHOOMISEVA Portal
+              Smart DLR Portal
             </h1>
             <p className="text-xs text-[#64748b]">
               Land Use Conversion | Revenue Department, DNH & DD

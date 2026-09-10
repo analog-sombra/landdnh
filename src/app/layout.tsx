@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Bhoomi Seva",
-  description: "Bhoomi Seva",
+  title: "Smart DLR",
+  description: "Smart DLR",
   icons: {
     icon: "/logo.png",
   },

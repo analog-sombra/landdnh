@@ -385,6 +385,21 @@ const ViewPermission = () => {
         </h1>
         <div className="grow"></div>
 
+        {userdata.data && ["PDA_JE"].includes(userdata.data.role) && (
+          <button
+            onClick={() =>
+              router.push(
+                `/dashboard/department/na-permission/view/${encryptURLData(
+                  formid.toString(),
+                )}/site-visit`,
+              )
+            }
+            className="bg-[#162f57] text-white py-1 px-4 rounded-md text-sm flex items-center gap-2 cursor-pointer hover:bg-[#1a3a6b] transition"
+          >
+            Site Visit
+          </button>
+        )}
+
         <button
           onClick={handlePrint}
           className="bg-[#162f57] text-white py-1 px-4 rounded-md text-sm flex items-center gap-2 cursor-pointer hover:bg-[#1a3a6b] transition"
@@ -4242,7 +4257,7 @@ const SubmitReportPage = (props: SubmitReportProviderProps) => {
         "REPORTDNHPDA",
         "REPORTFULL",
         "COMPLETEPDA",
-        "COMPLETEMAM"
+        "COMPLETEMAM",
       ],
     ],
     queryFn: async () => {
@@ -4447,9 +4462,11 @@ const SubmitReportPage = (props: SubmitReportProviderProps) => {
     !reportdata.data.some((field) => field.type === "COMPLETEMAM");
 
   const visibleReportData = reportdata.data?.filter(
-    (field) => !(shouldHideReportDnhpda && field.type === "REPORTDNHPDA") && !(shouldHideReportMam && field.type === "REPORTMAM"),
+    (field) =>
+      !(shouldHideReportDnhpda && field.type === "REPORTDNHPDA") &&
+      !(shouldHideReportMam && field.type === "REPORTMAM"),
   );
- 
+
   return (
     <>
       <div className="flex items-center gap-2">

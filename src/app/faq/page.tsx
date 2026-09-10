@@ -25,7 +25,7 @@ export default function FAQPage() {
       label: "What are the different types of land conversion available?",
       children: (
         <p className="text-[#334155] leading-relaxed">
-          The BHOOMISEVA Portal supports three main conversion types:
+          The Smart DLR Portal supports three main conversion types:
           <br />
           <strong>1. Unauthorized Land:</strong> For land that was previously
           used without proper permission.
@@ -47,7 +47,7 @@ export default function FAQPage() {
         <p className="text-[#334155] leading-relaxed">
           To apply for NA permission:
           <br />
-          1. Visit the BHOOMISEVA Portal and click on the login section.
+          1. Visit the Smart DLR Portal and click on the login section.
           <br />
           2. Create an account or log in with your credentials.
           <br />
@@ -95,7 +95,7 @@ export default function FAQPage() {
       label: "How do I calculate the NA conversion fees?",
       children: (
         <p className="text-[#334155] leading-relaxed">
-          The BHOOMISEVA Portal provides an integrated NA Fee Calculator tool
+          The Smart DLR Portal provides an integrated NA Fee Calculator tool
           that helps you estimate the total fees:
           <br />
           1. Navigate to the "NA Fee Calculator" from the homepage.
@@ -160,7 +160,7 @@ export default function FAQPage() {
       label: "What payment methods are accepted?",
       children: (
         <p className="text-[#334155] leading-relaxed">
-          The BHOOMISEVA Portal accepts multiple payment methods:
+          The Smart DLR Portal accepts multiple payment methods:
           <br />• <strong>Net Banking:</strong> Direct bank transfer from your
           account
           <br />• <strong>Credit/Debit Card:</strong> Visa, Mastercard, and
@@ -202,7 +202,7 @@ export default function FAQPage() {
         <p className="text-[#334155] leading-relaxed">
           Once your application is approved:
           <br />
-          1. Log in to your BHOOMISEVA Portal account.
+          1. Log in to your Smart DLR Portal account.
           <br />
           2. Navigate to "My Applications" or "Dashboard".
           <br />
@@ -243,7 +243,7 @@ export default function FAQPage() {
           <img src="/logo.png" alt="Emblem" className="w-15 h-15 rounded" />
           <div>
             <h1 className="text-xl text-[#1e3a8a] font-bold">
-              BHOOMISEVA Portal
+              Smart DLR Portal
             </h1>
             <p className="text-xs text-[#64748b]">
               Land Use Conversion | Revenue Department, DNH & DD
@@ -267,7 +267,7 @@ export default function FAQPage() {
               Find answers to frequently asked questions about the NA permission
               process, application procedures, fee calculations, and certificate
               verification. This comprehensive guide will help you navigate the
-              BHOOMISEVA Portal smoothly.
+              Smart DLR Portal smoothly.
             </p>
           </div>
 
@@ -345,7 +345,7 @@ export default function FAQPage() {
                   1. Getting Started
                 </h4>
                 <p className="text-[#334155] leading-relaxed mb-3">
-                  The BHOOMISEVA Portal is designed to simplify the
+                  The Smart DLR Portal is designed to simplify the
                   Non-Agricultural (NA) permission process. Before you begin,
                   ensure you have:
                 </p>
@@ -518,7 +518,7 @@ export default function FAQPage() {
                   <p>
                     <strong>Email:</strong>{" "}
                     <span className="text-base font-semibold text-[#1e3a8a]">
-                      support@bhoomiseva.in
+                      support@smartdlr.in
                     </span>
                   </p>
                   <p>

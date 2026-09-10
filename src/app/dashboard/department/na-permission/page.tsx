@@ -31,7 +31,7 @@ const NaPermission = () => {
 
   const [filter, setFilter] = useState<FILTERS>(FILTERS.MY_FILES);
 
-  const [isInfo, setIsInfo] = useState<boolean>(false);
+  const [openInfoId, setOpenInfoId] = useState<number | null>(null);
 
   const options: CheckboxGroupProps<string>["options"] = [
     { label: "My_Files", value: FILTERS.MY_FILES },
@@ -261,7 +261,7 @@ const NaPermission = () => {
                             <>
                               <button
                                 className="bg-blue-500 text-white px-4 py-1 rounded-md cursor-pointer"
-                                onClick={() => setIsInfo(true)}
+                                onClick={() => setOpenInfoId(naform.id)}
                               >
                                 Info
                               </button>
@@ -270,8 +270,8 @@ const NaPermission = () => {
 
                           <Drawer
                             placement="right"
-                            onClose={() => setIsInfo(false)}
-                            open={isInfo}
+                            onClose={() => setOpenInfoId(null)}
+                            open={openInfoId === naform.id}
                             closable={false}
                             // size="large"
                             styles={{
@@ -286,8 +286,7 @@ const NaPermission = () => {
                           >
                             <div>
                               <InfoPage
-                                setIsInfo={setIsInfo}
-                                isInfo={isInfo}
+                                setOpenInfoId={setOpenInfoId}
                                 id={naform.id}
                               />
                             </div>
@@ -334,8 +333,7 @@ export default NaPermission;
 
 interface InfoProviderProps {
   id: number;
-  setIsInfo: React.Dispatch<React.SetStateAction<boolean>>;
-  isInfo: boolean;
+  setOpenInfoId: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 interface ReportSubmitData {
@@ -355,7 +353,7 @@ interface ReportSubmitData {
 
 const InfoPage = (props: InfoProviderProps) => {
   const reportsubmitdata = useQuery({
-    queryKey: ["reportReceivedStatus"],
+    queryKey: ["reportReceivedStatus", props.id],
     refetchOnWindowFocus: false,
     queryFn: async () => {
       const response = await ApiCall({
@@ -388,6 +386,87 @@ const InfoPage = (props: InfoProviderProps) => {
     return <div>Error: {reportsubmitdata.error.message}</div>;
   }
 
+  console.log(reportsubmitdata.data);
+  interface ReportDataMap {
+    id: number;
+    role: string;
+    date: string;
+    status: string;
+  }
+
+  const reportdata: Map<String, ReportDataMap> = new Map();
+  reportsubmitdata.data!.forEach((item) => {
+    const getstatus = (role: String): String => {
+      switch (role) {
+        case "PDA_JE":
+          return "COMPLETEPDA";
+        case "LRO":
+          return "REPORTLRO";
+        case "LAQ":
+          return "REPORTLAQ";
+        case "TALATHI":
+          return "COMPLETEMAM";
+        default:
+          return "SUBMITREPORT";
+      }
+    };
+
+    if (item.type == "REPORT") {
+      const role = item.to_user.role;
+      const submitReport = reportsubmitdata.data!.find(
+        (sr) => sr.type === getstatus(role),
+      );
+      console.log(item.id);
+      console.log(item.from_user.role);
+      console.log(submitReport);
+      if (reportdata.has(item.to_user.role)) {
+        const existing = reportdata.get(item.to_user.role);
+        if (existing) {
+          existing.status = submitReport
+            ? formateDate(new Date(submitReport.createdAt.toString()))
+            : "Not Received";
+          existing.date = formateDate(new Date(item.createdAt.toString()));
+        }
+      } else {
+        reportdata.set(item.to_user.role, {
+          id: item.id,
+          role: item.to_user.role == "PDA_JE" ? "PDA" : item.to_user.role,
+          date: formateDate(new Date(item.createdAt.toString())),
+          status: submitReport
+            ? formateDate(new Date(submitReport.createdAt.toString()))
+            : "Not Received",
+        });
+      }
+    }
+
+    // const role = item.from_user.role;
+    // const submitReport = reportsubmitdata.data!.find(
+    //   (sr) =>
+    //     sr.type === getstatus(role) &&
+    //     sr.from_user.role === item.to_user.role &&
+    //     sr.to_user.role === item.from_user.role,
+    // );
+
+    // if (reportdata.has(item.to_user.role)) {
+    //   const existing = reportdata.get(item.to_user.role);
+
+    //   if (existing) {
+    //     existing.status = submitReport
+    //       ? formateDate(new Date(item.createdAt.toString()))
+    //       : "Not Received";
+    //     existing.date = formateDate(new Date(item.createdAt.toString()));
+    //   }
+    // } else {
+    //   reportdata.set(item.to_user.role, {
+    //     id: item.id,
+    //     role: item.to_user.role == "PDA_JE" ? "PDA" : item.to_user.role,
+    //     date: formateDate(new Date(item.createdAt.toString())),
+    //     status: submitReport
+    //       ? formateDate(new Date(item.createdAt.toString()))
+    //       : "Not Received",
+    //   });
+    // }
+  });
   return (
     <>
       <div>
@@ -407,7 +486,20 @@ const InfoPage = (props: InfoProviderProps) => {
               </tr>
             </thead>
             <tbody>
-              {reportsubmitdata
+              {Array.from(reportdata.entries()).map(([key, value]) => (
+                <tr key={value.id} className="hover:bg-gray-50">
+                  <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                    {value.role}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                    {value.date}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-1 font-normal text-sm">
+                    {value.status}
+                  </td>
+                </tr>
+              ))}
+              {/* {reportsubmitdata
                 .data!.filter((item) => item.type === "REPORT")
                 .map((item) => (
                   <tr key={item.id} className="hover:bg-gray-50">
@@ -438,7 +530,7 @@ const InfoPage = (props: InfoProviderProps) => {
                           : "Received"}
                     </td>
                   </tr>
-                ))}
+                ))} */}
             </tbody>
           </table>
         </div>

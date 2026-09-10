@@ -217,7 +217,7 @@ export default function CalculatorPage() {
             className="w-15 h-15 rounded"
           />
           <div>
-            <h1 className="text-xl text-[#1e3a8a] font-bold">BHOOMISEVA Portal</h1>
+            <h1 className="text-xl text-[#1e3a8a] font-bold">Smart DLR Portal</h1>
             <p className="text-xs text-[#64748b]">Land Use Conversion | Revenue Department, DNH & DD</p>
           </div>
         </div>

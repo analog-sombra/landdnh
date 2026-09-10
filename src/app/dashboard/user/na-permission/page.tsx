@@ -3,7 +3,7 @@ import { MaterialSymbolsLightAdd } from "@/components/icons";
 import { ApiCall } from "@/services/api";
 import { encryptURLData } from "@/utils/methods";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Alert, Pagination, Modal } from "antd";
+import { Alert, Pagination, Modal, Dropdown } from "antd";
 import { getCookie } from "cookies-next/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -131,20 +131,44 @@ const NaPermission = () => {
     setDeleteData(null);
   };
 
+  const permissionTypes = [
+    { label: "Subdivision", key: "Subdivision" },
+    { label: "Amalgamation Permission", key: "Amalgamation Permission" },
+    { label: "Family Partition Permission", key: "Family Partition Permission" },
+    { label: "Change of NA Permission", key: "Change of NA Permission" },
+    { label: "Sale NA Permission", key: "Sale NA Permission" },
+    { label: "Gift NA Permission", key: "Gift NA Permission" },
+  ];
+
+  const handlePermissionSelect = (key: string) => {
+    router.push(`/dashboard/user/na-permission/add?title=${encodeURIComponent(key)}`);
+  };
+
   return (
     <div className="p-6">
       <div className="flex gap-2 items-center">
         <h1 className="text-[#162f57] text-2xl font-semibold">NA Permission</h1>
         <div className="grow"></div>
-        <button
-          className="bg-blue-500 text-white px-2 py-1 rounded-md flex items-center gap-2 cursor-pointer"
-          onClick={() => {
-            router.push("/dashboard/user/na-permission/add");
+        <Dropdown
+          menu={{
+            items: permissionTypes.map((item) => ({
+              ...item,
+              icon: <MaterialSymbolsLightAdd className="text-lg" />,
+            })),
+            onClick: (e) => handlePermissionSelect(e.key),
+            style: { minWidth: "250px" },
+          }}
+          placement="bottomRight"
+          overlayStyle={{
+            boxShadow: "0 4px 12px rgba(22, 47, 87, 0.15)",
+            borderRadius: "8px",
           }}
         >
-          <MaterialSymbolsLightAdd className="text-white text-xl" />
-          New Permission
-        </button>
+          <button className="bg-[#162f57] text-white px-4 py-2 rounded-lg flex items-center gap-2 cursor-pointer hover:bg-[#1a3a6b] transition shadow-md hover:shadow-lg font-medium">
+            <MaterialSymbolsLightAdd className="text-white text-lg" />
+            New Permission
+          </button>
+        </Dropdown>
       </div>
 
       {naformdata.data?.data.length === 0 ? (

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Alert } from "antd";
 import LoginPage from "@/components/form/login/login";
 import { encryptURLData } from "@/utils/methods";
+import { toast } from "react-toastify";
 
 const colors = {
   primary: "#1e3a8a",
@@ -40,7 +41,7 @@ export default function Home() {
           <img src="/logo.png" alt="Emblem" className="w-15 h-15 rounded" />
           <div>
             <h1 className="text-xl text-[#1e3a8a] font-bold">
-              BHOOMISEVA Portal
+              Smart DLR Portal
             </h1>
             <p className="text-xs text-[#64748b]">
               Land Use Conversion | Revenue Department, DNH & DD
@@ -67,17 +68,7 @@ export default function Home() {
             </p>
 
             {/* Quick Tracker */}
-            {showAlert && (
-              <>
-                <Alert
-                  message="Please enter the Application Reference Number to track your status."
-                  type="error"
-                  closable
-                  onClose={() => setShowAlert(false)}
-                />
-                <div className="h-2"></div>
-              </>
-            )}
+
             <div className="bg-white p-4 rounded-lg border border-[#e2e8f0] flex gap-2 max-w-2xl shadow-md">
               <input
                 type="text"
@@ -88,17 +79,37 @@ export default function Home() {
               />
               <button
                 onClick={() => {
-                  if (encId.trim()) {
-                    window.open(`/report/${encryptURLData(encId)}`, "_blank");
-                  } else {
-                    setShowAlert(true);
-                  }
+                  // if (encId.trim()) {
+                  //   window.open(`/report/${encryptURLData(encId)}`, "_blank");
+                  // } else {
+                  setShowAlert(true);
+                  // }
                 }}
                 className="bg-[#1e3a8a] text-white px-5 py-2.5 rounded-md font-semibold cursor-pointer hover:bg-[#1e40af] text-sm"
               >
                 Track Status
               </button>
             </div>
+            {showAlert && (
+              <div className="mt-4 bg-red-100 p-4 rounded-lg border border-red-300 mb-4">
+                {/* <Alert
+                  message="Please enter the Application Reference Number to track your status."
+                  type="error"
+                  closable
+                  onClose={() => setShowAlert(false)}
+                /> */}
+                <p>
+                  Application Ref. No. {encId} is currently marked as Seek
+                  Report with the Mamlatdar.
+                </p>
+                <p>
+                  Note: To view detailed status updates or to check if any
+                  further action or documentation is required on your part,
+                  please log in to your applicant account.
+                </p>
+                <div className="h-2"></div>
+              </div>
+            )}
           </div>
 
           {/* Login Card */}
